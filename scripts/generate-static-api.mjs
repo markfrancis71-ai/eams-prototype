@@ -159,12 +159,22 @@ async function main() {
       const vpDetail = await fetchJSON(`/api/viewpoints/${vpId}`);
       saveJSON(`viewpoints/${vp.viewpoint_id}.json`, vpDetail);
 
-      // Resolve for known systems
+      // Resolve for known systems (using entity_id param, matching frontend)
       const systems = entityIds.filter(id => id.startsWith("system."));
       for (const sysId of systems) {
-        const resolved = await fetchJSON(`/api/viewpoints/${vpId}/resolve?system=${encodeURIComponent(sysId)}`);
+        const resolved = await fetchJSON(`/api/viewpoints/${vpId}/resolve?entity_id=${encodeURIComponent(sysId)}`);
         if (resolved) {
           saveJSON(`viewpoints/${vp.viewpoint_id}/resolve/${sysId}.json`, resolved);
+        }
+      }
+
+      // Resolve for domains (for domain-query viewpoints)
+      if (vp.scope_strategy === "domain-query") {
+        for (const domain of (domains || [])) {
+          const resolved = await fetchJSON(`/api/viewpoints/${vpId}/resolve?domain=${encodeURIComponent(domain)}`);
+          if (resolved) {
+            saveJSON(`viewpoints/${vp.viewpoint_id}/resolve/${domain}.json`, resolved);
+          }
         }
       }
     }

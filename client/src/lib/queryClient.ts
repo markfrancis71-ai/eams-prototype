@@ -4,6 +4,7 @@ const API_BASE = "";
 
 // Always rewrite to static .json paths.
 // Works on Netlify (static files) and locally if build:netlify was run.
+// For local Express dev, the server also serves from dist/public so .json files exist.
 function isStaticMode(): boolean {
   return true;
 }
@@ -17,18 +18,28 @@ function rewriteForStatic(url: string): string {
   const [path, qs] = url.split("?");
   const params = new URLSearchParams(qs || "");
 
+  // Lineage: direction param becomes path segment
   if (path.includes("/graph/lineage/") && params.has("direction")) {
     return `${path}/${params.get("direction")}.json`;
   }
-  if (path.endsWith("/resolve") && params.has("system")) {
-    return `${path}/${params.get("system")}.json`;
+  // Viewpoint resolve: system or entity_id param becomes path segment
+  if (path.endsWith("/resolve")) {
+    const entityId = params.get("system") || params.get("entity_id");
+    if (entityId) return `${path}/${entityId}.json`;
   }
+  // Domain-scoped viewpoint resolve
+  if (path.endsWith("/resolve") && params.has("domain")) {
+    return `${path}/${params.get("domain")}.json`;
+  }
+  // Search: always return the full list (client filters)
   if (path === "/api/search") {
     return "/api/search.json";
   }
+  // Graph traverse: use entity-specific file
   if (path === "/api/graph/traverse" && params.has("from")) {
     return `/api/graph/traverse/${params.get("from")}.json`;
   }
+  // Default: append .json to path, drop query params
   return `${path}.json`;
 }
 
@@ -46,6 +57,7 @@ export async function apiRequest(
 ): Promise<Response> {
   const isStatic = isStaticMode();
 
+  // In static mode, rewrite GET requests to .json files
   if (isStatic && method === "GET") {
     const staticUrl = rewriteForStatic(url);
     const res = await fetch(`${API_BASE}${staticUrl}`);
@@ -53,6 +65,8 @@ export async function apiRequest(
     return res;
   }
 
+  // For POST in static mode, return a mock response (handled by calling code)
+  // For dynamic mode (local Express), use normal fetch
   const res = await fetch(`${API_BASE}${url}`, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
