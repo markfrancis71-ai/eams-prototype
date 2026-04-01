@@ -1,0 +1,587 @@
+Table of Contents
+1. Overview
+The EAMS LLM Advisory Layer is the intelligence surface of the EAMS ecosystem. It synthesises the compiled architecture graph — available through the Architecture API context bundle endpoint — with large language model reasoning to produce six categories of advisory output: compliance assessment, risk identification, design alternatives, impact analysis, natural language explanation, and standards guidance.
+The advisory layer is differentiated from a generic LLM chat interface in three critical ways. First, it operates on grounded context — every advisory output is anchored to actual entity data, relationship data, and standards definitions from the architecture graph, not trained model memory. Second, it enforces a human review gate calibrated to output risk — informational outputs surface directly, while assessments and recommendations require explicit architect acknowledgement before influencing any downstream artifact. Third, its prompt templates are versioned code — stored in the EAMS repository alongside the schemas and standards they reference, reviewed and tested like any other spec artifact.
+1.1 Design Decisions
+All six output types in v1: Compliance assessment, risk identification, design alternatives, impact analysis, natural language explanation, and standards guidance are all in scope. They are differentiated by risk tier, which drives context assembly depth, model routing, and review gate requirements.
+Moderate review gate: Informational output types (explanation, standards guidance) surface directly in the Workbench without an acknowledgement step. Assessment output types (compliance, risk, impact, alternatives) require explicit architect acknowledgement before they can influence a downstream artifact such as a Confluence page, a review decision, or a branch comment.
+Prompt templates as versioned repository artifacts: Prompt templates live in .eams/prompts/ in the EAMS repository alongside schemas, standards, and viewpoints. Changes go through the same Git review process. Templates are loaded at Lambda cold start and cached — no redeploy required for prompt updates, but changes are auditable and reversible.
+Context bundle as the primary data interface: The advisory layer calls GET /entities/{id}/context-bundle to assemble entity context, rather than making direct OpenSearch or Ardoq calls. This keeps the advisory layer's data access decoupled from the storage layer and ensures it benefits from API caching.
+Model routing by output type: Informational output types use a smaller, faster, cheaper model. Assessment output types use a larger model with stronger reasoning capability. This is configurable via the prompt template metadata — not hardcoded.
+Structured output schemas: All six output types produce JSON-structured responses conforming to a defined schema, not free-text. Structure is enforced via JSON mode and schema validation. Free-text narrative is a field within the structured response, not the entire response.
+1.2 Advisory Layer Position
+2. Output Type Specifications
+Each advisory output type has a defined risk tier, context assembly strategy, model routing, review gate requirement, and structured output schema. The six types are specified below.
+2.1 Compliance Assessment
+Evaluates whether an entity or a set of entities satisfies its applicable standards. The compiler's rule-based compliance check is authoritative for deterministic rules. The advisory layer adds value by identifying pattern-level violations — issues that arise from the combination of attributes and relationships rather than any single field value — and by synthesising compliance status across a domain into an executive-facing assessment.
+2.2 Risk Identification
+Identifies architectural risks carried by a system or domain. Unlike compliance assessment — which checks against defined standards — risk identification reasons across multiple dimensions: resilience, security posture, technical debt, operational complexity, and strategic alignment. It surfaces risks that do not have a corresponding standard rule but represent genuine architectural concerns.
+2.3 Design Alternatives
+Proposes two or three alternative architectural approaches to a stated design problem. This is the highest-risk output type: alternatives require the most context, carry the highest potential for confident but wrong suggestions, and require the most careful architect review. Accordingly, they receive the deepest context assembly, the largest model, and the most explicit review gate language.
+2.4 Impact Analysis
+Analyses the downstream and upstream impact of a proposed change to an entity or a set of entities. Distinct from the blast radius viewpoint — which shows static graph dependencies — impact analysis reasons about the consequence of specific changes: what other entities would need to change, what SLA contracts would be affected, what compliance status would change, and which teams would need to coordinate.
+2.5 Natural Language Explanation
+Produces a natural language description of an entity, a system, or a domain for a specified stakeholder audience. This is the lowest-risk output type — it is purely informational and does not make claims about correctness, risk, or compliance. It surfaces directly in the Workbench without a review gate, though architects can optionally review before publishing to Confluence.
+2.6 Standards Guidance
+Explains a standard and its requirements as they apply to a specific entity or entity type. Surfaces the standard's rules in plain language, describes what the entity must do to comply, and links to the relevant field requirements in the DSL schema. Low-risk, informational — no review gate.
+3. Context Assembly
+Context assembly is the most consequential engineering problem in the advisory layer. The quality of an advisory output is directly bounded by the quality and completeness of the context provided to the model. Too little context produces vague, generic advice. Too much context overflows the context window, incurs unnecessary cost, and degrades reasoning quality by burying relevant signal in noise.
+3.1 Context Budget
+Every advisory request has a context budget — a maximum token allocation for the context portion of the prompt. The budget varies by output type and model tier:
+3.2 Context Priority Tiers
+Context is assembled in priority order. Higher-priority content is always included in full. Lower-priority content is summarised or omitted when the budget is tight.
+3.3 Context Assembly Pipeline
+3.4 Data Gaps
+A data gap is a DSL field that is absent or null on an entity that the advisory layer would use to improve output quality. Data gaps are reported in every advisory output schema and surfaced in the Workbench to encourage architects to complete their DSL files.
+4. Prompt Architecture
+Prompts are structured artifacts, not ad-hoc strings. Each output type has a versioned prompt template stored in .eams/prompts/. Templates are YAML files with a metadata header and the prompt text as a structured multi-section document. The Lambda function loads and caches templates at cold start — prompt updates take effect on the next Lambda instance initialisation, typically within minutes, without a redeploy.
+4.1 Prompt Template File Structure
+4.2 Prompt Template Inventory
+4.3 Prompt Versioning and Review
+Versioning: Prompt templates carry a version field. When a template is updated, the version is incremented. Advisory outputs record the prompt version used, enabling correlation between output quality changes and prompt changes.
+Review requirements: Prompt template changes go through a pull request review by at least one platform engineer and one practising architect. Changes to assessment prompts (compliance, risk) require review by two architects given their higher impact on advisory quality.
+Testing: A prompt change PR must include a test fixture: a reference entity context and the expected output (or the delta in expected output quality). The eams prompt test command runs the new template against the fixture and diffs the output against baseline.
+Rollback: Because templates are in Git, prompt rollback is a Git revert. The Lambda cache evicts on the next cold start (typically within 15 minutes) or is force-evicted via the eams prompt reload CLI command.
+5. Model Routing
+The advisory layer routes requests to different models based on output type, using the model tier declared in the prompt template. The specific model ID is configurable per environment via the prompt template metadata — the routing layer reads the model_id field rather than hardcoding model names.
+5.1 Model Tier Mapping
+5.2 Cost Governance
+6. Human Review Gate
+The review gate determines what an architect must do before an advisory output can influence a downstream artifact — a Confluence page, a branch review comment, a compile report, a team communication. The gate is calibrated to output risk, not applied uniformly.
+6.1 Gate Tiers
+6.2 Acknowledgement Record
+Acknowledgements are stored in DynamoDB alongside the advisory output record. The acknowledgement does not mean the architect agrees with the output — it means the architect has reviewed it and takes responsibility for any downstream use. This is explicitly communicated in the Workbench acknowledge UI.
+6.3 Disposition Values
+7. Feedback Loop
+The advisory layer accumulates signal about output quality through architect dispositions and explicit feedback. This signal informs prompt iteration — not model fine-tuning, which is out of scope for v1.
+7.1 Feedback Signals
+7.2 Quality Metrics
+7.3 Feedback-Driven Prompt Iteration
+Quality metrics are reviewed weekly by the platform engineer.
+A rejection rate ≥ 15% on any prompt template triggers a prompt review meeting with two practising architects.
+Rejected outputs with disposition notes are reviewed as a corpus — common themes in rejection notes drive prompt changes.
+Prompt changes are tested against a fixture set of reference entities before merge. The fixture set grows as new rejection patterns are identified.
+Model upgrades (e.g. upgrading from claude-sonnet-4-5 to a newer model) are evaluated by running the full fixture set through both models and comparing outputs against the baseline.
+8. API Reference
+The advisory layer exposes a REST API consumed by the Workbench and the CLI. All advisory endpoints are under /v1/advisory/. Authentication and authorization follow the Architecture API model — Architect role required for assessment types, Reader role permitted for explanation and standards guidance.
+8.1 Endpoint Reference
+8.2 POST /advisory/request
+9. Performance & Reliability
+9.1 Latency Targets
+Latency is dominated by model inference time. Context assembly adds 200–800ms depending on context budget. The Architecture API context bundle call adds 50–300ms (cached). Lambda cold start adds up to 2s on the first request after a period of inactivity — mitigated by provisioned concurrency for the advisory Lambda during business hours.
+9.2 Reliability Design
+Model API failure: If the model API call fails, the advisory Lambda retries twice with exponential backoff (2s, 4s). After three failures, the request is marked failed with MODEL_API_UNAVAILABLE. The Workbench shows a retry option.
+Schema validation failure: If the model response does not conform to the expected output schema, the advisory Lambda retries once with a schema correction prompt appended. If the second attempt also fails validation, the request is marked failed with INVALID_MODEL_OUTPUT.
+Context assembly failure: If the Architecture API context bundle call fails, the advisory request is failed immediately with CONTEXT_UNAVAILABLE. No retry — the context bundle API has its own retry and circuit breaker.
+Partial context: If the context bundle returns fewer fields than expected (e.g. a sparse entity), the advisory layer proceeds with a reduced context and reports data gaps in the output. Partial context is not treated as a failure.
+9.3 Infrastructure
+Appendix A — Output Type Quick Reference
+Appendix B — Structured Output Schemas
+All advisory output types produce JSON conforming to a versioned schema. Schemas are stored in .eams/prompts/schemas/ and are validated by the advisory Lambda before returning to the caller. Schema version is included in every output record.
+What the advisory layer is not
+It is not a general architecture chatbot. Queries are structured and scoped to the architecture graph context. Free-form chat is out of scope for v1.
+It is not an authoritative compliance engine. The compiler's rule-based compliance checks are authoritative. The advisory layer provides synthesis, explanation, and identification of issues the compiler's deterministic rules may not catch — pattern-level risks, cross-cutting concerns, missing relationships.
+It does not write DSL files. Advisory outputs are text artifacts surfaced in the Workbench. The architect decides whether to act on them and authors any resulting DSL changes.
+Consumer | How They Invoke the Advisory Layer | Output Destination
+Architect Workbench | Via Workbench advisory panel. Architect selects an entity or domain and requests an advisory output type. | Workbench advisory panel. Architect reviews, acknowledges if required, and optionally publishes to Confluence.
+eams CLI | eams advise --type risk --entity system.claims-processing | Terminal output. Structured JSON. No review gate in CLI mode — architect is implicit reviewer.
+Compile pipeline (future) | Automatically triggered on branch compile for high-risk entity changes. | Branch compile report as advisory section. Requires architect acknowledgement during review.
+Confluence generator (future) | Called during domain page generation to produce natural language architecture summaries. | Confluence page prose sections. Always informational type — no acknowledgement gate.
+Output Type | Risk Tier | Review Gate | Model Tier | Primary Consumer
+Compliance Assessment | High | Acknowledge required | Large | Architect (review board prep)
+Risk Identification | High | Acknowledge required | Large | Architect (design review)
+Design Alternatives | High | Acknowledge required | Large | Architect (design exploration)
+Impact Analysis | Medium | Acknowledge required | Large | Architect (change planning)
+Natural Language Explanation | Low | Direct — no gate | Small | All stakeholders
+Standards Guidance | Low | Direct — no gate | Small | Architect (standards lookup)
+Scope Modes | Description
+Entity compliance | Single entity assessed against all applicable standards. Returns per-standard verdicts, specific findings, and a synthesised overall compliance status.
+Domain compliance | All entities in a domain assessed. Returns a domain-level compliance health summary, top violations by severity, systemic pattern findings, and recommended remediation priority order.
+Standard coverage | All entities governed by a specific standard assessed for that standard only. Returns a coverage map and exception inventory.
+Compliance Assessment — Structured Output Schema
+output_type: compliance_assessment
+advisory_id: adv.ca.2026-03-10.claims-processing.001
+generated_at: 2026-03-10T09:15:00Z
+model: claude-sonnet-4-5  # model used — from prompt template metadata
+scope_entity: system.claims-processing
+scope_mode: entity
+git_sha: a3f8c2d1b4e9...  # architecture graph state this assessment is based on
+
+overall:
+status: non-compliant  # compliant | at-risk | non-compliant | unknown
+confidence: high  # high | medium | low — LLM self-assessed confidence
+summary: The Claims Processing System has two active compliance violations and three at-risk findings. The most critical violation is in the Adjudication API container, which stores PII data without meeting the auth_mechanism requirement of the PII Data Handling standard.
+
+standard_verdicts:
+- standard: standard.pii-data-handling
+verdict: violation  confidence: high
+findings:
+- entity: container.adjudication-api
+finding: auth_mechanism is 'api-key'. Standard requires oauth2-jwt or stronger for PII containers.
+severity: violation  deterministic: true
+- entity: container.adjudication-api
+finding: No data retention policy declared. PII standard requires retention_policy field on all PII-bearing containers.
+severity: violation  deterministic: false
+
+- standard: standard.rest-api-first
+verdict: compliant  confidence: high
+summary: All container interfaces declared as REST. No gRPC or SOAP interfaces found.
+
+pattern_findings:
+# Cross-cutting issues not attributable to a single standard
+- finding: Three PII-bearing containers lack inbound relationship tracing from a data product. This creates an untracked PII lineage gap.
+severity: warning  affected_entities: [container.adjudication-api, container.claims-db, container.audit-store]
+
+remediation_priority:
+1. entity: container.adjudication-api  action: Upgrade auth_mechanism to oauth2-jwt. Update DSL and raise ADR.
+2. entity: container.adjudication-api  action: Declare retention_policy field. Confirm with data steward.
+3. pattern:  action: Add data product lineage relationships for all three PII containers.
+
+review_gate:
+required: true
+status: pending_acknowledgement
+acknowledged_by:
+acknowledged_at:
+
+Risk Dimensions | Description
+Resilience risks | Single points of failure, missing circuit breakers on synchronous-critical paths, availability target mismatches across dependency chains, lack of failover design.
+Security posture risks | Weak auth mechanisms, PII/PHI data flows without encryption declaration, overly broad actor access, missing data classification on containers with sensitive relationship patterns.
+Technical debt risks | Deprecated components still carrying active inbound relationships, lifecycle mismatches (production system depending on a deprecated container), missing ADR coverage for architectural decisions.
+Operational complexity risks | High fan-out integration patterns, synchronous dependency chains exceeding defined SLA budgets, containers with NFR profiles that conflict with their dependencies' SLA declarations.
+Strategic alignment risks | Systems without capability traceability (no realised_by relationship), orphaned capabilities (no implementing system), goals without capability coverage.
+Risk Identification — Structured Output Schema (abbreviated)
+output_type: risk_identification
+scope_entity: system.claims-processing
+scope_mode: system  # system | domain
+overall_risk_rating: medium  # low | medium | high | critical
+confidence: medium  # lower confidence than compliance — reasoning across unlabelled patterns
+
+risks:
+- id: risk.claims-processing.001
+dimension: resilience
+severity: high
+title: Synchronous-critical dependency chain with no circuit breaker
+description: container.adjudication-api has a synchronous-critical dependency on container.policy-coverage-api (policy domain), which itself has a synchronous-critical dependency on container.rate-tables-db. A failure in rate-tables-db will cascade synchronously through policy-coverage-api to adjudication-api with no circuit breaker or fallback declared at any hop.
+affected_entities: [container.adjudication-api, container.policy-coverage-api, container.rate-tables-db]
+evidence: Relationship chain: adjudication-api --[consumes, synchronous-critical]--> policy-coverage-api --[reads-from, synchronous-critical]--> rate-tables-db. circuit_breaker field is null on both relationships.
+suggested_action: Declare circuit_breaker: resilience4j on the adjudication-api -> policy-coverage-api relationship. Consider an async fallback for coverage lookups when policy domain is degraded.
+confidence: high
+
+- id: risk.claims-processing.002
+dimension: technical_debt
+severity: medium
+title: Two containers missing ADR coverage for significant design decisions
+description: container.rules-engine (embedded Drools) and container.event-router (custom Kafka routing logic) represent significant architectural decisions with no accepted ADR. If these containers are replaced or re-evaluated, there is no recorded decision rationale.
+confidence: medium
+
+risk_summary:
+critical: 0
+high: 2
+medium: 3
+low: 1
+dominant_dimension: resilience
+
+Design alternatives are proposals, not recommendations
+Alternatives are generated from the architecture graph context and general architectural knowledge. They do not have access to team capacity, budget, organisational constraints, or implementation history beyond what is in the DSL.
+Every alternative output includes an explicit disclaimer in the structured response and in the Workbench display. Architects must acknowledge this disclaimer before the output can be shared or used as a review artifact.
+The advisory layer does not rank alternatives or indicate a 'best' choice. Ranking is the architect's role.
+Design Alternatives — Structured Output Schema
+output_type: design_alternatives
+problem_statement: The adjudication-api has a synchronous-critical dependency on the policy domain for coverage lookups. This creates a resilience risk and a cross-domain coupling concern. What alternative designs should be considered?
+context_entity: system.claims-processing
+model: claude-opus-4-6
+confidence: medium
+disclaimer: These alternatives are generated from architecture graph data and architectural knowledge. They do not account for team capacity, budget, contractual constraints, or implementation history not captured in the DSL. All alternatives require architect review and validation before use in any design decision.
+
+alternatives:
+
+- id: alt.001
+title: Async coverage pre-fetch with local cache
+description: The adjudication-api subscribes to a policy-coverage-events topic. Coverage data is pre-fetched and cached locally in a Redis sidecar. At adjudication time, the api reads from the local cache, falling back to a synchronous call only on cache miss. The synchronous dependency becomes non-critical-path for the common case.
+tradeoffs:
+benefits:
+- Eliminates synchronous-critical dependency for the common case (~95% of adjudications where coverage data is pre-populated)
+- Improves adjudication latency — cache reads are sub-millisecond vs 50-200ms policy API call
+risks:
+- Cache staleness: coverage data may be stale by the time adjudication occurs. Acceptable if coverage changes are low-frequency; unacceptable for real-time endorsement scenarios.
+- New infrastructure dependency: Redis sidecar adds operational complexity and a new failure mode.
+architectural_changes_required:
+- Add publishes-to relationship: policy-coverage-api -> coverage-events topic
+- Add subscribes-to relationship: adjudication-api -> coverage-events topic
+- Add infrastructure entity: redis-coverage-cache component within claims-processing
+- Downgrade adjudication-api -> policy-coverage-api relationship criticality from synchronous-critical to non-critical-fallback
+estimated_dsL_changes: 4 relationship changes, 1 new component entity
+
+- id: alt.002
+title: Coverage data product consumption
+description: The policy domain publishes a coverage data product (policy.coverage-data-product). The claims domain consumes this data product rather than calling the policy API directly. The data product SLA becomes the dependency contract, and the policy domain manages freshness internally.
+tradeoffs:
+benefits:
+- Clean domain boundary: claims domain no longer has a runtime dependency on policy domain infrastructure
+- Data product ownership model is already established in the EAMS metamodel
+risks:
+- Requires policy domain to publish and maintain a coverage data product — cross-domain coordination dependency
+- Data product latency SLA may not meet real-time adjudication requirements
+architectural_changes_required:
+- New entity: data_product.policy-coverage-data-product (policy domain)
+- Add contracts-with relationship: adjudication-api -> policy-coverage-data-product
+- Remove or downgrade: adjudication-api -> policy-coverage-api direct integration
+
+- id: alt.003
+title: Adjudication scope restriction — defer coverage validation
+description: Adjudication is split into two phases: rapid adjudication (no coverage check, synchronous, sub-second) and coverage validation (async, separate process). Claims are adjudicated provisionally and coverage is confirmed in a background job. Invalid coverage results in a post-adjudication correction workflow.
+tradeoffs:
+benefits:
+- Completely eliminates synchronous cross-domain dependency from the adjudication hot path
+risks:
+- Significant process change: introduces provisional claim states and a correction workflow. Business process complexity increases substantially.
+- Regulatory risk: some jurisdictions require coverage validation at point of adjudication.
+confidence: low
+
+Impact Analysis — Structured Output Schema (abbreviated)
+output_type: impact_analysis
+proposed_change: Retire container.legacy-claims-api and route all consumers to container.adjudication-api
+scope_entity: container.legacy-claims-api
+model: claude-sonnet-4-5
+
+impact_summary:
+affected_entity_count: 7
+team_coordination_required: 3  # distinct business owners or architects
+estimated_change_scope: medium  # low | medium | high | critical
+compliance_impact: none  # none | improvement | regression
+
+affected_entities:
+- entity: system.claims-portal
+impact_type: consumer_migration
+description: claims-portal has a uses relationship to legacy-claims-api. This must be re-pointed to adjudication-api. The adjudication-api interface must be confirmed as backward-compatible or claims-portal must update its integration contract.
+required_action: Update relationship target in claims-portal DSL file. Validate adjudication-api contract compatibility.
+owner: j.smith@company.com  urgency: blocking
+
+- entity: container.adjudication-api
+impact_type: load_increase
+description: adjudication-api absorbs traffic currently routed to legacy-claims-api. Its declared throughput NFR (200 rps) must be validated against combined traffic volumes. Current legacy-claims-api throughput is not declared in DSL — data gap.
+data_gaps: [legacy-claims-api throughput_rps not declared in DSL]
+
+data_gaps:
+# Fields absent from the DSL that would materially improve this analysis
+- container.legacy-claims-api: throughput_rps not declared
+- rel.claims-portal--uses--legacy-claims-api: sla_dependency_ms not declared
+
+recommended_sequencing:
+
+
+
+
+
+
+Natural Language Explanation — Structured Output Schema
+output_type: explanation
+scope_entity: system.claims-processing
+audience: business  # business | executive | developer | new-team-member | regulator
+model: claude-haiku-4-5
+confidence: high  # Explanation confidence is typically high — grounded in entity data
+
+explanation:
+headline: The Claims Processing System is the core platform responsible for receiving, evaluating, and settling insurance claims across all product lines.
+body: When a customer or agent submits a claim, it enters the Claims Processing System for validation and adjudication. The system checks that the claim is complete and within the policy coverage boundaries, applies the company's adjudication rules to determine the settlement amount, and then triggers payment through the Billing System. The process typically completes within 24 hours for straightforward claims; complex claims involving coverage disputes are flagged for manual review by a claims adjudicator. The system handles approximately 12,000 claims per day at peak.
+
+key_facts:
+- Criticality: Tier 1 — any outage directly impacts claims settlement SLAs
+- Integrates with: Policy Admin System (coverage checking), Billing System (payment), Customer Portal (status updates)
+- Data sensitivity: Handles PII and PHI data — subject to data handling standards
+- Owner: VP Claims Operations (business), j.smith@company.com (architecture)
+
+what_it_does_not_do:
+- Does not manage policy issuance or renewals (Policy Admin System)
+- Does not handle customer-facing claim submission UI (Claims Portal)
+
+review_gate:
+required: false
+publish_confirmation_required: true  # Optional confirmation before publishing to Confluence
+
+Standards Guidance — Structured Output Schema (abbreviated)
+output_type: standards_guidance
+standard: standard.pii-data-handling
+scope_entity: container.adjudication-api
+model: claude-haiku-4-5
+
+standard_summary:
+name: PII Data Handling Standard
+purpose: Ensures all containers that store, process, or transmit personally identifiable information implement minimum security and governance controls.
+governed_by: Data Privacy Office — contact: privacy@company.com
+
+applicability:
+applies: true
+reason: container.adjudication-api has nfr_profile.data_classification: pii. All PII-classified containers are governed by this standard.
+
+requirements:
+- requirement: Authentication mechanism must be oauth2-jwt or stronger
+dsl_field: interfaces[*].auth_mechanism
+current_value: api-key
+compliant: false
+remediation: Update the auth_mechanism field on all declared interfaces to oauth2-jwt. This requires coordination with all consuming systems to support JWT bearer tokens.
+
+- requirement: Data retention policy must be declared
+dsl_field: nfr_profile.retention_policy
+current_value: null
+compliant: false
+
+- requirement: Encryption at rest must be declared for all data stores
+dsl_field: nfr_profile.encryption_at_rest
+current_value: true
+compliant: true
+
+exception_path:
+available: true
+process: File an exception ADR referencing this standard. Exception ADRs require Data Privacy Office sign-off and are time-limited to 90 days.
+
+Output Type | Model Tier | Context Budget | Prompt Overhead | Max Output Tokens | Total Window
+Compliance Assessment | Large | 16,000 | 2,000 | 4,000 | 22,000
+Risk Identification | Large | 16,000 | 2,000 | 4,000 | 22,000
+Design Alternatives | Large | 20,000 | 2,000 | 6,000 | 28,000
+Impact Analysis | Large | 12,000 | 2,000 | 4,000 | 18,000
+Explanation | Small | 4,000 | 1,000 | 2,000 | 7,000
+Standards Guidance | Small | 4,000 | 1,000 | 2,000 | 7,000
+Token estimates are soft limits
+The context budget is a target, not a hard cutoff. The context assembly pipeline tracks token consumption as it builds the context and truncates or summarises lower-priority sections when the budget is approached.
+Token counts are estimated using a character-based heuristic (1 token ≈ 4 characters) during assembly, then verified against the model's tokenizer before dispatch. If the assembled context exceeds budget by more than 10%, the assembler re-runs one priority tier lower.
+Priority | Content Type | Inclusion Rule | Approx Tokens
+P1 | Primary entity — all fields | Always included in full | 300–600
+P1 | Directly applicable standards — full text | Always included (up to 3 standards full text; remainder summarised) | 500–2,000
+P1 | Active compliance findings on primary entity | Always included in full | 200–500
+P2 | Direct relationships (1-hop) — full relationship records | Included in full up to 20 relationships; remainder summarised as counts by type | 600–2,000
+P2 | Related entities (direct relationship targets) — key fields only | id, name, kind, domain, status, criticality. Full records omitted to save budget. | 500–1,500
+P3 | Accepted decisions (ADRs) linked to primary entity | Included up to 3 full ADRs; remainder as title+status only | 300–1,200
+P3 | Signal history — recent incidents and performance events | Last 5 signals, summary only | 200–400
+P4 | 2-hop relationships and entities | Summarised as counts and patterns only — never full records | 200–400
+P4 | Domain context — sibling entities of same kind | Count, status distribution only | 100–200
+P5 | Enterprise context — cross-domain summary | Omitted unless output type is domain-scoped | 0–500
+Context Assembly — Pseudocode
+# Input: entity_id, output_type, branch
+# Output: assembled_context (string), token_count, data_gaps (list)
+
+function assembleContext(entity_id, output_type, branch) {
+
+# Step 1: Fetch context bundle from Architecture API
+const bundle = await GET /entities/{entity_id}/context-bundle?depth=2&branch={branch}
+const budget = CONTEXT_BUDGETS[output_type]
+
+# Step 2: Assemble P1 context — always included
+let ctx = formatEntity(bundle.entity)                  # ~400 tokens
+ctx += formatStandards(bundle.applicable_standards, full=3)   # ~1,200 tokens
+ctx += formatFindings(bundle.compliance_findings)             # ~300 tokens
+
+# Step 3: Assemble P2 context — included if budget permits
+if (estimateTokens(ctx) + 2600 < budget) {
+ctx += formatRelationships(bundle.relationships, full=20)
+ctx += formatRelatedEntities(bundle.relationships, keyFieldsOnly=true)
+}
+
+# Step 4: Assemble P3 context — decisions and signals
+if (estimateTokens(ctx) + 1600 < budget) {
+ctx += formatDecisions(bundle.decisions, full=3)
+ctx += formatSignals(bundle.signals, last=5, summaryOnly=true)
+}
+
+# Step 5: Assemble P4 context — 2-hop summary
+if (estimateTokens(ctx) + 600 < budget) {
+ctx += formatTwoHopSummary(bundle.relationships)
+}
+
+# Step 6: Identify data gaps — fields absent from DSL that affect output quality
+const dataGaps = identifyDataGaps(bundle, output_type, REQUIRED_FIELDS[output_type])
+
+return {
+context: ctx,
+tokenCount: estimateTokens(ctx),
+dataGaps: dataGaps
+}
+}
+
+Output Type | High-Impact Data Gaps (materially degrade output if absent)
+Compliance Assessment | nfr_profile.data_classification, interfaces[*].auth_mechanism, nfr_profile.retention_policy, nfr_profile.encryption_at_rest
+Risk Identification | nfr_profile.availability_target, relationships[*].sla_dependency_ms, relationships[*].circuit_breaker, nfr_profile.throughput_rps
+Design Alternatives | relationships[*].criticality, relationships[*].protocol, nfr_profile fields, technology fields
+Impact Analysis | relationships[*].sla_dependency_ms, nfr_profile.throughput_rps, business_owner (of all affected entities)
+Explanation | description (entity), relationships[*].description, technology fields, nfr_profile.availability_target
+Standards Guidance | All fields governed by the requested standard
+.eams/prompts/compliance-assessment.prompt.yaml
+eams_version: 1.0
+kind: prompt_template
+id: prompt.compliance-assessment
+output_type: compliance_assessment
+version: 1.3
+metadata:
+author: platform-engineering@company.com
+last_reviewed: 2026-02-28
+model_tier: large  # small | large
+model_id: claude-sonnet-4-5  # specific model — overridable per environment
+max_context_tokens: 16000
+max_output_tokens: 4000
+temperature: 0  # 0 for assessment outputs — determinism preferred
+json_mode: true  # Enforce JSON output
+output_schema:
+
+system_prompt:
+# --- system_prompt value below (multi-line) ---
+You are an expert enterprise architect advising on the architectural compliance of a software system.
+Your role is to assess whether the described entities satisfy their applicable architectural standards.
+
+You have access to:
+- The entity's DSL definition, including all declared fields and relationships
+- The full text of all applicable standards
+- Active compliance findings already identified by the compiler's rule engine
+- Related entity summaries providing dependency context
+
+Assessment rules:
+1. Base every finding on evidence from the provided entity data. Do not invent fields, relationships, or attribute values.
+2. Distinguish deterministic findings (the compiler also catches this) from pattern findings (cross-cutting concerns the compiler's rule engine does not evaluate).
+3. Report data gaps where absent DSL fields would materially affect the assessment.
+4. Self-assess your confidence as high / medium / low. Low = significant data gaps or ambiguous evidence.
+5. Produce a remediation priority list ordered by severity and ease of remediation.
+6. Respond ONLY with valid JSON conforming to the compliance_assessment_v1 schema. No preamble. No markdown.
+
+user_prompt_template:
+# --- user_prompt_template value below — {{variables}} are substituted at runtime ---
+## Architecture Context
+
+### Primary Entity
+{{entity_context}}
+
+### Applicable Standards
+{{standards_context}}
+
+### Active Compiler Findings
+{{findings_context}}
+
+### Direct Relationships and Dependencies
+{{relationships_context}}
+
+### Related Entity Summaries
+{{related_entities_context}}
+
+### Accepted Decisions (ADRs)
+{{decisions_context}}
+
+### Data Gaps
+The following fields are absent from the DSL and would improve this assessment if populated:
+{{data_gaps_list}}
+
+## Assessment Request
+Scope mode: {{scope_mode}}
+Assess the compliance of the entity described above against all applicable standards.
+Produce a compliance_assessment_v1 JSON response.
+
+Template ID | Output Type | Temperature | JSON Mode | Model Tier | Version
+prompt.compliance-assessment | Compliance Assessment | 0 | Yes | Large | 1.3
+prompt.risk-identification | Risk Identification | 0.2 | Yes | Large | 1.1
+prompt.design-alternatives | Design Alternatives | 0.4 | Yes | Large | 1.0
+prompt.impact-analysis | Impact Analysis | 0.1 | Yes | Large | 1.2
+prompt.explanation | Natural Language Explanation | 0.3 | Yes | Small | 1.4
+prompt.standards-guidance | Standards Guidance | 0 | Yes | Small | 1.2
+Temperature guidance
+Assessment outputs (compliance, risk, impact) use low temperature (0–0.2) to maximise determinism and evidence-anchoring. The same entity assessed twice should produce the same findings.
+Generative outputs (design alternatives) use moderate temperature (0.4) to produce genuinely distinct alternatives rather than variations on the same approach.
+Explanations use moderate temperature (0.3) to produce natural-sounding prose rather than robotic field enumeration.
+Tier | Default Model | Characteristics | When Used
+Small | claude-haiku-4-5 | Fast (< 1s), low cost, strong at structured extraction and explanation | Explanation, Standards Guidance
+Large | claude-sonnet-4-5 | Strong reasoning, better pattern recognition, higher cost, 3–8s | Compliance, Risk, Impact
+Large (alt) | claude-opus-4-6 | Best reasoning, highest cost, used only for Design Alternatives where alternative quality matters most | Design Alternatives
+Model IDs are configuration, not code
+The model_id field in each prompt template controls which model is called. Upgrading from claude-sonnet-4-5 to a newer model requires updating the prompt template file and merging via the normal review process — no Lambda code change, no redeploy.
+Per-environment overrides: the EAMS_MODEL_OVERRIDE environment variable can force all requests to a specific model. Used in development to always route to a cheaper model and avoid cost runaway during testing.
+Control | Mechanism | Default Setting
+Per-request cost estimate | Lambda estimates token cost before dispatch. If estimated cost exceeds threshold, request is rejected with COST_THRESHOLD_EXCEEDED error. | $0.50 per request (configurable)
+Daily spend cap | CloudWatch metric alarm on daily Bedrock/Anthropic API spend. Above cap: new advisory requests queue but do not execute. | $50/day (configurable per environment)
+Bulk advisory rate limit | Design alternatives (most expensive output type) rate-limited per user to prevent accidental cost runaway. | 5 design alternative requests per user per day
+Domain compliance scan cost guard | Domain-scoped compliance assessment triggers a cost estimate before running. Estimate shown to user with confirmation required if > $2. | Confirmation threshold: $2
+Cost attribution tagging | Every API call tagged with output_type, scope_entity, domain, and user identity. Enables cost breakdown by team and output type. | Always on
+Gate Tier | Output Types | Workbench Behaviour | Downstream Influence
+Direct | Explanation, Standards Guidance | Output rendered immediately in the advisory panel. No confirmation step. | Can be published to Confluence or shared immediately. No acknowledgement recorded.
+Acknowledge | Compliance Assessment, Risk Identification, Impact Analysis, Design Alternatives | Output rendered with a prominent advisory disclaimer banner. Architect must click Acknowledge to record review. | Cannot be published, inserted into a review comment, or included in a compile report until acknowledged. Acknowledgement records architect identity and timestamp.
+Acknowledgement Record — DynamoDB
+advisory_id: adv.ca.2026-03-10.claims-processing.001
+acknowledged_by: j.smith@company.com
+acknowledged_at: 2026-03-10T10:22:00Z
+acknowledgement_text: I have reviewed this compliance assessment and understand that it is advisory. I take responsibility for any actions taken based on this output.
+disposition: accepted_with_modifications  # accepted | accepted_with_modifications | rejected | noted
+disposition_note: Finding 3 (PII lineage gap) is disputed — the data product relationship exists but was not declared in DSL. Updating DSL to resolve.
+
+Disposition | Meaning | Effect
+accepted | Architect agrees with the assessment and intends to act on all findings. | Output can be published. Findings are added to the entity's advisory action queue in the Workbench.
+accepted_with_modifications | Architect agrees with some findings but disputes or modifies others. Disposition note is required. | Output can be published with a note indicating modifications. Only accepted findings added to action queue.
+rejected | Architect disputes the assessment. Rejection reason required. | Output is not published. Rejection recorded. If a finding recurs in the next compile, it is flagged to the platform engineer for prompt review.
+noted | Architect has reviewed but does not intend to act immediately. Note required. | Output recorded. No action queue items created. Advisory resurfaces on next compile if findings persist.
+Signal | Source | Captured As | Used For
+Disposition | Architect acknowledge flow | accepted | rejected | noted + optional note | Primary quality signal. High rejection rate on a prompt template triggers review.
+Thumbs up/down | Workbench advisory panel (per finding, not per output) | binary + optional comment | Granular signal — identifies which findings within an output are useful vs noise.
+Data gap completions | Architect updates DSL fields flagged as data gaps | Field completion event linked to advisory_id | Measures whether data gap reporting drives DSL quality improvement.
+Downstream use | Output published to Confluence or used in a review comment | publish event linked to advisory_id | Measures whether architects find outputs useful enough to share.
+Metric | Definition | Target | Review Trigger
+Rejection rate per template | % of acknowledged outputs with disposition=rejected, per prompt template | < 10% | ≥ 15% in a 30-day window triggers prompt review
+Data gap rate | % of advisory outputs with one or more high-impact data gaps | < 30% | ≥ 40% indicates DSL completeness campaign needed
+Downstream use rate | % of acknowledged outputs that are published or used in a review | ≥ 40% | < 25% suggests outputs are not actionable enough
+Per-finding thumbs down rate | % of individual findings rated thumbs down | < 20% | ≥ 30% on a specific finding type triggers investigation
+P95 latency per output type | End-to-end advisory request latency | See Section 9 | Sustained breach triggers model routing or context budget review
+Method | Path | Summary | Min Role | Sync/Async
+POST | /advisory/request | Submit an advisory request | Architect (assessment types) Reader (info types) | Async
+GET | /advisory/{advisory_id} | Retrieve advisory output by ID | Reader | Sync
+GET | /advisory/entity/{eams_id} | List all advisory outputs for an entity | Reader | Sync
+POST | /advisory/{advisory_id}/acknowledge | Record acknowledgement and disposition | Architect | Sync
+POST | /advisory/{advisory_id}/feedback | Submit per-finding thumbs up/down feedback | Reader | Sync
+GET | /advisory/queue | List pending advisory outputs awaiting acknowledgement | Architect | Sync
+GET | /advisory/metrics | Advisory quality metrics summary | Architect | Sync
+Advisory Request — Request Body
+output_type: compliance_assessment  # compliance_assessment | risk_identification | design_alternatives | impact_analysis | explanation | standards_guidance
+scope_entity: system.claims-processing
+scope_mode: entity  # entity | domain | standard (where applicable)
+branch: main
+
+# Output-type-specific parameters
+# For explanation:
+audience: business  # business | executive | developer | new-team-member | regulator
+# For standards_guidance:
+standard: standard.pii-data-handling
+# For design_alternatives:
+problem_statement: The adjudication-api has a synchronous-critical dependency on the policy domain...
+# For impact_analysis:
+proposed_change: Retire container.legacy-claims-api and route all consumers to container.adjudication-api
+
+Advisory Request — Response (async accepted)
+advisory_id: adv.ca.2026-03-10.claims-processing.001
+status: processing  # processing | complete | failed
+output_type: compliance_assessment
+estimated_completion_seconds: 8
+poll_url: /advisory/adv.ca.2026-03-10.claims-processing.001
+
+Async model and polling
+All advisory requests are async. The Workbench uses long-polling (GET /advisory/{id} with up to 30s wait) to retrieve completed outputs. The CLI uses synchronous polling with a progress indicator.
+Typical completion times: explanation and standards guidance 1–3s; compliance and risk 4–10s; design alternatives 8–20s.
+Failed requests include an error field with a structured error code. The most common failure is CONTEXT_TOO_SPARSE — the entity has too few fields populated to produce a useful advisory output. The advisory layer returns the data gap list even on failure.
+Output Type | p50 | p95 | p99
+Explanation | 1.5s | 3s | 5s
+Standards Guidance | 1.5s | 3s | 5s
+Compliance Assessment | 5s | 10s | 20s
+Risk Identification | 5s | 10s | 20s
+Impact Analysis | 4s | 8s | 15s
+Design Alternatives | 10s | 20s | 40s
+Component | Technology | Sizing | Notes
+Advisory Lambda | AWS Lambda (Node.js 22) | 512MB, 60s timeout | Provisioned concurrency: 2 during 08:00–19:00 local business hours
+Advisory DynamoDB table | DynamoDB on-demand | — | Stores advisory outputs, acknowledgements, feedback. TTL: 90 days.
+Model API | Anthropic API (claude.ai/api) | — | Rate limit: 60 RPM for large model, 200 RPM for small model. Shared across all advisory output types.
+Context bundle cache | API Gateway response cache (5 min TTL) | — | Prevents repeated context bundle calls for the same entity within a session.
+Prompt template cache | Lambda in-memory (warm instance lifetime) | — | Templates loaded at cold start. eams prompt reload force-evicts.
+Output Type | Risk Tier | Gate | Model | Temp | Context Budget | Scope Modes
+Compliance Assessment | High | Acknowledge | claude-sonnet-4-5 | 0 | 16,000 tok | entity, domain, standard
+Risk Identification | High | Acknowledge | claude-sonnet-4-5 | 0.2 | 16,000 tok | system, domain
+Design Alternatives | High | Acknowledge | claude-opus-4-6 | 0.4 | 20,000 tok | entity + problem statement
+Impact Analysis | Medium | Acknowledge | claude-sonnet-4-5 | 0.1 | 12,000 tok | entity + proposed change
+Explanation | Low | Direct | claude-haiku-4-5 | 0.3 | 4,000 tok | entity, domain
+Standards Guidance | Low | Direct | claude-haiku-4-5 | 0 | 4,000 tok | entity + standard
+Schema ID | Output Type | Key Top-Level Fields | Version
+compliance_assessment_v1 | Compliance Assessment | output_type, advisory_id, overall{status,confidence,summary}, standard_verdicts[], pattern_findings[], remediation_priority[], review_gate | 1
+risk_identification_v1 | Risk Identification | output_type, overall_risk_rating, confidence, risks[]{id,dimension,severity,title,description,affected_entities,evidence,suggested_action,confidence}, risk_summary | 1
+design_alternatives_v1 | Design Alternatives | output_type, problem_statement, disclaimer, confidence, alternatives[]{id,title,description,tradeoffs{benefits[],risks[]},architectural_changes_required[],estimated_dsl_changes,confidence} | 1
+impact_analysis_v1 | Impact Analysis | output_type, proposed_change, impact_summary{affected_entity_count,team_coordination_required,estimated_change_scope,compliance_impact}, affected_entities[]{entity,impact_type,description,required_action,owner,urgency}, data_gaps[], recommended_sequencing[] | 1
+explanation_v1 | Explanation | output_type, audience, confidence, explanation{headline,body,key_facts[],what_it_does_not_do[]}, review_gate | 1
+standards_guidance_v1 | Standards Guidance | output_type, standard, scope_entity, standard_summary{name,purpose,governed_by}, applicability{applies,reason}, requirements[]{requirement,dsl_field,current_value,compliant,remediation}, exception_path | 1

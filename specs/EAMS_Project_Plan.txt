@@ -1,0 +1,244 @@
+Enterprise Architecture
+Management System
+Ecosystem Initiative
+Project Charter & Strategic Architecture Plan
+Version 1.0  •  March 2026
+Table of Contents
+1. Executive Summary
+This document defines the strategic architecture and project plan for the Enterprise Architecture Management System (EAMS) — a transformational initiative to replace fragmented, manually-maintained architecture artifacts with a unified, data-driven ecosystem. The initiative addresses long-standing limitations across the current toolchain (Ardoq, Salesforce TPM, Confluence, Gliffy) and establishes a modern platform grounded in four foundational principles:
+Architecture information treated as first-class data — versionable, queryable, and governed
+A pivot from 'building diagrams' to 'developing data', with diagrams as derived outputs
+Deep traceability from business goals and user experience through technical implementation
+LLM-augmented advisory capabilities embedded into the architecture practice workflow
+The system will be anchored on Ardoq's graph database as the authoritative backend, extended with a Git-backed DSL layer for versioning, a purpose-built API and viewpoint engine, and an Architect Workbench portal. The initiative targets a functional architecture in place by Q4 2026, with ongoing content migration continuing into subsequent years.
+2. Current State Assessment
+2.1 Current Toolchain
+The current architecture practice relies on four core platforms, each carrying significant limitations that compound when architects must work across them:
+2.2 Critical Gaps
+No single source of truth for architecture data
+Traceability from business goals to technical components does not exist
+Business architecture is not formally connected to technical and data architecture
+Architecture artifacts cannot be generated or updated programmatically
+No mechanism to ingest operational signals (tickets, metrics, technology changes) for architectural evaluation
+Diagram layout and stakeholder-specific visualization require manual effort for every update
+2.3 What We Are Keeping
+The following assets are retained and built upon:
+Ardoq: Retained as the graph database backend. The graph model and existing Salesforce TPM integration are preserved. Ardoq's API is the primary write target for all architecture data.
+Salesforce TPM: Retained as the technology portfolio metadata store. Integration with Ardoq continues and is extended.
+Confluence: Retained as the publication target for architecture artifacts. Content will be programmatically generated and pushed to Confluence rather than manually authored there.
+Existing Architecture Data: Thousands of existing Ardoq components and relationships are migrated and enriched under the new metamodel. Existing Confluence and Gliffy artifacts are catalogued, assessed, and progressively migrated.
+3. Strategic Architecture
+3.1 Architecture Overview
+The EAMS ecosystem is organized into three logical layers, each with distinct responsibilities and integration contracts:
+3.2 Core Architectural Decisions
+ADR-001: Ardoq as Graph Backend, Abstracted by API Layer
+Ardoq's graph database is the most powerful asset in the current landscape. Rather than replacing it, we build an abstraction layer — a purpose-built API and ingestion pipeline — that insulates the rest of the ecosystem from Ardoq's operational complexity. Direct Ardoq UI usage is reduced to administrative and diagnostic scenarios.
+ADR-002: Git-backed DSL as Source of Truth for Architecture Data
+Architecture entities, relationships, and attributes are authored in a structured DSL committed to a Git repository. This provides the versioning, branching, and merging semantics that Ardoq's Scenario editor cannot adequately support. The Git repository compiles into the Ardoq graph — Git is the durable record, Ardoq is the queryable index.
+ADR-003: C4 Model as Primary Technical Architecture Language
+C4 (Context, Containers, Components, Code) is adopted as the primary modeling language for technical architecture. C4 maps naturally to Ardoq's component/reference model and provides stakeholder-appropriate views at each level. ArchiMate constructs are selectively incorporated for cross-domain concepts (motivation, strategy, physical) where C4 has no equivalent.
+ADR-004: BPMN as Business Process Modeling Language
+BPMN 2.0 is adopted for business process modeling. BPMN processes are linked to business capabilities, business rules, and C4 system boundaries to enable end-to-end traceability. BPMN artifacts are stored in the Git-backed DSL and linked to Ardoq entities.
+ADR-005: Viewpoints as Queries, Not Diagrams
+Following the Views and Beyond framework, a viewpoint is defined as a query over the architecture graph combined with a rendering specification. Diagrams are derived outputs — they are never the authoritative record. This enables unlimited stakeholder-specific visualization without divergence from the authoritative data.
+ADR-006: AWS-native Infrastructure
+The EAMS platform is built on AWS, aligned to the company's existing cloud posture. Key services: S3/CodeCommit for DSL versioning, Lambda/ECS for processing pipelines, API Gateway for the architecture API, EventBridge for signal ingestion, Bedrock for LLM advisory capabilities, and OpenSearch for full-text architecture search.
+3.3 Modeling Language Strategy
+The following table defines the scope and boundary of each modeling language within the EAMS ecosystem:
+4. Information Metamodel
+4.1 Metamodel Purpose
+The information metamodel is the schema of schemas for EAMS. It defines what entity types exist, what relationships are valid between them, what attributes each entity type carries, and what constraints govern data quality. All architecture tooling is downstream of the metamodel.
+4.2 Core Entity Types (v1 Scope)
+4.3 Key Relationship Types
+Relationships in the EAMS metamodel are first-class entities with their own attributes — not just graph edges. This resolves the Ardoq Viewpoint complexity problem by encoding relationship semantics in the metamodel rather than in viewpoint definitions.
+Goal → realizes → Capability
+Capability → supported_by → System (C4 Level 1)
+Process → invokes → System / Container
+Process → governed_by → Rule
+System → composed_of → Container
+Container → exposes → Interface (API, Event, File)
+Container → consumes → Interface
+Container → stores → Data Entity
+Container → deployed_on → Infrastructure Node
+Standard → mandates → System / Container / Node
+ADR → constrains → any entity
+5. Project Plan
+5.1 Approach
+The EAMS initiative is organized into six phases. Phases 0 and 1 are strictly sequential prerequisites. Phases 2 through 5 are designed for parallel execution with defined integration checkpoints. The cross-cutting workstream runs continuously throughout.
+5.2 Phase Overview
+5.3 Phase Detail
+Phase 0 — Foundation & Discovery  (Weeks 1–6)
+0.1 Current State Audit: Catalog all architecture artifacts across Confluence, Gliffy, Ardoq, and Salesforce. Document volume, quality, and coverage gaps. Interview architects across application, infrastructure, security, and any embedded business architecture functions.
+0.2 Pain Point Analysis: Map specific workflow failures — not platform-level complaints — to determine root causes and prioritization. Identify which current Ardoq workspaces, component types, and references are salvageable vs. require restructuring.
+0.3 Metamodel Scoping Workshop: Facilitated session with practicing architects to agree on v1 entity types, relationship types, and attribute sets. This is the single highest-value activity in Phase 0.
+0.4 Technology Candidate Evaluation: Evaluate Git hosting (CodeCommit vs. GitHub Enterprise), DSL format (YAML/HCL/custom), diagram rendering candidates (Structurizr, D2, Mermaid, custom), API framework, and LLM service (Bedrock preferred).
+0.5 ADR Initialization: Establish the ADR registry. Document Architectural Decision Records for all choices made in Phase 0.
+Phase 0 Exit Criteria: Signed-off metamodel scope document. Technology candidate decision matrix completed. Phase 1 scope baselined.
+Phase 1 — Core Metamodel & Data Architecture  (Weeks 6–18)
+1.1 Metamodel v1 Implementation: Define and implement the full v1 metamodel. Produce the formal metamodel schema — entity types, relationship types, attribute definitions, cardinality constraints, and validation rules.
+1.2 Git-backed DSL Design: Design the DSL syntax for authoring architecture entities and relationships. Tooling: schema validation on commit (pre-commit hooks), CI pipeline that compiles DSL to Ardoq graph via API.
+1.3 Ardoq Schema Alignment: Map the EAMS metamodel to Ardoq workspaces, component types, and reference types. Enforce the metamodel through the Ardoq API rather than relying on Ardoq's native UI conventions.
+1.4 Versioning & Branching Model: Implement Git branching strategy for architecture evolution. Define merge semantics for competing architecture branches. Build tooling to diff architecture states between branches.
+1.5 Data Migration Pipeline v1: Build importers for existing Ardoq components. Assess and categorize existing content against the new metamodel. Execute initial migration of highest-value, highest-quality existing data.
+Phase 1 Exit Criteria: Metamodel v1 schema published. DSL toolchain operational. Initial Ardoq migration complete for at least one architecture domain. Branching model demonstrated.
+Phase 2 — API, Integration & Signal Layer  (Weeks 12–24)
+2.1 Architecture API: REST + GraphQL API over the architecture graph. Read operations: query by entity type, relationship, domain, viewpoint. Write operations: validated against metamodel constraints. API-first design — all internal tooling consumes the same API.
+2.2 Salesforce TPM Integration: Extend the existing Ardoq ↔ Salesforce integration to operate through the EAMS API layer. Bi-directional sync of application and infrastructure metadata. TPM remains the system of record for portfolio management; EAMS is the system of record for architecture relationships.
+2.3 Signal Ingestion Pipeline: AWS EventBridge-based event bus for operational signals. Initial signal types: production incidents (ServiceNow/Jira), application performance metrics, technology lifecycle events (retirement notices, version changes). Signals are enriched with architecture context and surfaced to architects as evaluation candidates.
+2.4 Artifact Generation Engine: Template-based generation of Confluence pages from architecture data. Initial templates: System Overview, Integration Specification, Data Flow. Generation triggered by DSL commit pipeline or on-demand via API.
+2.5 Architecture Search: AWS OpenSearch index over all architecture entities, relationships, and attributes. Replaces ad-hoc Confluence search for architecture discovery. Faceted search by domain, lifecycle, owner, standard compliance.
+Phase 3 — Viewpoint, Visualization & Portal  (Weeks 20–32)
+3.1 Viewpoint Engine: Implement viewpoints as first-class metamodel objects: a named query (graph traversal expression) + a rendering specification (layout rules, element styling, relationship filtering). Any architect can define a new viewpoint without engineering assistance.
+3.2 Diagram-as-Code Renderer: Evaluate and select the rendering target. Primary candidates: Structurizr DSL (strong C4 alignment, programmatic layout), D2 (modern, clean output, flexible). Implement a rendering pipeline: architecture graph query → intermediate representation → diagram output. Target channels: Confluence embed, SVG export, PDF, IDE plugin.
+3.3 Architect Workbench Portal: Web application providing the primary architect interface. Features: entity browser (graph navigation), viewpoint browser, data entry and editing forms (validated against metamodel), DSL editor with preview, diff viewer for branch comparison, signal queue for architect review.
+3.4 Multi-stakeholder View Library: Implement initial library of stakeholder-specific viewpoints: Executive (capability heat map), Business Analyst (process-to-system), Developer (container/component detail), Operations (infrastructure topology), Security (trust boundary and data flow).
+Phase 4 — Business Architecture & SME Tooling  (Weeks 26–40)
+This phase acknowledges that there is no centralized business architecture function. The tools must enable technical architects to capture MVP business context without requiring business architecture expertise. LLM assistance is load-bearing here.
+4.1 Business Layer Metamodel Extension: Extend the v1 metamodel with the business layer entity types: Business Goal, Capability, Process (BPMN-linked), Rule, Term, Actor. Define traceability relationships from each business entity to the technical layer.
+4.2 BPMN Integration: Select and integrate a BPMN authoring tool (Camunda Modeler preferred — open source, BPMN 2.0 compliant). BPMN files stored in Git alongside DSL. Parser extracts process elements and links them to metamodel entities.
+4.3 LLM-guided Business Intake: Chat interface (powered by Amazon Bedrock) that guides technical architects through capturing business context. Structured prompts elicit: business capability description, owning business unit, key processes, important business rules, relevant KPIs. Outputs are validated and committed to the DSL as business layer entities.
+4.4 Figma / UX Artifact Linkage: Figma file references linked to business processes and C4 systems. Metadata extraction from Figma API: screen names, user flows, linked components. Traceability chain: Screen → Process Step → Business Rule → System → Container.
+4.5 Goal-to-Outcome Lineage: Implement the traceability chain from strategic goals through capabilities, processes, and systems to measurable outcomes. Lineage viewpoint provides executives with a coherent view of how IT investment delivers business value.
+Phase 5 — Advisory, Governance & Standards  (Weeks 34–52)
+5.1 Standards Migration: Migrate all technical architecture standards from Salesforce into the EAMS standards metamodel. Standards are linked to the entity types they govern. Compliance checking is automated as part of the DSL commit pipeline.
+5.2 Automated Compliance Validation: On every DSL commit, run compliance checks against applicable standards. Non-compliant entities surface in the Architect Workbench as validation findings. Exception workflow: architect documents rationale, review board approves, exception recorded in ADR.
+5.3 LLM-augmented Architecture Review: Bedrock-powered advisory layer that reviews submitted architecture data against standards, patterns, and best practices. Produces: compliance findings, pattern match suggestions, risk flags, and draft advisory commentary for architect review. Architects review, annotate, and approve before distribution.
+5.4 Pattern Library: Catalog of recognized architecture patterns stored in the metamodel. Patterns are linked to the entity types they apply to. LLM advisory layer can suggest applicable patterns during architecture development.
+5.5 Architecture Review Board Support: Workflow for architecture submission, review, approval, and publication. Review board members interact with architecture data directly in the Workbench rather than reviewing static diagrams. Full audit trail of review decisions.
+6. Technology Stack
+6.1 Recommended Stack
+6.2 Integration Architecture
+Ardoq ↔ EAMS: API-mediated. DSL compiler writes to Ardoq. Architecture API reads from Ardoq. No direct Ardoq UI dependency for production data.
+Salesforce TPM ↔ EAMS: Existing integration retained and routed through EAMS API layer. TPM application records sync to C4 System entities.
+Confluence ↔ EAMS: Artifact generation pipeline pushes rendered pages to Confluence via REST API. Confluence becomes a read-only publication channel for architecture consumers.
+Jira/ServiceNow ↔ EAMS: EventBridge rules capture incident and ticket events. Enrichment Lambda adds architecture context. Architect Workbench surfaces enriched signals.
+Figma ↔ EAMS: Figma API polling or webhook for file metadata. Screen and flow metadata linked to business process entities in the metamodel.
+7. Risk Register
+8. Success Metrics
+8.1 Quantitative
+≥80% of new architecture artifacts created through EAMS data-first workflow within 12 months of portal launch
+≤1 hour to produce a new stakeholder-specific viewpoint from existing architecture data (vs. multiple days manually)
+100% of production architecture standards migrated from Salesforce to EAMS with automated compliance checking by end of Phase 5
+≥90% of architecture diagrams published to Confluence generated programmatically (not manually drawn)
+Full traceability chain (Goal → Capability → System → Container) populated for ≥5 business domains by end of Phase 4
+8.2 Qualitative
+Architects report that navigating architecture relationships is faster and more reliable than the current wiki-based approach
+Non-architect stakeholders (product managers, business analysts) can self-serve architecture information without requesting diagrams from architects
+Architecture review board meetings spend majority of time on decisions rather than artifact presentation
+New architect onboarding time to productive contribution is measurably reduced
+9. Immediate Next Steps
+The following actions initiate Phase 0:
+Schedule the Phase 0 Metamodel Scoping Workshop with practicing architects (application, infrastructure, security). Target: within 2 weeks.
+Commission the Ardoq API capability assessment — document all known rate limits, reference type constraints, and programmatic write limitations against the EAMS integration design.
+Initiate the current-state artifact audit — assign ownership for cataloguing Confluence, Gliffy, and Ardoq content by domain.
+Stand up the ADR registry in Git — all architectural decisions from this point forward are documented as ADRs.
+Evaluate diagram-as-code candidates — Structurizr DSL and D2 — with a time-boxed spike: can we generate a high-quality C4 Context and Container diagram from a simple YAML/HCL data file?
+Draft the Principles document — formalize the principles outlined in the project brief as a governed reference document within the new ADR registry.
+Appendix A — Glossary
+Appendix B — TOGAF Artifact Mapping
+The following TOGAF catalog artifacts are mapped to EAMS metamodel entity types for selective adoption:
+Prepared by:  Enterprise Architecture Practice
+Classification:  Internal — Architecture Leadership
+Key Outcome:  Technical architects will be able to navigate the full spectrum from business capability to deployed component in a single, coherent data environment — without leaving structured tooling to read a wiki or trace a Gliffy diagram.
+Platform | Limitations
+Salesforce TPM + Standards | Technology Portfolio Management and Standards management are functional but the platform is costly to extend, uses non-standard integration patterns, and is not amenable to API-first data access.
+Confluence Wiki | Architecture design artifacts live as freeform wiki pages. No programmatic read/write. Search does not surface architecture-specific concepts. Data cannot populate pages without manual effort.
+Gliffy (in Confluence) | All architecture diagrams are manual. No diagrams-as-code capability. No automated discovery or search. Cannot be generated from or linked to authoritative data.
+Ardoq EA Platform | Graph DB model is architecturally sound but adoption is low. Viewpoint system limits semantic richness of relationships. Programmatic I/O is cumbersome. Versioning limited to single-branch Scenario editor. Standards enforcement is absent.
+Business & Requirements Layer |  | Architecture Data Layer |  | Visualization & Delivery Layer
+• BPMN Process Models
+• Business Capability Maps
+• Business Rules & Vocabulary
+• UX Artifacts / Figma Links
+• Goals & Outcomes Lineage
+• LLM-guided SME Intake | → | • Ardoq Graph DB (backend)
+• Git-backed DSL (source of truth)
+• C4 + ArchiMate Metamodel
+• Versioned / Branching Model
+• REST + GraphQL API Layer
+• AWS EventBridge Signal Bus | → | • Viewpoint Engine
+• Diagrams-as-Code Renderer
+• Architect Workbench Portal
+• Confluence Integration
+• Artifact Generation Engine
+• LLM Advisory Layer
+Domain | Language / Standard
+Technical Architecture (App, Infra, Security) | C4 Model (primary) + ArchiMate motivation/strategy views (supplemental)
+Business Process Modeling | BPMN 2.0
+Business Capability Modeling | Custom metamodel (lightweight, not APQC-constrained)
+Business Rules | Decision Model and Notation (DMN) for structured rules; free-text for policy rules
+Data Architecture | Open Data Product Specification (ODPS) for data products; Open Data Contract Standard (ODCS) for contracts; Erwin for physical modeling — boundaries defined in metamodel
+Business Vocabulary | Simple Term → Definition → Alias model; linked to data entities and BPMN elements
+Architecture Decisions | ADR format (lightweight Markdown in Git); linked to relevant architecture components
+Non-Functional Requirements | Structured attribute sets on C4 Containers/Components; templated from standard NFR catalog
+Principle:  Every architecture function maps to specific entity types, relationship types, and attribute sets in the metamodel. No architecture artifact can exist outside the metamodel.
+Entity Type | Description & Key Attributes
+Business Goal | Strategic objective from the business. Attributes: owner, priority, time horizon, status. Links to: Capabilities, Outcomes.
+Business Capability | What the business does, independent of how. Attributes: domain, maturity level, owner. Links to: Processes, Applications.
+Business Process | BPMN-modeled process. Attributes: process owner, frequency, criticality, BPMN file reference. Links to: Capabilities, Rules, Systems.
+Business Rule | Constraint or policy governing a process or decision. Attributes: rule type, owner, effective date, DMN reference. Links to: Processes, Data Entities.
+Business Term | Vocabulary entry. Attributes: definition, aliases, domain, status. Links to: Data Entities, Processes.
+Actor | Person, role, or external system interacting with the enterprise. Attributes: type (person/system/org), external flag. Links to: Processes, Systems.
+C4 System (Level 1) | Software system at Context level. Attributes: owner, lifecycle status, business criticality, links to TPM record. Links to: Containers, Actors, Capabilities.
+C4 Container (Level 2) | Deployable unit within a System. Attributes: technology, hosting model, NFR profile. Links to: Components, Data Entities, Systems.
+C4 Component (Level 3) | Logical component within a Container. Attributes: component type, implementation language. Links to: Containers, Interfaces.
+Infrastructure Node | Physical/virtual infrastructure resource. Attributes: hosting type, region, provider. Links to: Containers, Systems.
+Data Entity | Business-level data concept. Attributes: domain, sensitivity, data owner. Links to: Data Products, Processes, Systems.
+Data Product | ODPS-structured data product. Attributes: ODPS metadata, SLA, access policy. Links to: Data Entities, Systems.
+Data Contract | ODCS-structured interface contract. Attributes: producer, consumer, schema reference. Links to: Data Products, Containers.
+Architecture Decision | ADR-format decision record. Attributes: status, consequences, alternatives considered. Links to: any affected entity.
+Standard | Technology or architecture standard. Attributes: domain, mandatory/advisory, effective date. Links to: Systems, Containers, Infrastructure Nodes.
+NFR Profile | Non-functional requirement set. Attributes: availability, RTO/RPO, throughput, security classification. Links to: Containers, Systems.
+Constraint:  The system must be architect-owned and maintainable with periodic engineering assistance. All technology choices must support low operational overhead and configuration-driven extensibility over custom code wherever feasible.
+Phase | Title | Timeline | Owner | Dependency
+0 | Foundation & Discovery | Wks 1–6 | Architects | None
+1 | Core Metamodel & Data Architecture | Wks 6–18 | Architects + Eng | Phase 0
+2 | API, Integration & Signal Layer | Wks 12–24 | Engineering | Phase 1
+3 | Viewpoint, Visualization & Portal | Wks 20–32 | Architects + Eng | Phase 1
+4 | Business Architecture & SME Tooling | Wks 26–40 | Architects | Phase 1
+5 | Advisory, Governance & Standards | Wks 34–52 | Architects | Phases 2–4
+✦ | Cross-cutting: ADRs, DevX, Change Mgmt | Continuous | Architects | All
+Component | Technology / Service
+Graph Database (backend) | Ardoq (retained) — accessed exclusively via API; no direct UI for production data entry
+DSL Source of Truth | YAML-based DSL in Git (AWS CodeCommit or GitHub Enterprise); HCL evaluated as alternative for Terraform-familiar teams
+DSL Compiler / Sync | AWS Lambda pipeline: DSL validation → metamodel constraint check → Ardoq API write
+Architecture API | AWS API Gateway + Lambda; GraphQL (AWS AppSync) for flexible graph queries; REST for integrations
+Search | AWS OpenSearch Service — full-text and faceted search over all architecture entities
+Signal Ingestion | AWS EventBridge — event bus for operational signals from Jira, ServiceNow, monitoring platforms
+Artifact Generation | AWS Lambda templates → Confluence REST API for page generation and update
+Diagram Rendering | Structurizr DSL (C4) as primary; D2 evaluated for non-C4 viewpoints; SVG export pipeline for all channels
+Architect Workbench Portal | React SPA on AWS Amplify; reads from Architecture API; integrates diagram renderer
+LLM / Advisory | Amazon Bedrock (Claude model); structured prompt chains for business intake, compliance review, pattern suggestion
+BPMN Authoring | Camunda Modeler (desktop) + BPMN files in Git; bpmn-js for portal-embedded BPMN viewer
+Identity / Auth | AWS Cognito + company SSO (SAML/OIDC); role-based access: Architect, Reviewer, Consumer, Admin
+Monitoring / Ops | AWS CloudWatch for pipeline monitoring; architecture API usage metrics; data quality dashboards
+Risk | Mitigation
+Adoption failure — architects continue using Confluence/Gliffy manually | Invest heavily in Workbench UX. Make the data-driven workflow strictly easier than the manual workflow. Enforce data-first through governance processes, not just tooling.
+Metamodel scope creep — every stakeholder wants their concept modeled in v1 | Strict v1 scope gate after Phase 0 workshops. Metamodel extensibility is built-in; defer non-core entities to v2 with a documented path.
+Ardoq API limitations surface during integration | Phase 0 technology evaluation includes a detailed Ardoq API capability assessment. Design the abstraction layer to accommodate known limitations (rate limits, reference complexity).
+LLM advisory output quality is insufficient for production use | LLM advisory is always human-reviewed before action. Phase 5 begins with a controlled pilot. Quality gates are defined before broad rollout.
+Confluence migration creates parallel maintenance burden | New content goes into EAMS-generated pages from day one. Historical migration is batched and architect-reviewed. A clear cut-over date for each domain is set.
+Engineering resource availability for initial build | Phases 0–1 are architect-executable. Engineering engagement is scoped to Phase 2+ and can be phased to match resource availability.
+Data quality of existing Ardoq content is worse than expected | Phase 0 audit produces a data quality baseline. Migration is gated on quality thresholds. Low-quality content is quarantined rather than migrated blindly.
+Term | Definition
+ADR | Architecture Decision Record — a lightweight document capturing a significant architectural decision, its context, and its consequences.
+C4 Model | A hierarchical software architecture modeling approach with four levels: Context, Containers, Components, and Code.
+BPMN | Business Process Model and Notation — the standard notation for business process modeling.
+DSL | Domain-Specific Language — a structured text format for authoring architecture data.
+EAMS | Enterprise Architecture Management System — this initiative.
+Metamodel | A model that defines the structure, types, and constraints of the architecture data model.
+ODCS | Open Data Contract Standard — a specification for defining data interface contracts between producers and consumers.
+ODPS | Open Data Product Specification — a specification for defining and publishing data products.
+Viewpoint | A query over the architecture graph combined with a rendering specification, producing a view for a specific stakeholder concern.
+NFR Profile | Non-Functional Requirements profile — a structured attribute set defining quality characteristics for a system or container.
+TOGAF Artifact | EAMS Metamodel Mapping
+Business Capability Catalog | Business Capability entity type
+Actor/Role Catalog | Actor entity type
+Application Portfolio Catalog | C4 System entity type + Salesforce TPM integration
+Interface Catalog | Interface entity type (Container-level)
+Data Entity Catalog | Data Entity entity type
+Business Service Catalog | Business Capability (service-oriented view via Viewpoint)
+Technology Portfolio Catalog | Infrastructure Node entity type + Salesforce TPM
+Business Interaction Matrix | Derived viewpoint: Actor ↔ Process ↔ System relationships
+Application Interaction Matrix | Derived viewpoint: System ↔ System interaction relationships
+Architecture Decision Log | Architecture Decision (ADR) entity type

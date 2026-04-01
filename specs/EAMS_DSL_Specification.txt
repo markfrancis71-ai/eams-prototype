@@ -1,0 +1,807 @@
+Table of Contents
+1. Introduction
+The EAMS DSL (Enterprise Architecture Management System Domain-Specific Language) is the authoritative source of truth for all architecture data in the EAMS ecosystem. It is a YAML-based, Git-versioned language designed to be authored and maintained by enterprise architects, compiled by an automated pipeline, and consumed by downstream systems including the Ardoq graph database, the Architecture API, and the Visualization layer.
+The core proposition: Architects write structured data files. Diagrams, wiki pages, and advisory outputs are derived from that data. The DSL file is the architecture — not the diagram.
+1.1 Design Decisions
+One file per entity: Each entity (system, container, process, capability, etc.) lives in exactly one file. File path encodes entity type and domain. Git diffs are meaningful at the entity level.
+Relationships in domain files: Relationships between entities are declared in separate relationship files, one per domain. This eliminates merge conflicts between architects working on different systems in the same domain.
+Human-readable IDs: Entity IDs are architect-assigned slugs (e.g., system.claims-processing), not database-generated UUIDs. IDs must be stable — once assigned, they do not change.
+Rich relationship semantics: Relationship types (uses, exposes, stores, governs, etc.) are explicit in the DSL. They compile to Ardoq reference types with semantic metadata as attributes, keeping Ardoq viewpoint definitions manageable.
+Layered completeness: A minimal valid entity requires only five fields. All other attributes are optional and additive. An incomplete entity is better than no entity.
+Branching carries intent: Git branches are annotated with EAMS branch metadata declaring whether a branch represents a proposal, a project change, or an experiment. This metadata drives Workbench behavior and the approval workflow.
+1.2 Relationship to Other Systems
+2. Repository Structure
+The DSL repository follows a strict directory convention. The directory structure is the taxonomy — entity type and domain are encoded in the path, not just in the file content.
+2.1 ID Conventions
+Every entity has a globally unique qualified ID formed from the entity type prefix and the file slug:
+3. Entity Schema Reference
+Every entity file shares a common header block, followed by entity-type-specific fields. Required fields are marked R; optional fields are marked O. The compiler rejects files missing required fields.
+3.1 Common Header Block
+All entity files begin with this block:
+3.2 System (C4 Level 1)
+A System represents a software system at the highest level of C4 abstraction — a black box delivering functionality to users or other systems. Systems map directly to application records in Salesforce TPM.
+3.3 Container (C4 Level 2)
+A Container is a deployable unit within a System — a web application, API, database, message broker, background worker, etc. Containers are where most architectural detail lives: technology choices, NFR profiles, and data storage.
+3.4 Component (C4 Level 3)
+Components are logical building blocks within a Container. They are optional — not every Container needs Components modeled. Components are appropriate when the internal structure of a Container is architecturally significant: a complex rules engine with distinct processing stages, a data ingestion container with multiple transformation steps, etc.
+3.5 Infrastructure Node
+Infrastructure Nodes represent physical or virtual infrastructure resources: Kubernetes clusters, managed databases, message brokers, CDN distributions, etc. Nodes are linked to containers via the container's infrastructure attribute and via deployment relationships in the relationships file.
+3.6 Business Capability
+Capabilities represent what the business does, expressed independently of how or which system implements it. Capabilities are deliberately lightweight — architects do not need business architecture training to capture a useful capability record.
+3.7 Business Process
+Process entities link BPMN 2.0 process models to the architecture graph. The BPMN file is the authoritative process definition — the DSL entity is the metadata envelope that connects the process to systems, capabilities, rules, and actors.
+3.8 Data Entity
+Data Entities are business-level data concepts — not physical tables. They represent the key information objects that the enterprise creates, maintains, and uses. Data Entities link upward to Business Capabilities and Processes, and downward to Data Products and physical models in Erwin.
+3.9 Architecture Decision
+Architecture Decisions capture significant design choices in ADR format. They are first-class entities in the metamodel — linked to the components they constrain, queryable by status, and surfaced in the Workbench alongside the entities they govern.
+4. Relationships File Schema
+Relationships between entities live in domain-scoped relationship files. Each file covers all relationships where at least one participant belongs to the named domain. A relationship between a Claims system and a Policy system lives in claims.relationships.yaml by convention — the domain of the source entity determines the file.
+4.1 Relationship File Structure
+4.2 Relationship Type Catalog
+The following relationship types are valid in the DSL. Each maps to an Ardoq reference type and a semantic metadata attribute. The compiler rejects undeclared relationship types.
+4.3 Relationship ID Convention
+Relationship IDs follow the pattern: rel.<from-slug>--<type>--<to-slug>. For interface-level relationships the to-slug includes the interface fragment: rel.<from>--consumes--<to>#<interface-id>.
+5. Branch Metadata
+Every non-main Git branch must contain a .eams/branch.yaml file at the repository root. This file declares the intent and scope of the branch. The EAMS compiler, Workbench, and approval workflow all consume this metadata.
+5.1 Branch Intent Types
+5.2 Branch Metadata File
+5.3 Branch Diff Semantics
+The EAMS compiler produces a structured diff report when compiling a non-main branch. The diff report is the primary input to architecture review. It answers: what has changed, what has been added, what has been removed, and what standards violations have been introduced?
+Entity additions: new entity files present in branch but not in base
+Entity modifications: entity files present in both, with changed fields
+Entity removals: entity files removed (or status changed to deprecated/retired)
+Relationship additions: new relationships in domain relationship files
+Relationship removals: relationships present in base but absent in branch
+Standards violations: new entities or relationships that fail compliance checks
+NFR regressions: containers whose NFR profile is weaker than the base branch
+6. Compiler Contract
+The EAMS compiler is the pipeline that validates DSL files and writes compiled architecture data to Ardoq. It runs as a CI/CD pipeline step on every commit to any branch.
+6.1 Pipeline Stages
+6.2 Ardoq Mapping Rules
+The following rules govern how DSL entities and relationships compile to Ardoq constructs:
+6.3 CI/CD Integration
+7. Validation Rules Reference
+7.1 Universal Rules (All Entity Types)
+7.2 Relationship File Rules
+7.3 Standards Compliance Rules (Examples)
+Standards compliance rules are defined in the .eams/standards/ catalog and referenced by standard ID. The following are illustrative examples:
+8. Authoring Guide
+This section provides practical guidance for architects authoring DSL content day-to-day.
+8.1 Minimal Valid Entity — Getting Started
+The principle of layered completeness means a new entity can be committed with only the required fields. The following is the smallest valid system entity that will pass schema validation:
+8.2 Workflow: Adding a New System to a Project Branch
+Create a project branch from main: git checkout -b project/claims-rt-adjudication
+Add .eams/branch.yaml with intent: project and project tracking information
+Create the system entity file in systems/<domain>/<slug>.system.yaml
+Create container entity files in containers/<domain>/<system-slug>/<slug>.container.yaml
+Add relationships to relationships/<domain>.relationships.yaml
+Run eams validate locally to check for errors before pushing
+Push branch — CI pipeline runs schema validation, referential integrity, and compliance checks
+Review the diff report generated by the compiler in the pull request
+Submit for architecture review — update .eams/branch.yaml review.status to in-review
+After review approval, update review.status to approved and merge to main
+8.3 Tooling Support
+VS Code extension (planned): YAML schema validation via JSON Schema, ID autocompletion from the entity index, hover documentation for field definitions, inline compliance warnings.
+eams CLI: Local validation (eams validate), entity search (eams find <query>), diff preview (eams diff --base main), and new entity scaffolding (eams new system --domain claims --slug my-system).
+Architect Workbench: Browser-based editor with guided form entry, entity graph navigation, and branch diff visualization. Generates DSL files for architect review and commit — the Workbench does not commit directly.
+8.4 Common Errors and How to Fix Them
+Appendix A — Metamodel Quick Reference
+Appendix B — Status Lifecycle
+Appendix C — Enum Value Reference
+Scope of this document
+This specification defines: DSL syntax, file organization, entity schemas, relationship schemas, branch metadata, and the compiler contract.
+It does not define: the Ardoq mapping layer (covered in the Integration Specification), the viewpoint query language (covered in the Viewpoint Engine Specification), or the CI/CD pipeline implementation (covered in the Platform Engineering Guide).
+System | Relationship to DSL
+Ardoq | Compilation target. The DSL compiler writes entities and relationships to Ardoq via its REST API. Ardoq is never written to directly by architects.
+Architecture API | The API reads from Ardoq (the compiled graph). The DSL is upstream of the API — changes flow DSL → Ardoq → API.
+Git Repository | The DSL repository is the durable source of truth. Ardoq is a queryable index of the DSL content, not an independent record.
+Architect Workbench | The Workbench can read DSL files directly from Git for editing, and displays diff views between branches. It does not write DSL directly — it generates DSL files for architect review and commit.
+Confluence | Artifact generation reads from the compiled graph via the Architecture API. Confluence content is derived, not authoritative.
+Salesforce TPM | TPM application records are referenced from DSL system entities via a tpm_id attribute. The sync integration is read-from-TPM, enrich-in-DSL — TPM metadata is not overwritten.
+Repository Layout
+eams-architecture/
+├── .eams/
+│   ├── metamodel.yaml            # Metamodel schema — governs all entity types
+│   ├── branch.yaml               # Branch intent metadata (present on non-main branches)
+│   └── standards/                # Architecture standards catalog
+│
+├── systems/                       # C4 Level 1 — Software Systems
+│   ├── claims/                    # Domain: Claims
+│   │   ├── claims-processing.system.yaml
+│   │   ├── claims-portal.system.yaml
+│   │   └── claims-data-platform.system.yaml
+│   └── policy/
+│       └── policy-admin.system.yaml
+│
+├── containers/                    # C4 Level 2 — Containers (per owning system)
+│   └── claims/
+│       └── claims-processing/
+│           ├── adjudication-api.container.yaml
+│           ├── rules-engine.container.yaml
+│           └── claims-db.container.yaml
+│
+├── components/                    # C4 Level 3 — Components (per owning container)
+│   └── claims/claims-processing/adjudication-api/
+│       ├── claim-validator.component.yaml
+│       └── payment-calculator.component.yaml
+│
+├── infrastructure/                # Infrastructure Nodes
+│   └── claims/
+│       └── claims-eks-cluster.infra.yaml
+│
+├── capabilities/                  # Business Capabilities
+│   └── claims/
+│       ├── claim-intake.capability.yaml
+│       └── claim-adjudication.capability.yaml
+│
+├── processes/                     # Business Processes (BPMN-linked)
+│   └── claims/
+│       └── first-notice-of-loss.process.yaml
+│
+├── data/                          # Data entities, products, contracts
+│   └── claims/
+│       ├── claim-record.entity.yaml
+│       ├── claims-data-product.product.yaml
+│       └── claims-feed.contract.yaml
+│
+├── actors/                        # Actors (persons, roles, external systems)
+│   └── claims/
+│       ├── claims-adjudicator.actor.yaml
+│       └── state-dol.actor.yaml   # External: Dept of Labor
+│
+├── goals/                         # Business Goals & Objectives
+│   └── corporate/
+│       └── reduce-claims-cycle-time.goal.yaml
+│
+├── decisions/                     # Architecture Decision Records
+│   └── claims/
+│       └── ADR-0042-rules-engine-selection.decision.yaml
+│
+└── relationships/                 # Domain relationship files
+├── claims.relationships.yaml
+├── policy.relationships.yaml
+└── cross-domain.relationships.yaml
+
+File naming convention
+Format: <slug>.<entity-type>.yaml
+Slug: lowercase, hyphen-separated, globally unique within entity type.
+Entity type suffix is mandatory — it enables tooling to identify entity type without parsing the file.
+Examples: claims-processing.system.yaml  |  adjudication-api.container.yaml  |  ADR-0042-rules-engine-selection.decision.yaml
+Entity Type | Prefix | Example ID
+System (C4 L1) | system. | system.claims-processing
+Container (C4 L2) | container. | container.adjudication-api
+Component (C4 L3) | component. | component.claim-validator
+Infrastructure | infra. | infra.claims-eks-cluster
+Business Capability | capability. | capability.claim-adjudication
+Business Process | process. | process.first-notice-of-loss
+Data Entity | entity. | entity.claim-record
+Data Product | product. | product.claims-data-product
+Data Contract | contract. | contract.claims-feed
+Actor | actor. | actor.claims-adjudicator
+Business Goal | goal. | goal.reduce-claims-cycle-time
+Architecture Decision | decision. | decision.ADR-0042
+ID stability rule
+Once an entity ID is committed to the main branch, it MUST NOT change.
+Ardoq component IDs, API URLs, viewpoint definitions, and cross-references all depend on stable IDs.
+If an entity needs renaming, use the display name field. The ID remains frozen.
+If an entity is retired, set status: retired — do not delete the file from Git history.
+Common Header — All Entity Types
+eams_version: 1.0  # DSL schema version — always required
+kind: <entity-type>  # Entity type. Must match file suffix
+id: <qualified-id>  # Globally unique qualified ID. Immutable after first commit
+name: <display name>  # Human-readable display name. May change freely
+domain: <domain-slug>  # Owning business domain. Must match directory path
+status: active  # active | proposed | deprecated | retired
+ownership:
+architect: <email>  # Accountable architect for this entity
+business_owner: <email or team>  # Business owner (optional for technical entities)
+metadata:
+created: 2026-01-15
+last_reviewed: 2026-03-01
+review_due: 2026-09-01
+tags:
+- claims
+- adjudication
+description: <concise entity description>  # Plain language. One to three sentences.
+
+claims-processing.system.yaml — Annotated
+# ═══ COMMON HEADER ════════════════════════════════════════════════
+eams_version: 1.0
+kind: system
+id: system.claims-processing
+name: Claims Processing System
+domain: claims
+status: active  # active | proposed | deprecated | retired
+ownership:
+architect: j.smith@company.com
+business_owner: VP Claims Operations
+metadata:
+created: 2025-06-01
+last_reviewed: 2026-02-15
+review_due: 2026-08-15
+tags:
+- claims
+- core-platform
+description: Receives, validates, adjudicates, and settles insurance claims. Central hub for the claims value chain.
+
+# ═══ SYSTEM-SPECIFIC ══════════════════════════════════════════════
+tpm_id: APP-00842  # Salesforce TPM application ID — links to portfolio record
+criticality: tier-1  # tier-1 | tier-2 | tier-3 | tier-4
+lifecycle: production  # incubating | production | sunset | retired
+
+business_context:
+capabilities:
+- capability.claim-intake  # Links to capability entities — traceability chain
+- capability.claim-adjudication
+goals:
+- goal.reduce-claims-cycle-time
+
+external_users:
+- actor: actor.claims-adjudicator
+- actor: actor.state-dol
+
+compliance:
+- standard.rest-api-first  # Standards this system is governed by
+- standard.pii-data-handling
+
+# Containers are in separate files under containers/claims/claims-processing/
+# Relationships are in relationships/claims.relationships.yaml
+
+Field | Req | Type / Values | Notes
+tpm_id | R | string (TPM format APP-NNNNN) | Must match a valid Salesforce TPM record
+criticality | R | tier-1 | tier-2 | tier-3 | tier-4 | Tier-1 = highest criticality. Drives NFR defaults
+lifecycle | R | incubating | production | sunset | retired | 
+business_context.capabilities | O | list of capability.* IDs | Capabilities this system supports
+business_context.goals | O | list of goal.* IDs | Strategic goals this system contributes to
+external_users | O | list of actor refs | Actors who interact at the system boundary
+compliance | O | list of standard IDs | Standards governing this system
+adjudication-api.container.yaml — Annotated
+eams_version: 1.0
+kind: container
+id: container.adjudication-api
+name: Adjudication API
+domain: claims
+status: active
+ownership:
+architect: j.smith@company.com
+metadata:
+created: 2025-06-01
+last_reviewed: 2026-02-15
+review_due: 2026-08-15
+description: REST API exposing claim adjudication operations. Orchestrates the rules engine, payment calculator, and state machine.
+
+# ═══ CONTAINER-SPECIFIC ═══════════════════════════════════════════
+parent_system: system.claims-processing  # Owning system — must exist in systems/
+container_type: api  # api | web-app | worker | database | cache | message-broker | file-store | function | cli | other
+
+technology:
+primary: Java 21 / Spring Boot 3
+runtime: JVM
+hosting: eks  # eks | ecs | lambda | ec2 | rds | s3 | managed-service | on-prem | saas
+- container.adjudication-api
+
+nfr_profile:
+availability_target: 99.95
+rto_minutes: 15
+rpo_minutes: 5
+throughput_rps: 500
+data_classification: pii  # public | internal | confidential | pii | phi | pci
+auth_mechanism: oauth2-jwt
+
+interfaces:
+# Interfaces exposed by this container — consumed by others in relationships file
+- id: container.adjudication-api#submit-claim
+name: Submit Claim
+protocol: REST
+path: POST /claims
+auth: oauth2-jwt
+sla_ms: 2000  # Max response time SLA
+
+- id: container.adjudication-api#claim-events
+name: Claim State Events
+protocol: SNS
+topic_arn_pattern: arn:aws:sns:*:*:claims-events-*
+
+stores:
+# Data entities persisted by this container
+- entity: entity.claim-record
+- entity: entity.adjudication-decision
+
+compliance:
+- standard.rest-api-first
+- standard.pii-data-handling
+- standard.eks-deployment
+
+infrastructure:
+- infra.claims-eks-cluster
+
+Field | Req | Type / Values | Notes
+parent_system | R | system.* ID | Must reference a valid system entity
+container_type | R | enum (9 values) | Determines default NFR baseline and diagram notation
+technology.primary | R | string | Primary language/framework
+technology.hosting | R | enum (10 values) | Hosting model drives infrastructure linkage
+nfr_profile | R | block | All sub-fields optional but block must be present
+nfr_profile.data_classification | R | enum (6 values) | Drives compliance standard application
+interfaces | O | list | Interfaces exposed. Each interface gets a stable ID for use in relationship files
+stores | O | list of entity.* refs | Data entities persisted by this container
+compliance | O | list of standard IDs | Inherited from parent system unless overridden
+infrastructure | O | list of infra.* IDs | Nodes this container is deployed on
+claim-validator.component.yaml
+eams_version: 1.0
+kind: component
+id: component.claim-validator
+name: Claim Validator
+domain: claims
+status: active
+ownership:
+architect: j.smith@company.com
+metadata:
+created: 2026-01-10
+last_reviewed: 2026-02-15
+review_due: 2026-08-15
+description: Validates inbound claim submissions against coverage rules and data completeness requirements before adjudication.
+
+parent_container: container.adjudication-api
+component_type: domain-service  # domain-service | repository | gateway | facade | event-handler | scheduler | validator | transformer | other
+
+technology:
+implementation: Java 21
+pattern: Chain of Responsibility
+
+governed_by:
+- entity.coverage-rule  # Business rules influencing this component's logic
+
+C4 Level 3 usage guidance
+Model Components when: the container has distinct internal subsystems with separate teams, patterns, or data concerns.
+Do not model Components when: the container is a simple CRUD API or single-responsibility service. Premature L3 modeling adds noise without insight.
+Components do not appear in C4 Context or Container diagrams — they are only visible in Component-level viewpoints.
+claims-eks-cluster.infra.yaml
+eams_version: 1.0
+kind: infrastructure
+id: infra.claims-eks-cluster
+name: Claims EKS Cluster
+domain: claims
+status: active
+ownership:
+architect: b.patel@company.com
+metadata:
+created: 2025-03-01
+last_reviewed: 2026-01-10
+review_due: 2026-07-10
+description: Production EKS cluster for all Claims domain workloads.
+
+infra_type: kubernetes-cluster  # kubernetes-cluster | ecs-cluster | rds-instance | aurora-cluster | elasticache | msk | s3-bucket | api-gateway | lambda | cloudfront | ec2-instance | other
+
+aws:
+account_id: 123456789012
+region: us-east-1
+environment: production  # production | staging | development | dr
+
+nfr_profile:
+availability_zones: 3
+auto_scaling: true
+
+compliance:
+- standard.eks-baseline
+- standard.pii-network-segmentation
+
+claim-adjudication.capability.yaml
+eams_version: 1.0
+kind: capability
+id: capability.claim-adjudication
+name: Claim Adjudication
+domain: claims
+status: active
+ownership:
+architect: j.smith@company.com
+business_owner: VP Claims Operations
+metadata:
+created: 2025-09-01
+last_reviewed: 2026-02-01
+review_due: 2026-08-01
+description: The ability to evaluate a submitted claim against policy terms, coverage rules, and fraud indicators to reach a settlement decision.
+
+maturity: managed  # initial | developing | defined | managed | optimized
+strategic_importance: differentiating  # commodity | enabling | differentiating | innovative
+
+parent_capability:
+id: capability.claims-management  # Optional — for capability hierarchy
+
+kpis:
+- name: Average Adjudication Cycle Time
+unit: days
+target: 3.5
+goal_ref: goal.reduce-claims-cycle-time
+
+Technical architect guidance: capturing MVP capabilities
+You do not need a formal business architecture process to create a useful capability record.
+Start with: id, name, domain, description, business_owner. That is sufficient to establish the traceability chain to systems.
+Add maturity and strategic_importance only when you have a business owner conversation to inform them.
+KPIs are highly valuable but not blocking — add them when the business owner can provide targets.
+first-notice-of-loss.process.yaml
+eams_version: 1.0
+kind: process
+id: process.first-notice-of-loss
+name: First Notice of Loss
+domain: claims
+status: active
+ownership:
+architect: j.smith@company.com
+business_owner: Director of Claims Intake
+metadata:
+created: 2026-01-20
+last_reviewed: 2026-02-20
+review_due: 2026-08-20
+description: End-to-end process for a claimant's initial notification of a loss event through to claim record creation and assignment.
+
+bpmn_file: processes/claims/first-notice-of-loss.bpmn  # Path to BPMN 2.0 file in repository
+process_type: core  # core | support | management
+frequency: event-driven
+criticality: high  # low | medium | high | critical
+
+participants:
+- actor: actor.claimant
+- actor: actor.claims-adjudicator
+- system: system.claims-processing
+- system: system.claims-portal
+
+capabilities_supported:
+- capability.claim-intake
+
+governed_by:
+- rule.fnol-completeness-requirements
+- rule.claimant-identity-verification
+
+ux_artifacts:
+- name: FNOL Intake Screen Flow
+figma_url: https://www.figma.com/file/xxxxx/fnol-intake
+description: Claimant-facing digital FNOL submission flow
+
+claim-record.entity.yaml
+eams_version: 1.0
+kind: data_entity
+id: entity.claim-record
+name: Claim Record
+domain: claims
+status: active
+ownership:
+architect: j.smith@company.com
+business_owner: Chief Data Officer - Claims
+metadata:
+created: 2025-06-15
+last_reviewed: 2026-02-10
+review_due: 2026-08-10
+description: The central business record representing a single insurance claim from first notice through final settlement or denial.
+
+sensitivity: pii  # public | internal | confidential | pii | phi | pci
+data_owner: VP Claims Operations
+
+key_attributes:
+# Conceptual attributes — not a physical schema
+- name: Claim Number    description: Unique identifier assigned at FNOL
+- name: Policy Reference   description: Link to the governing policy record
+- name: Loss Date         description: Date the loss event occurred
+- name: Settlement Amount  description: Final approved settlement value
+
+physical_models:
+- tool: erwin  model: ClaimsMaster  entity: CLAIM_RECORD
+
+related_terms:
+- term.claim
+- term.loss-event
+- term.claimant
+
+ADR-0042-rules-engine-selection.decision.yaml
+eams_version: 1.0
+kind: decision
+id: decision.ADR-0042
+name: Rules Engine Selection for Claims Adjudication
+domain: claims
+status: accepted  # proposed | accepted | superseded | deprecated
+ownership:
+architect: j.smith@company.com
+metadata:
+created: 2026-01-05
+last_reviewed: 2026-02-01
+review_due: 2027-02-01
+description: Selection of Drools as the embedded rules engine for the Claims Adjudication container.
+
+adr:
+context: Claims adjudication requires evaluation of hundreds of policy rules that change quarterly. A dedicated rules engine separates rule authoring from application code deployment.
+decision: Adopt Drools (Apache-licensed) as an embedded rules engine within the Adjudication API container.
+alternatives_considered:
+- name: Easy Rules  rationale: Insufficient expressiveness for complex coverage scenarios
+- name: AWS Lambda rules  rationale: Latency and operational complexity unacceptable for synchronous adjudication
+consequences: Rules are authored in DRL. Team requires Drools training. Rule deployment decoupled from API deployment.
+review_trigger: If adjudication rule volume exceeds 1000 active rules or latency SLA cannot be met.
+
+affects:
+- container: container.adjudication-api
+- component: component.claim-validator
+- standard: standard.approved-jvm-libraries
+
+Why separate relationship files?
+Eliminates merge conflicts: two architects can update different systems in the same domain simultaneously without touching each other's entity files.
+Makes the integration map explicit: claims.relationships.yaml is the definitive map of how the Claims domain connects to everything else.
+Enables domain-scoped relationship review: architecture review can assess a domain's integration surface in a single file.
+relationships/claims.relationships.yaml — Full Structure
+eams_version: 1.0
+domain: claims
+description: All relationships where the source entity belongs to the Claims domain.
+
+relationships:
+
+# ──────────────────────────────────────────────────────────────────
+# SYSTEM-TO-SYSTEM RELATIONSHIPS
+# ──────────────────────────────────────────────────────────────────
+
+- id: rel.claims-processing--uses--policy-admin
+from: system.claims-processing
+to: system.policy-admin
+type: uses
+description: Retrieves policy coverage details during claim adjudication.
+criticality: synchronous-critical  # synchronous-critical | synchronous-non-critical | async | batch | reference
+protocol: REST
+
+- id: rel.claims-processing--publishes--notification-service
+from: system.claims-processing
+to: system.notification-service
+type: publishes-to
+description: Publishes claim state change events for claimant notifications.
+criticality: async
+protocol: SNS/SQS
+
+# ──────────────────────────────────────────────────────────────────
+# CONTAINER-TO-CONTAINER RELATIONSHIPS
+# ──────────────────────────────────────────────────────────────────
+
+- id: rel.adjudication-api--consumes--policy-coverage-api
+from: container.adjudication-api
+to_interface: container.policy-coverage-api#get-coverage # References a named interface
+type: consumes
+description: Calls policy coverage endpoint during adjudication rule evaluation.
+criticality: synchronous-critical
+sla_dependency_ms: 500    # Max tolerable latency from dependency
+circuit_breaker: true
+
+- id: rel.adjudication-api--stores-in--claims-db
+from: container.adjudication-api
+to: container.claims-db
+type: stores-in
+description: Persists adjudication decisions and claim records.
+access_pattern: read-write
+
+# ──────────────────────────────────────────────────────────────────
+# CAPABILITY-TO-SYSTEM TRACEABILITY
+# ──────────────────────────────────────────────────────────────────
+
+- id: rel.cap-adjudication--supported-by--claims-processing
+from: capability.claim-adjudication
+to: system.claims-processing
+type: supported-by
+description: Claims Processing System is the primary technical enabler for adjudication capability.
+coverage: full           # full | partial | planned
+
+# ──────────────────────────────────────────────────────────────────
+# PROCESS-TO-SYSTEM INVOCATIONS
+# ──────────────────────────────────────────────────────────────────
+
+- id: rel.fnol-process--invokes--claims-portal
+from: process.first-notice-of-loss
+to: system.claims-portal
+type: invokes
+description: Claimant initiates FNOL via the Claims Portal digital channel.
+channel: digital
+
+# ──────────────────────────────────────────────────────────────────
+# GOAL-TO-CAPABILITY REALIZATION
+# ──────────────────────────────────────────────────────────────────
+
+- id: rel.goal-cycle-time--realized-by--cap-adjudication
+from: goal.reduce-claims-cycle-time
+to: capability.claim-adjudication
+type: realized-by
+description: Improving adjudication cycle time is the primary lever for reducing overall claims cycle time.
+contribution: primary     # primary | contributing | indirect
+
+Type | Direction | Valid From → To | Ardoq Ref Type | Notes
+uses | A → B | system → system, container → container/system | integration | Generic synchronous dependency
+consumes | A → B | container → interface | integration | Explicit interface consumption — preferred over `uses` at container level
+exposes | A → B | container → interface (self) | interface | Declares interface provided by container
+publishes-to | A → B | container/system → container/system | integration | Async event/message publication
+subscribes-to | A → B | container → container/system | integration | Async event/message subscription
+stores-in | A → B | container → container (db/store) | data-flow | Write access to a data store
+reads-from | A → B | container → container (db/store) | data-flow | Read-only access to a data store
+deployed-on | A → B | container → infra | deployment | Container running on infrastructure node
+supported-by | A → B | capability → system | realization | Capability technically enabled by system
+realized-by | A → B | goal → capability | realization | Goal achieved through capability
+invokes | A → B | process → system/container | invocation | Process step calls a system
+governed-by | A → B | process/component → rule | governance | Entity subject to a business rule
+constrains | A → B | decision/standard → any | governance | ADR or standard constrains entity
+produces | A → B | system/container → data product | data-flow | System publishes a data product
+contracts-with | A ↔ B | data product → contract | contract | Bidirectional contract linkage
+Relationship ID Examples
+id: rel.claims-processing--uses--policy-admin
+id: rel.adjudication-api--consumes--policy-coverage-api#get-coverage
+id: rel.cap-adjudication--supported-by--claims-processing
+id: rel.fnol-process--invokes--claims-portal
+id: rel.goal-cycle-time--realized-by--cap-adjudication
+
+Intent | Description | Compiler Behavior | Approval Required
+proposal | Future-state architecture being reviewed before any project commitment. No implementation underway. | Compiles to a read-only Ardoq Scenario. Does not affect production graph. | Architecture Review Board approval before merge to main.
+project | Architecture changes associated with an active implementation project. Project is in flight. | Compiles to a staging Ardoq workspace. Validated against standards. Produces a diff report against main. | Lead architect sign-off + impacted domain review.
+experiment | Exploratory architecture modeling. Low formality. Not intended for production adoption as-is. | Compiles to an isolated Ardoq Scenario. Not promoted automatically. | No approval required for branch. Adoption requires conversion to proposal or project branch.
+migration | Content migration from legacy systems (Confluence, Gliffy). Historical data import. | Validated against metamodel. Flagged as migrated content — requires architect review annotation. | Domain architect review before merge.
+.eams/branch.yaml
+eams_version: 1.0
+intent: project  # proposal | project | experiment | migration
+name: Claims Real-Time Adjudication Initiative
+description: Architecture changes supporting the move from batch to real-time claim adjudication. Introduces event-driven processing and a dedicated rules evaluation service.
+
+scope:
+- domain.claims
+- system.claims-processing
+- container.adjudication-api
+- container.rules-engine
+
+project:
+id: PRJ-2026-0031  # Project tracking ID (Jira, ServiceNow, etc.)
+jira_epic: ARCH-1142
+sponsor: VP Claims Operations
+target_date: 2026-09-30
+
+authors:
+- j.smith@company.com
+- b.patel@company.com
+
+review:
+status: in-review  # draft | in-review | approved | rejected | merged
+submitted_date: 2026-03-05
+reviewers:
+- arch-review-board@company.com
+- policy-domain-lead@company.com
+approved_date: null
+
+base_branch: main  # Branch this was forked from — compiler uses this for diff generation
+ardoq_scenario_id: null  # Populated by compiler after first compilation — do not edit manually
+
+Branch rules enforced by compiler
+A .eams/branch.yaml file is required on all non-main branches. Compiler fails without it.
+intent: project branches must include a project.id referencing a valid project record.
+intent: proposal branches must list at least one reviewer in review.reviewers.
+Merge to main is blocked unless review.status = approved (for proposal and project branches).
+The base_branch field is immutable after first commit — do not rebase and change it.
+Stage | Description | Failure Behavior
+1. Schema validation | Every entity file and relationship file is validated against the metamodel JSON Schema. Required fields checked. Enum values checked. ID format checked. | Hard failure — commit rejected. Error report lists all violations with file and line number.
+2. Referential integrity | All entity references (parent_system, capabilities, goal refs, relationship from/to) are resolved against the full entity graph. | Hard failure — dangling references are not permitted. Error lists unresolved IDs.
+3. ID stability check | Checks that no entity ID present in the base branch has been changed. | Hard failure on main branch. Warning on feature branches.
+4. Standards compliance | Each entity is checked against applicable standards from the standards catalog. | Soft failure — produces findings report. Does not block compile. Exceptions require ADR documentation.
+5. NFR regression check | Containers compared to base branch NFR profiles for regressions in availability, RTO, RPO, or data classification downgrade. | Soft failure — produces regression report. Requires architect acknowledgment to proceed.
+6. Ardoq write | Validated entities and relationships are written to Ardoq via API. Entities are upserted by qualified ID. Relationships are upserted by relationship ID. | Hard failure if Ardoq API is unavailable or rejects writes. Retried 3x with backoff before failing.
+7. Diff report | For non-main branches, a structured diff report is generated and stored as a build artifact. Posted to the pull request as a comment summary. | Non-blocking — diff report failure does not fail the build.
+8. Search index update | OpenSearch index is updated with all changed entities and relationships. | Non-blocking — search lag is acceptable. Indexed asynchronously.
+DSL Construct | Ardoq Target | Mapping Notes
+Entity file | Ardoq Component | Component type maps to entity kind. Qualified ID stored as a component attribute for stable cross-reference.
+Entity domain | Ardoq Workspace | One Ardoq workspace per domain. Cross-domain relationships use Ardoq cross-workspace references.
+Relationship (any type) | Ardoq Reference | All relationship types map to one of five Ardoq reference types: integration, data-flow, deployment, realization, governance. The DSL relationship type is stored as a reference attribute.
+Interface declaration | Ardoq Component | Interfaces declared on containers are compiled as child components of type Interface. Interface ID is the container ID + fragment.
+NFR profile | Component attributes | All NFR fields are stored as typed attributes on the container component. Enables Ardoq viewpoint filtering by NFR values.
+Branch (non-main) | Ardoq Scenario | Non-main branches compile to a named Ardoq Scenario for visualization. Scenario name includes branch intent and branch name.
+Standards compliance finding | Component attribute | Compliance status and finding list stored as attributes. Enables viewpoints that highlight non-compliant components.
+The Ardoq Viewpoint complexity solution
+Ardoq Viewpoints become complex when relationship semantics are encoded as distinct Ardoq reference types.
+The EAMS approach: all integration relationships share one Ardoq reference type ('integration'). The semantic type (uses, consumes, publishes-to, etc.) is a reference attribute.
+Viewpoints filter on the semantic attribute rather than requiring a separate reference type per semantic. This keeps Viewpoint definitions manageable while preserving full semantic richness in the DSL.
+Compiler Pipeline — GitHub Actions / AWS CodePipeline
+# Triggered on: push to any branch, pull request to main
+
+stages:
+validate:
+image: eams-compiler:latest
+commands:
+- eams validate --all --strict
+- eams check-refs --base origin/main
+- eams check-ids --immutable
+
+compliance:
+commands:
+- eams compliance --report compliance-report.json
+- eams nfr-check --base origin/main --report nfr-report.json
+
+compile:
+condition: on_push
+commands:
+- eams compile --target ardoq --env ${BRANCH_ENV}
+- eams diff --base origin/main --output diff-report.md
+- eams index --target opensearch
+
+report:
+commands:
+- eams post-pr-comment --diff diff-report.md --compliance compliance-report.json
+
+Rule ID | Rule | Severity
+VAL-001 | eams_version is present and is a recognized schema version | Error
+VAL-002 | kind matches the file extension suffix (e.g., kind: system with .system.yaml) | Error
+VAL-003 | id is present, matches the qualified ID format for the entity type, and matches the filename slug | Error
+VAL-004 | id has not changed from the base branch (immutability check) | Error on main, Warning on feature branch
+VAL-005 | domain matches the directory path domain segment | Error
+VAL-006 | status is one of: active | proposed | deprecated | retired | Error
+VAL-007 | ownership.architect is a valid company email address format | Error
+VAL-008 | metadata.review_due is present and is a future date (Warning if overdue) | Warning
+VAL-009 | description is present and is at least 20 characters | Warning
+VAL-010 | All entity ID references (capabilities, goals, parent_system, etc.) resolve to existing entity files | Error
+Rule ID | Rule | Severity
+REL-001 | relationship id follows the rel.<from-slug>--<type>--<to-slug> convention | Warning
+REL-002 | relationship id is unique within the repository (not just within the file) | Error
+REL-003 | type is a recognized relationship type from the catalog (Section 4.2) | Error
+REL-004 | from entity ID resolves to an existing entity file | Error
+REL-005 | to entity ID (or to_interface ID) resolves to an existing entity file / interface declaration | Error
+REL-006 | The relationship type is valid for the from and to entity type combination (type catalog validation) | Error
+REL-007 | A relationship file's domain attribute matches its filename domain prefix | Error
+REL-008 | Duplicate relationship between the same from/to/type combination produces a Warning (may be intentional for multi-path relationships) | Warning
+Standard ID | Applies To | Rule | Severity
+standard.rest-api-first | Containers: api type | Must declare at least one REST interface. auth_mechanism must be oauth2-jwt or api-key. | Compliance Finding
+standard.pii-data-handling | Containers: data_classification = pii or phi | nfr_profile.auth_mechanism must not be none. Must reference standard.pii-network-segmentation on infrastructure. | Compliance Finding
+standard.eks-deployment | Containers: hosting = eks | Must reference an infra entity of type kubernetes-cluster. Must reference standard.eks-baseline. | Compliance Finding
+standard.event-driven-async | Relationships: publishes-to or subscribes-to | Protocol must be SNS, SQS, MSK, EventBridge, or Kinesis. | Compliance Finding
+standard.adr-required | Containers: new entities in project branches | At least one decision entity of status: accepted must reference this container in its affects block. | Warning
+Minimal Valid System Entity
+eams_version: 1.0
+kind: system
+id: system.my-new-system
+name: My New System
+domain: claims
+status: proposed
+ownership:
+architect: j.smith@company.com
+metadata:
+created: 2026-03-05
+last_reviewed: 2026-03-05
+review_due: 2026-09-05
+description: Brief description of what this system does.
+tpm_id: APP-00999
+criticality: tier-2
+lifecycle: incubating
+
+Error | Cause | Fix
+VAL-010: Unresolved reference 'capability.foo' | A capability ID referenced in a system entity does not have a corresponding capability file. | Create the capability entity file, or correct the ID to reference an existing capability.
+REL-006: Relationship type 'uses' not valid from process to container | Processes use 'invokes' to reference systems or containers, not 'uses'. | Change the relationship type to invokes.
+VAL-004: ID 'system.claims-processing' was changed | The entity id field was edited after the entity was committed to main. | Revert the id field. Change the name field instead if a display rename is needed.
+VAL-002: kind mismatch — file is .container.yaml but kind: system | The file extension suffix and kind field do not match. | Ensure kind matches the file extension: container files must have kind: container.
+REL-003: Unrecognized relationship type 'depends-on' | 'depends-on' is not in the relationship type catalog. | Use 'uses' for synchronous dependencies or 'consumes' for explicit interface consumption.
+Kind Value | File Suffix | Directory | Required Fields Beyond Header
+system | .system.yaml | systems/<domain>/ | tpm_id, criticality, lifecycle
+container | .container.yaml | containers/<domain>/<system>/ | parent_system, container_type, technology, nfr_profile
+component | .component.yaml | components/<domain>/<system>/<cont>/ | parent_container, component_type
+infrastructure | .infra.yaml | infrastructure/<domain>/ | infra_type, aws.region, aws.environment
+capability | .capability.yaml | capabilities/<domain>/ | maturity, strategic_importance
+process | .process.yaml | processes/<domain>/ | bpmn_file, process_type, criticality
+data_entity | .entity.yaml | data/<domain>/ | sensitivity, data_owner
+data_product | .product.yaml | data/<domain>/ | odps_ref, data_owner, sla_tier
+data_contract | .contract.yaml | data/<domain>/ | producer, consumer, schema_ref
+actor | .actor.yaml | actors/<domain>/ | actor_type, external
+goal | .goal.yaml | goals/<domain>/ | owner, time_horizon, priority
+decision | .decision.yaml | decisions/<domain>/ | adr.context, adr.decision, affects
+Status | Meaning | Compiler Behavior | Permitted Transitions
+proposed | Entity is being designed. Not yet in production. | Compiled to Ardoq but flagged as proposed. Excluded from production compliance checks. | → active, → retired
+active | Entity is in production use. | Fully compiled. All compliance checks applied. | → deprecated
+deprecated | Entity is being phased out. Still operational. | Compiled with deprecation flag. Relationships from deprecated entities generate warnings. | → retired
+retired | Entity no longer exists. File retained for history. | Not compiled to Ardoq production graph. Relationships to/from retired entities generate errors. | Terminal state
+Field | Valid Values
+status (all entities) | active | proposed | deprecated | retired
+system.criticality | tier-1 | tier-2 | tier-3 | tier-4
+system.lifecycle | incubating | production | sunset | retired
+container.container_type | api | web-app | worker | database | cache | message-broker | file-store | function | cli | other
+container.technology.hosting | eks | ecs | lambda | ec2 | rds | s3 | managed-service | on-prem | saas
+container.nfr_profile.data_classification | public | internal | confidential | pii | phi | pci
+component.component_type | domain-service | repository | gateway | facade | event-handler | scheduler | validator | transformer | other
+infrastructure.infra_type | kubernetes-cluster | ecs-cluster | rds-instance | aurora-cluster | elasticache | msk | s3-bucket | api-gateway | lambda | cloudfront | ec2-instance | other
+capability.maturity | initial | developing | defined | managed | optimized
+capability.strategic_importance | commodity | enabling | differentiating | innovative
+process.process_type | core | support | management
+process.criticality | low | medium | high | critical
+data_entity.sensitivity | public | internal | confidential | pii | phi | pci
+branch.yaml intent | proposal | project | experiment | migration
+branch.yaml review.status | draft | in-review | approved | rejected | merged
+relationship.criticality | synchronous-critical | synchronous-non-critical | async | batch | reference
+decision.status | proposed | accepted | superseded | deprecated

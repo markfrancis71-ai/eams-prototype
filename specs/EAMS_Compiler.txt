@@ -1,0 +1,618 @@
+Table of Contents
+1. Overview
+The EAMS Compiler is the pipeline that transforms DSL source files in Git into the materialised architecture graph. It is the single authoritative write path in the EAMS ecosystem — every entity record in OpenSearch, every component in Ardoq, every compliance finding, and every diff report originates from a compiler run. No other component writes architecture data.
+The compiler runs in two modes: CI mode (triggered by a Git push via GitHub Actions) and local mode (invoked directly by an architect via the eams CLI). Both modes execute the same pipeline stages. They differ only in invocation, output destination, and concurrency behaviour.
+1.1 Design Decisions
+Three-tier error classification: Errors are classified as hard (block the affected entity and its dependents), soft (generate findings but never block), or advisory (completeness warnings surfaced to the architect). This maximises the number of entities that succeed on every compile while being strict where correctness matters.
+Git diff plus dependency graph for incremental compiles: The reprocess set is the union of files changed in the commit and any files that declare relationships to changed entities. This closes the referential integrity gap in git-diff-only incremental compiles without requiring a full recompile.
+Queued concurrency: A second compile trigger while a compile is in progress waits in a DynamoDB-backed queue. Compiles on the same branch run sequentially. This is simpler than branch-isolated parallelism and correct for v1; branch-isolated concurrency is a future optimisation.
+Both human-readable and JSON output: The CLI produces human-readable output with file paths and line numbers by default. The --json flag produces structured JSON for CI pipeline integration. Both formats carry identical information.
+Idempotent pipeline stages: Every pipeline stage is designed to be safely re-run. If a stage fails partway through, re-running the compile from scratch produces the same result as completing the original run. This means the compiler never needs a rollback mechanism — re-run is the recovery action.
+Compile record as the audit trail: Every compile run produces a compile record in DynamoDB capturing the trigger, branch, git SHA, stage outcomes, entity counts, findings, and duration. This is the authoritative audit trail for the architecture graph's evolution.
+1.2 Compiler Position
+2. Pipeline Stages
+The compiler pipeline has eight stages, executed in sequence. Stages 1–4 are read-only (no external writes). Stages 5–8 write to external systems. This separation means that validation failures in stages 1–4 abort the compile before any external state is modified.
+2.1 Stage 1 — Source Loading
+Git operations
+In CI mode the repository is available as a fresh clone in the GitHub Actions runner. In local mode, eams compile runs against the working directory. The compiler reads the current branch name, current HEAD SHA, and the SHA of the last successful compile for this branch from the DynamoDB compile record table.
+2.2 Stage 2 — Schema Validation
+Error classification
+Every validation error produced in stage 2 is classified into one of three tiers. The classification determines whether the entity proceeds through the pipeline.
+2.3 Stage 3 — Referential Integrity
+Referential integrity validation ensures every ID referenced in a DSL file corresponds to a real entity. References that cross domain boundaries are validated against the full entity set loaded from the previous compile's OpenSearch index (for unchanged entities) and the current reprocess set (for changed entities).
+2.4 Stage 4 — Standards Compliance Check
+The compliance check evaluates each entity against its applicable standards. Standards define mandatory fields, field value constraints, and relationship requirements. The compliance engine is distinct from schema validation: schema validation checks the DSL file format; compliance checks whether the entity's declared attributes satisfy the organisation's architectural standards.
+2.5 Stage 5 — Diff Computation
+The diff compares the current compile's entity set against the previous compile's entity set for the same branch. It produces counts and details of added, modified, and removed entities, which are written to the compile record and surfaced in the Architecture API /diff/{branch} endpoint.
+3. Error Handling and Partial Compiles
+The compiler distinguishes four compile outcomes. Each has defined behaviour for what is written to external systems and what is reported to the architect.
+3.1 Blocked Entity Propagation
+When an entity is blocked by a hard error, the compiler must also block any entity that declares a relationship to the blocked entity. This prevents dangling relationships in the graph — an entity that references a non-existent or invalid target would produce a broken relationship record in Ardoq and OpenSearch.
+4. Concurrency and Compile Locking
+The compiler uses a DynamoDB-backed compile lock to prevent concurrent compiles on the same branch from interleaving their writes to OpenSearch and Ardoq. A second compile trigger that arrives while a compile is already in progress waits in a queue until the lock is released.
+4.1 Compile Lock Protocol
+5. Branch Compile Semantics
+Branch compiles write to branch-isolated targets rather than the main architecture graph. The targets differ by branch intent, as established in the Ardoq Integration Layer specification.
+5.1 Branch Compile Targets
+5.2 Branch Compile Lifecycle
+First compile of a branch: compiler detects no existing branch targets, creates OpenSearch branch index and Ardoq target (Scenario or workspace copy). Writes full entity set.
+Subsequent branch compiles: incremental compile against branch-specific OpenSearch index. Ardoq diff-aware writes to branch target.
+Branch review: architect requests review via eams review submit. Compile report and diff are attached to the review record.
+Merge to main: post-merge GitHub Actions trigger runs a main branch compile. Branch index and Ardoq branch target are marked for cleanup but not immediately deleted.
+Branch cleanup: 30 days after merge, a nightly cleanup job deletes the branch OpenSearch index and Ardoq branch target. Compile records are retained indefinitely.
+5.3 Branch Conflict Detection
+A branch conflict occurs when both the branch and main have modified the same entity since the branch was created. The compiler detects conflicts during the diff computation stage by comparing the branch entity's base SHA (the main branch SHA at branch creation time) against the current main branch SHA for the same entity.
+6. The eams CLI
+The eams CLI is the primary tool for architects authoring DSL files. It provides local validation, compilation, preview, review submission, and advisory access without requiring a browser. It is a Node.js executable distributed as an npm package and configured via .eamsrc.yaml in the repository root.
+6.1 Command Reference
+6.2 eams validate — Error Output
+The validate command is the command architects run most frequently — before every commit, as a pre-commit hook, and when debugging DSL issues. Its error output is optimised for human readability, with precise file location, a clear error description, and an actionable remediation hint.
+Human-readable output (default)
+JSON output (--json flag)
+6.3 eams compile — Dry Run
+The --dry-run flag runs stages 1–5 (source loading, schema validation, referential integrity, compliance check, diff computation) but skips stages 6–7 (OpenSearch and Ardoq writes). It produces the full compile report as if the compile had run, without modifying any external state. Used to preview the effect of a commit before pushing.
+6.4 eams CLI Configuration
+7. Compile Record
+Every compiler run produces a compile record in DynamoDB. This is the authoritative audit trail for the architecture graph's evolution. The Architecture API's /diff/{branch} and /branches endpoints read directly from compile records.
+7.1 Compile Record Schema
+7.2 Compile Record DynamoDB Access Patterns
+8. CI/CD Integration
+The compiler integrates with GitHub Actions via two workflow files: a compile workflow that runs on every push, and a PR review workflow that runs on pull request open/update and posts a compile summary as a PR comment.
+8.1 Push Compile Workflow
+8.2 PR Compile Comment
+When a compile runs on a pull request branch, the compiler posts a structured compile summary as a PR comment. The comment is updated (not re-posted) on each subsequent compile of the same PR branch.
+9. Performance
+9.1 Compile Duration Targets
+9.2 Performance Architecture
+Stages 1–4 are CPU-only: No external network calls in validation stages. All validation runs in Lambda memory against loaded DSL files and in-memory indexes. This is the fastest part of the pipeline.
+Stages 6–7 are the bottleneck: OpenSearch and Ardoq writes dominate compile duration. Both are batched (50 entities per batch) and parallelised within a stage (up to 5 concurrent batches). Cross-stage parallelism (6 and 7 simultaneously) is off by default in v1 but available via the parallel_stages config flag.
+Ardoq rate limit management: The Ardoq Integration Layer's write throttle (200ms inter-batch delay) is the primary Ardoq rate limit control. On large compiles, this is the limiting factor. The throttle is configurable; increasing it risks 429 responses from Ardoq.
+OpenSearch bulk indexing: Stage 6 uses the OpenSearch Bulk API (POST /_bulk) rather than individual document writes. Batch size is 50 documents, approximately 200KB per batch. Indexing 200 entities takes approximately 4–8 seconds under normal conditions.
+10. Infrastructure
+Appendix A — Error Code Reference
+Appendix B — eams CLI Quick Reference
+Input | Source | Output | Destination
+DSL source files (.yaml) | Git repository | Validated entity records | OpenSearch eams-entities index
+Relationship definitions | DSL files (inline) | Relationship records | OpenSearch eams-relationships index
+Branch metadata | Git branch + commit | Ardoq components and references | Ardoq workspaces
+Standards definitions | .eams/standards/ in Git | Compliance findings | DynamoDB compile record + OpenSearch
+Previous compile record | DynamoDB | Diff report (added/modified/removed) | DynamoDB compile record
+Viewpoint definitions | .eams/viewpoints/ in Git | Viewpoint catalog refresh | Architecture API Definition Registry
+Prompt templates | .eams/prompts/ in Git | Prompt cache refresh (if changed) | Lambda advisory cache
+Stage | Name | Read/Write | Blocking on Failure | Description
+1 | Source Loading | Read | Yes | Clone or fetch the Git repository. Identify changed files via git diff against last compile SHA. Expand reprocess set via dependency graph walk.
+2 | Schema Validation | Read | Hard errors only | Parse each DSL file. Validate YAML syntax, required fields, enum values, field format constraints. Classify errors.
+3 | Referential Integrity | Read | Hard errors only | Verify all relationship targets exist. Verify all referenced standards, ADRs, and capabilities exist. Build in-memory entity graph.
+4 | Standards Compliance Check | Read | Never | Evaluate each entity against its applicable standards. Generate compliance findings. No entity is blocked by a compliance finding.
+5 | Diff Computation | Read + Write | Yes | Compare current entity set against previous compile record. Compute added/modified/removed counts. Write diff to compile record.
+6 | OpenSearch Indexing | Write | Soft | Write validated entity and relationship records to OpenSearch. Diff-aware: only write changed entities in incremental mode.
+7 | Ardoq Integration | Write | Soft | Write entities and relationships to Ardoq via the Integration Layer. ID Registry updates. Diff-aware.
+8 | Compile Record Finalisation | Write | Yes | Write final compile record to DynamoDB. Publish compile completion event. Trigger Workbench entityUpdated subscription. Refresh prompt cache if prompt files changed.
+Stage failure semantics
+Stages 1–3 failures abort the compile immediately — external systems are never written to. Stage 4 never blocks.
+Stage 5 failure (diff computation) blocks because it would leave the compile record in an inconsistent state.
+Stages 6–7 failures are soft: a partial write is recorded in the compile record. The compile is marked partial-success. Affected entities are retried on the next compile. Stage 8 always runs even after stage 6–7 partial failures — the compile record must be finalised.
+Source loading — incremental reprocess set computation
+# Step 1: Get last successful compile SHA for this branch
+const lastSha = await getLastCompileSha(branch)  // DynamoDB lookup
+
+# Step 2: Git diff to find changed DSL files
+const changedFiles = await gitDiff(lastSha, currentSha, '**/*.yaml')
+
+# Step 3: Load last compile's relationship index (in-memory)
+#          Maps entity_id -> [entity_ids that declare relationships TO this entity]
+const reverseRelIndex = await loadReverseRelIndex(branch, lastSha)
+
+# Step 4: Expand reprocess set
+#          For each changed entity, add all files that reference it
+const reprocessSet = new Set(changedFiles)
+for (const file of changedFiles) {
+const entityId = entityIdFromFilePath(file)
+const dependents = reverseRelIndex.get(entityId) ?? []
+for (const dep of dependents) reprocessSet.add(entityFileFromId(dep))
+}
+
+# Step 5: If no last compile exists (first run), reprocess set = all DSL files
+if (!lastSha) reprocessSet = await glob('**/*.yaml', { cwd: repoRoot })
+
+return { changedFiles, reprocessSet, unchangedFiles: allFiles - reprocessSet }
+
+First compile and force-full-sync
+When no previous compile record exists for a branch, the compiler treats all DSL files as changed and processes everything. This is the bootstrap path.
+The --force flag on eams compile bypasses incremental logic entirely and reprocesses all files regardless of git diff. Used after a schema migration, a standards definition change that affects all entities, or when the compile record is suspected to be stale.
+Error Tier | Classification Criteria | Pipeline Effect | Examples
+Hard | Schema violation: missing required field, invalid enum value, malformed ID format, YAML parse failure. Referential integrity violation in stage 3. | Entity and all entities that declare relationships to it are removed from the compile set. Their previous Ardoq/OpenSearch records are not updated. | Missing eams_version, invalid kind value, malformed eams_id (spaces, uppercase), relationship target that does not exist
+Soft | Standards compliance violation (stage 4). NFR profile conflict. | Entity proceeds through the pipeline. Finding recorded in compile report. Compliance status set to 'violation' in entity record. | auth_mechanism weaker than standard requires, missing retention_policy on PII container, availability_target mismatch across dependency chain
+Advisory | Optional field absent, description missing, review_due date in the past, non-critical completeness gap. | Entity proceeds. Warning recorded in compile report. No effect on entity status. | Missing description field, review_due overdue, tags empty, technology.primary not specified
+Schema validation — error classification pseudocode
+function classifyError(errorType, field, entityKind) {
+const HARD_ERROR_TYPES = [
+'YAML_PARSE_FAILURE', 'MISSING_REQUIRED_FIELD', 'INVALID_ENUM_VALUE',
+'MALFORMED_EAMS_ID', 'INVALID_VERSION_FORMAT', 'DUPLICATE_ID'
+]
+const SOFT_ERROR_TYPES = [
+'STANDARDS_VIOLATION', 'NFR_CONFLICT', 'MISSING_STANDARDS_FIELD'
+]
+if (HARD_ERROR_TYPES.includes(errorType)) return 'hard'
+if (SOFT_ERROR_TYPES.includes(errorType)) return 'soft'
+return 'advisory'
+}
+
+function shouldBlockEntity(entity, errors) {
+return errors.some(e => e.tier === 'hard' && e.entityId === entity.id)
+}
+
+function shouldBlockDependent(entity, blockedSet, reverseRelIndex) {
+# Block entity if it declares a relationship to a blocked entity
+const deps = reverseRelIndex.get(entity.id) ?? []
+return deps.some(d => blockedSet.has(d))  // Note: relationship *target* blocked, not source
+# Actually block the SOURCE entity if its relationship TARGET is blocked
+}
+
+Reference Type | Validation Rule | Error Tier if Violated
+Relationship target (to: field) | Target eams_id must exist in the current entity set or the unchanged entity set from the last compile. | Hard — entity with broken relationship is blocked
+Standard reference (governed_by:) | Standard ID must exist in .eams/standards/ catalog. | Hard
+Decision reference (decisions:) | ADR ID must exist in the decisions entity set. | Soft — missing ADR reference does not block entity
+Capability realisation (realized_by:) | Capability ID must exist in the capabilities entity set. | Soft
+Infrastructure reference (deployed_on:) | Infrastructure entity ID must exist. | Soft
+Parent system reference (system: in container) | System ID must exist. | Hard — container without a valid parent system is orphaned
+Data contract reference (contracts_with:) | Data contract entity ID must exist. | Soft
+Standards compliance check — evaluation loop
+async function checkCompliance(entities, standardsCatalog) {
+const findings = []
+
+for (const entity of entities) {
+const applicableStandards = standardsCatalog
+.filter(s => appliesToEntity(s, entity))  // domain, kind, attribute-based applicability
+
+for (const standard of applicableStandards) {
+for (const rule of standard.rules) {
+const result = evaluateRule(rule, entity)
+if (result.violation) {
+findings.push({
+entityId: entity.id,
+standard: standard.id,
+rule: rule.id,
+severity: rule.severity,  // violation | warning | advisory
+finding: result.message,
+deterministic: true  // compiler finding vs LLM advisory finding
+})
+}
+}
+}
+}
+
+return findings
+}
+
+Compliance findings never block
+Stage 4 findings are always soft or advisory. An entity with ten compliance violations still writes to OpenSearch and Ardoq — its compliance_status field is set to 'violation' and all findings are stored in the compile record and on the entity record.
+The rationale: blocking entities on compliance violations would prevent architects from seeing non-compliant architecture in Ardoq, making it harder to assess and remediate. Visibility is more valuable than enforcement at the write layer.
+Exception: a standard can declare severity: blocking on a specific rule. This is rare and requires explicit platform engineer approval to add to a standard definition.
+Diff computation — change detection
+# An entity is ADDED if its eams_id does not appear in the previous compile record
+# An entity is REMOVED if it appeared in the previous compile record but not in the current set
+# An entity is MODIFIED if its content_hash differs from the previous compile record
+# An entity is UNCHANGED if its content_hash matches and it was not in the reprocess set
+
+function computeContentHash(entity) {
+# SHA-256 over canonical JSON serialisation
+# Excludes: compiled_at, git_sha (these change every compile)
+# Includes: all business fields, relationships, status, standards references
+return sha256(JSON.stringify(canonicalise(entity)))
+}
+
+function computeDiff(currentEntities, previousCompileRecord) {
+const prev = new Map(previousCompileRecord.entities.map(e => [e.id, e.content_hash]))
+const curr = new Map(currentEntities.map(e => [e.id, e.content_hash]))
+
+return {
+added:    [...curr.keys()].filter(id => !prev.has(id)),
+removed:  [...prev.keys()].filter(id => !curr.has(id)),
+modified: [...curr.keys()].filter(id => prev.has(id) && prev.get(id) !== curr.get(id)),
+unchanged:[...curr.keys()].filter(id => prev.has(id) && prev.get(id) === curr.get(id))
+}
+}
+
+Outcome | Condition | External Writes | Compile Record Status
+Success | All entities pass stage 2–3 validation. Stages 6–7 complete without write failures. | All entities written to OpenSearch and Ardoq. | success
+Partial success | One or more entities fail hard validation (blocked). Remaining entities pass. Stages 6–7 complete for unblocked entities. | Unblocked entities written. Blocked entities not written — previous records unchanged. | partial_success
+Write failure | Stages 6–7 fail for one or more entities due to OpenSearch/Ardoq errors (after retries). | Successfully written entities updated. Failed entities not updated — previous records unchanged. | partial_success with write_failures list
+Compile failure | Stage 1, 2 (catastrophic), 3 (catastrophic), or 5 failure. No DSL files parseable, or compile lock acquisition failed. | Nothing written. External state unchanged. | failed
+Blocked entity propagation — breadth-first expansion
+function propagateBlocks(initialBlocked, allEntities) {
+const blocked = new Set(initialBlocked)
+const queue = [...initialBlocked]
+
+while (queue.length > 0) {
+const entityId = queue.shift()
+# Find all entities that declare a relationship TO this blocked entity
+const dependents = allEntities.filter(e =>
+e.relationships?.some(r => r.to === entityId)
+)
+for (const dep of dependents) {
+if (!blocked.has(dep.id)) {
+blocked.add(dep.id)
+queue.push(dep.id)  // Propagate transitively
+recordBlockCause(dep.id, entityId, 'DEPENDENT_ON_BLOCKED_ENTITY')
+}
+}
+}
+
+return blocked  // Full set including transitively blocked entities
+}
+
+Transitive blocking can have wide impact
+If a widely-referenced entity (e.g. a shared infrastructure entity or a core system) fails validation, transitive blocking can affect dozens of dependent entities.
+The compile report surfaces the block propagation chain clearly: 'container.claims-db was blocked because it declares a relationship to system.policy-admin, which failed validation with error MISSING_REQUIRED_FIELD: eams_id.'
+Architects can use eams validate --entity system.policy-admin to check a specific entity locally before pushing, which avoids this scenario entirely.
+Compile lock — DynamoDB item
+PK: compile-lock#main
+branch: main
+locked_by: compile-run-2026-03-10T09-15-00-a3f8c
+locked_at: 2026-03-10T09:15:00Z
+lock_expires_at: 2026-03-10T10:15:00Z  # 1-hour TTL — orphan lock protection
+queued_runs:
+- compile-run-2026-03-10T09-22-00-b4e9d  # waiting
+
+Event | Behaviour
+Compile triggered, no lock held | Acquire lock immediately. Begin compile.
+Compile triggered, lock held | Write run ID to lock item's queued_runs list. Lambda returns 202 Accepted. Polling endpoint available at GET /compile/{run_id}/status.
+Compile completes successfully | Release lock. If queued_runs is non-empty, dequeue the oldest entry and trigger it via SQS.
+Compile fails | Release lock. Queued runs are dequeued and triggered normally — the queue is not cleared on failure.
+Lock TTL expires (lock orphaned) | DynamoDB TTL deletes the lock item. Next compile trigger acquires the lock cleanly. Orphan is logged as a CloudWatch alarm.
+Queue depth exceeds 5 | Sixth queued compile is rejected with 429 COMPILE_QUEUE_FULL. Caller must retry after current compile completes.
+Branch-isolated parallelism — future optimisation
+v1 uses a global queue: any compile, on any branch, waits if any other compile is running. This is conservative but correct.
+A future optimisation is per-branch locking: compiles on different branches can run in parallel since they write to separate OpenSearch indexes and separate Ardoq workspaces/scenarios. The lock key would become compile-lock#{branch} rather than a global lock.
+Per-branch locking is not implemented in v1 because it requires the Ardoq Integration Layer to confirm that branch workspace writes are fully isolated, which needs operational verification before relying on it for concurrent writes.
+Branch Intent | OpenSearch Target | Ardoq Target | Created On
+main | eams-entities (primary index) | Domain workspaces (eams-{domain}) | Always exists
+proposal / experiment | eams-entities-{branch} | Ardoq Scenario on domain workspace | First compile of branch
+project | eams-entities-{branch} | Workspace copy (eams-{domain}-branch-{slug}) | First compile of branch
+migration | eams-entities-{branch} | Main workspace with eams_migrated=true flag | First compile of branch
+Branch conflict detection
+function detectConflicts(branchEntities, mainEntities, branchBaseSha) {
+const conflicts = []
+
+for (const branchEntity of branchEntities) {
+const mainEntity = mainEntities.get(branchEntity.id)
+if (!mainEntity) continue  // New entity on branch — no conflict
+
+# Conflict: both branch AND main modified the entity since branch was created
+const mainChangedSinceBranch = mainEntity.git_sha !== branchBaseSha
+const branchChanged = branchEntity.content_hash !== mainEntity.content_hash
+
+if (mainChangedSinceBranch && branchChanged) {
+conflicts.push({
+entityId: branchEntity.id,
+branchVersion: branchEntity.content_hash,
+mainVersion: mainEntity.content_hash,
+mainLastModified: mainEntity.compiled_at
+})
+}
+}
+
+return conflicts  // Surfaced in compile report; do not block compile
+}
+
+Conflicts are reported, not blocked
+A branch compile with conflicts succeeds — the branch entity set is written to the branch targets as-is. Conflicts are surfaced in the compile report and in the Architecture API diff endpoint as a conflicts array.
+The architect is responsible for resolving conflicts before the branch is merged. The review submission workflow (eams review submit) warns if the branch has unresolved conflicts.
+Command | Description | Key Flags
+eams validate | Validate DSL files in the working directory against schema and referential integrity rules. Does not write to any external system. | --file` single file, `--entity` by ID, `--all` full repo, `--json` structured output
+eams compile | Run the full compile pipeline against the current branch. | --force` full recompile, `--dry-run` validate + diff without writing, `--branch` override branch name
+eams status | Show the current compile status for the branch, last compile outcome, and pending queue depth. | —
+eams diff | Show the diff between the current working directory state and the last compile for this branch. | --branch` compare against a named branch
+eams viewpoint | Validate, test, and preview viewpoint definitions. | validate`, `resolve`, `preview` subcommands
+eams advise | Invoke the LLM advisory layer from the CLI. | --type` output type, `--entity` scope entity, `--audience` (explanation), `--problem` (design alternatives)
+eams review | Manage branch review lifecycle. | submit`, `status`, `withdraw` subcommands
+eams prompt | Manage prompt templates. | list`, `validate`, `test`, `reload` subcommands
+eams graph | Query the architecture graph from the CLI. | --entity`, `--traverse`, `--lineage` subcommands
+eams validate --all (human-readable output)
+$ eams validate --all
+
+Validating 147 entities across 6 domains...
+Reprocess set: 12 files (3 changed + 9 dependents)
+
+ERROR  [hard] domains/claims/containers/adjudication-api.yaml:14
+MISSING_REQUIRED_FIELD: nfr_profile.data_classification is required for containers
+with PII-related relationship targets. Add one of: public | internal | confidential | pii | phi | pci
+12 |   nfr_profile:
+13 |     availability_target: 99.95
+> 14 |     throughput_rps: 200
+15 |     retention_policy: 7-years
+
+ERROR  [hard] domains/claims/containers/event-router.yaml:8
+INVALID_ENUM_VALUE: container_type 'message-queue' is not valid.
+Valid values: api | ui | worker | database | cache | queue | stream | batch | gateway | sidecar | library
+6  |   container_type: worker
+7  |   technology:
+> 8  |     primary: Apache Kafka
+
+WARN   [soft] domains/policy/systems/policy-admin.yaml:1
+STANDARDS_VIOLATION [standard.rest-api-first]: container policy-coverage-api declares
+protocol: gRPC on interface get-coverage. Standard requires REST or GraphQL.
+
+INFO   [advisory] domains/claims/systems/claims-portal.yaml:1
+MISSING_DESCRIPTION: description field is empty. Recommended for all system entities.
+
+─────────────────────────────────────────────────────────────────────
+Results: 2 hard errors  1 warning  1 advisory
+Blocked:  adjudication-api, event-router, claims-db (depends on adjudication-api)
+Pass:     144 / 147 entities
+
+Compile would be PARTIAL SUCCESS. Fix hard errors before pushing to avoid blocked entities.
+
+eams validate --all --json (structured output for CI)
+outcome: partial_success
+entities_total: 147
+entities_pass: 144
+entities_blocked: 3
+errors:
+- tier: hard    code: MISSING_REQUIRED_FIELD
+entity: container.adjudication-api
+file: domains/claims/containers/adjudication-api.yaml
+line:
+field: nfr_profile.data_classification
+message: nfr_profile.data_classification is required for containers with PII relationship targets
+remediation: Add data_classification field. Valid values: public | internal | confidential | pii | phi | pci
+
+- tier: hard    code: INVALID_ENUM_VALUE
+entity: container.event-router
+file: domains/claims/containers/event-router.yaml
+line:   field: container_type  value: message-queue
+
+blocked_entities:
+- entity: container.adjudication-api
+reason: HARD_ERROR  error_code: MISSING_REQUIRED_FIELD
+- entity: container.claims-db
+reason: DEPENDENT_ON_BLOCKED_ENTITY  blocked_by: container.adjudication-api
+
+eams compile --dry-run output
+$ eams compile --dry-run
+
+Branch: project/claims-rt-adjudication
+Base SHA: a3f8c2d1b4e9 (last compile)
+Current SHA: f7b2e4c9a1d3 (working directory)
+
+Source loading:        12 files in reprocess set (3 changed, 9 dependents)
+Schema validation:     OK — 0 hard errors, 1 warning, 2 advisories
+Referential integrity: OK — all relationship targets resolved
+Compliance check:      1 finding (standard.rest-api-first / container.event-router)
+Diff computation:      3 added, 7 modified, 0 removed
+
+─────────────────────────────────────────────────────────────────────
+DRY RUN — no writes performed
+
+Would write to OpenSearch: 10 entity records, 14 relationship records
+Would write to Ardoq:      10 components, 14 references (Scenario: claims-rt-adjudication)
+
+Conflicts with main:  1
+container.adjudication-api — modified on main since branch creation (2026-03-08)
+
+Compile would succeed (partial — 1 compliance warning, 2 advisories).
+Run without --dry-run to apply.
+
+.eamsrc.yaml — repository root configuration
+eams_version: 1.0
+repository: git@github.com:company/architecture.git
+default_branch: main
+
+api:
+base_url: https://api.eams.company.com/v1
+auth: cognito  # cognito | service-token
+
+compiler:
+incremental: true  # false = always full compile
+dependency_graph: true  # false = git diff only (not recommended)
+parallel_stages: false  # true = stages 6+7 run in parallel (experimental)
+
+domains:
+- claims
+- policy
+- billing
+- operations
+- shared
+
+validation:
+strict_advisories: false  # true = advisory warnings treated as hard errors (CI enforcement mode)
+pre_commit_hook: true  # install git pre-commit hook running eams validate --all
+
+output:
+default_format: text  # text | json
+colour: true
+verbose: false
+
+Compile Record — DynamoDB item
+PK: compile#main#2026-03-10T09-15-00Z  # branch + timestamp
+SK: compile  # fixed sort key for GSI queries
+compile_id: compile-main-2026-03-10T09-15-00-a3f8c
+branch: main
+git_sha: f7b2e4c9a1d3...
+base_sha: a3f8c2d1b4e9...  # previous compile SHA
+trigger: github-push  # github-push | cli | scheduled | manual-ci
+triggered_by: j.smith@company.com
+started_at: 2026-03-10T09:15:00Z
+completed_at: 2026-03-10T09:17:43Z
+duration_ms: 163000
+outcome: success  # success | partial_success | failed
+
+entity_counts:
+total_in_scope: 147
+reprocessed: 12
+passed: 144
+blocked: 3
+written_opensearch: 12
+written_ardoq: 12
+
+diff:
+added: 3
+modified: 7
+removed: 0
+unchanged: 135
+
+errors:
+- tier: hard  entity: container.adjudication-api  code: MISSING_REQUIRED_FIELD
+field: nfr_profile.data_classification  file: domains/claims/containers/adjudication-api.yaml  line:
+
+compliance_findings:
+- entity: container.adjudication-api  standard: standard.pii-data-handling
+rule: rule.pii.auth-mechanism  severity: violation  deterministic: true
+
+blocked_entities:
+- entity: container.adjudication-api
+reason: HARD_ERROR  error_code: MISSING_REQUIRED_FIELD
+- entity: container.claims-db
+reason: DEPENDENT_ON_BLOCKED_ENTITY  blocked_by: container.adjudication-api
+
+conflicts:
+# Non-empty only for branch compiles
+
+stage_timings:
+source_loading_ms: 1200
+schema_validation_ms: 8400
+referential_integrity_ms: 3200
+compliance_check_ms: 12100
+diff_computation_ms: 900
+opensearch_indexing_ms: 44000
+ardoq_integration_ms: 91000
+record_finalisation_ms: 2200
+
+meta:
+compiler_version: 1.4.2
+schema_version: 2.1  # DSL schema version active at compile time
+standards_sha: b9c3a1...  # git SHA of .eams/standards/ at compile time
+
+Access Pattern | Key Expression | Used By
+Latest compile for a branch | PK = compile#{branch}, SK = compile, sort by started_at DESC, limit 1 | API /diff/{branch}, Workbench compile status
+All compiles for a branch | PK = compile#{branch}, SK = compile | Workbench compile history panel
+Compile by ID | PK = compile#{branch}#{timestamp}, SK = compile | Advisory layer (correlate findings to compile)
+Compiles with failures in last 7 days | GSI: outcome-index, filter outcome IN [partial_success, failed] | Nightly audit job, platform monitoring
+Blocked entities across all branches | GSI: outcome-index + filter blocked_entities non-empty | Architecture quality dashboard
+.github/workflows/eams-compile.yaml
+name: EAMS Compile
+on:
+push:
+branches:
+- main
+- project/**
+- proposal/**
+- experiment/**
+- migration/**
+
+jobs:
+compile:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout
+uses: actions/checkout@v4  with: {fetch-depth: }
+- name: Setup Node
+uses: actions/setup-node@v4  with: {node-version: 22}
+- name: Install eams CLI
+run: npm install -g @company/eams-cli
+- name: Configure AWS credentials
+uses: aws-actions/configure-aws-credentials@v4
+with: {role-to-assume: ${{ vars.EAMS_COMPILER_ROLE_ARN }}}
+- name: Run compile
+run: eams compile --json > compile-report.json
+env: {EAMS_API_URL: ${{ vars.EAMS_API_URL }}}
+- name: Upload compile report
+uses: actions/upload-artifact@v4
+with: {name: compile-report, path: compile-report.json}
+- name: Annotate PR with errors
+if: github.event_name == 'pull_request'
+uses: company/eams-pr-annotator@v1
+with: {report: compile-report.json}
+
+Example PR compile comment
+EAMS Compile — project/claims-rt-adjudication
+Compiled against main @ a3f8c2d | Partial success — 1 hard error, 1 warning
+ 
+Diff against main:
+3 entities added: container.rules-engine-v2, container.event-router-v2, rel.adjudication-api--uses--rules-engine-v2
+7 entities modified (field changes)
+0 entities removed
+ 
+Hard errors (1):
+container.adjudication-api — MISSING_REQUIRED_FIELD: nfr_profile.data_classification (line 14)
+container.claims-db — DEPENDENT_ON_BLOCKED_ENTITY (blocked by adjudication-api)
+ 
+Compliance findings (1):
+container.event-router — STANDARDS_VIOLATION: standard.rest-api-first / protocol gRPC not permitted
+ 
+Conflicts with main (1):
+container.adjudication-api — modified on main on 2026-03-08. Resolve before merge.
+Compile Type | Scope | Target p50 | Target p95 | Notes
+Incremental — small change | 1–5 files changed, < 20 in reprocess set | < 30s | < 90s | Typical developer commit
+Incremental — medium change | 5–20 files changed, < 50 in reprocess set | < 2m | < 5m | Feature branch with multiple entity additions
+Incremental — large change | 20+ files changed or schema/standards change | < 5m | < 10m | Domain-wide refactor or standard update
+Full compile (--force) | All entities across all domains | < 15m | < 30m | Bootstrap, disaster recovery, schema migration
+Branch compile — proposal | 1–10 entity changes typical | < 60s | < 3m | Most common branch type
+Branch compile — project | 10–50 entity changes typical | < 3m | < 8m | Larger project branches
+Component | Technology | Configuration | Notes
+Compiler runtime | AWS Lambda (Node.js 22) | 3GB memory, 15min timeout | Higher memory for large in-memory entity graphs. Timeout covers full compile.
+Compile trigger | GitHub Actions → SQS → Lambda | SQS queue with 1 concurrent Lambda | SQS provides durable queuing; Lambda scales to 1 to prevent concurrent compiles.
+Compile lock | DynamoDB (on-demand) | Item TTL: 1 hour | Lock orphan protection via TTL.
+Compile records | DynamoDB (on-demand) | TTL: none (permanent) | Audit trail retained indefinitely. GSI on outcome field.
+Source repository access | GitHub App installation | Read-only clone permission | Compiler clones repo on each run. No write permissions to Git.
+AWS credentials | IAM role via OIDC | Least-privilege: OpenSearch write, DynamoDB read/write, Ardoq secrets read | GitHub Actions OIDC — no long-lived credentials stored.
+eams CLI distribution | npm package: @company/eams-cli | Node.js 18+ | Published to company npm registry. Versioned independently from compiler Lambda.
+Error Code | Tier | Stage | Description | Common Cause
+YAML_PARSE_FAILURE | Hard | 2 | YAML file cannot be parsed | Syntax error: unclosed string, bad indentation, tab character
+MISSING_REQUIRED_FIELD | Hard | 2 | A required field is absent or null | Forgot eams_id, kind, or domain field
+INVALID_ENUM_VALUE | Hard | 2 | Field value not in the valid enum set | Typo in kind, status, container_type, etc.
+MALFORMED_EAMS_ID | Hard | 2 | eams_id does not match {kind}.{slug} pattern | Uppercase, spaces, or wrong kind prefix
+DUPLICATE_ID | Hard | 2 | Two entities share the same eams_id | Copy-paste error when creating a new entity file
+INVALID_VERSION_FORMAT | Hard | 2 | eams_version field is not a valid semver string | Missing or malformed version field
+REF_NOT_FOUND | Hard | 3 | Relationship target entity ID does not exist | Typo in to: field, or target entity not yet created
+STANDARD_NOT_FOUND | Hard | 3 | Referenced standard ID does not exist in standards catalog | Typo in governed_by field
+ORPHANED_CONTAINER | Hard | 3 | Container's parent system (system: field) does not exist | System entity not yet created or wrong ID
+STANDARDS_VIOLATION | Soft | 4 | Entity does not satisfy a mandatory standards rule | Non-compliant field value — see finding for detail
+NFR_CONFLICT | Soft | 4 | Entity NFR profile conflicts with a dependency's NFR declaration | SLA dependency mismatch across relationship
+MISSING_DESCRIPTION | Advisory | 2 | description field is absent | Incomplete entity definition
+REVIEW_DUE_OVERDUE | Advisory | 2 | review_due date is in the past | Entity has not been reviewed on schedule
+MISSING_STANDARDS_FIELD | Soft | 4 | Field required by an applicable standard is absent | Standard governs this entity kind but field not populated
+DEPENDENT_ON_BLOCKED_ENTITY | Hard | 2 | Entity blocked due to transitive dependency on a hard-errored entity | Fix the root entity to unblock
+eams CLI — command summary
+# ─── Validation ───────────────────────────────────────────────────────
+eams validate                        # Validate all files in working dir
+eams validate --file path/to/entity.yaml  # Validate a single file
+eams validate --entity container.adjudication-api  # Validate by entity ID
+eams validate --json                  # JSON output for CI
+
+# ─── Compilation ─────────────────────────────────────────────────────
+eams compile                         # Incremental compile, current branch
+eams compile --force               # Full recompile (bypass incremental)
+eams compile --dry-run             # Validate + diff, no writes
+eams compile --branch main         # Override branch name
+eams compile --json                # JSON compile report output
+eams status                          # Show current compile status and queue
+
+# ─── Diff ────────────────────────────────────────────────────────────
+eams diff                             # Diff working dir vs last compile
+eams diff --branch main             # Diff current branch vs main
+
+# ─── Viewpoints ──────────────────────────────────────────────────────
+eams viewpoint validate --file path/to/vp.yaml
+eams viewpoint resolve --id viewpoint.c4-container --scope-system system.claims-processing
+eams viewpoint preview --id viewpoint.c4-container --format structurizr_dsl
+
+# ─── Advisory ────────────────────────────────────────────────────────
+eams advise --type compliance_assessment --entity system.claims-processing
+eams advise --type explanation --entity system.claims-processing --audience business
+eams advise --type design_alternatives --entity container.adjudication-api --problem "..."
+
+# ─── Review ──────────────────────────────────────────────────────────
+eams review submit --branch project/claims-rt-adjudication
+eams review status --branch project/claims-rt-adjudication
+
+# ─── Prompts ─────────────────────────────────────────────────────────
+eams prompt list
+eams prompt test --template prompt.compliance-assessment --fixture fixtures/claims-processing.json
+eams prompt reload                    # Force-evict Lambda prompt cache
+
+# ─── Graph ───────────────────────────────────────────────────────────
+eams graph --entity system.claims-processing
+eams graph --traverse --from system.claims-processing --depth 2
+eams graph --lineage --entity container.adjudication-api

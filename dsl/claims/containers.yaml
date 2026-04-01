@@ -1,0 +1,29 @@
+# Claims Domain — Containers
+domain: claims
+
+containers:
+  - eams_id: container.adjudication-api
+    name: Adjudication API
+    parent_system: system.claims-processing
+    container_type: api
+    technology:
+      primary: Java/Spring Boot
+      language: Java 17
+    nfr:
+      latency: "p99 < 150ms"
+      throughput: "200 req/s"
+
+  - eams_id: container.rules-engine
+    name: Rules Engine
+    parent_system: system.claims-processing
+    container_type: worker
+    technology:
+      primary: Drools
+      framework: Drools 8.x
+
+  - eams_id: container.claims-database
+    name: Claims Database
+    parent_system: system.claims-processing
+    container_type: database
+    technology:
+      primary: Aurora PostgreSQL

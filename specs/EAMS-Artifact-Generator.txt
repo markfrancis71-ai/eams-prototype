@@ -1,0 +1,405 @@
+Table of Contents
+1. Overview
+The EAMS Artifact Generator transforms the compiled architecture graph into publishable artifacts for consumption beyond the Workbench. It produces four artifact types: Confluence domain pages (auto-generated, always-current architecture documentation), dynamic HTML reports (self-contained interactive architecture summaries), viewpoint diagram bundles (packaged diagram exports in multiple formats), and change reports (what-changed summaries derived from compile diffs). These artifacts carry the architecture from the authoritative graph to the audiences — business stakeholders, development teams, governance boards, and external reviewers — who need it in a form suited to their context.
+The Artifact Generator is a Lambda-based pipeline invoked by two triggers. Confluence domain pages are auto-published after every successful main branch compile — they stay current without architect intervention. All other artifact types are on-demand: an architect triggers them explicitly via the eams artifact CLI command or from the Workbench Artifact panel. This split keeps routine documentation automatic while keeping intentional, point-in-time artifacts under architect control.
+1.1 Design Decisions
+Automatic trigger for Confluence domain pages only: Confluence domain pages are living documentation — they should reflect the current compiled graph without requiring manual action. Every successful main branch compile triggers a Confluence page refresh for any domain with changed entities. All other artifact types are on-demand: dynamic HTML, diagram bundles, and change reports are intentional artifacts produced for a specific purpose and audience.
+Dynamic HTML as a first-class artifact type: Dynamic HTML reports are self-contained single-file artifacts that can be distributed via email or a file share without requiring Confluence access or the Workbench. They embed the entity data as JSON and render interactively in the browser — architects can navigate entities, filter by status or criticality, and expand relationship detail without a network connection. This makes them suitable for external distribution (auditors, external partners, review boards) and for point-in-time snapshots.
+Confluence pages are generated, not authored: Confluence domain pages are fully generated from the architecture graph on every compile. They are not editable by Confluence users — attempting to edit them is futile because the next compile overwrites changes. A prominent banner on every generated page states this. Confluence is a distribution channel, not an authoring surface.
+Diagram bundles use the canonical render graph: Diagram bundles package diagrams in all supported formats (Structurizr DSL, Mermaid, D2, SVG, PNG) from the canonical render graph. The bundle format is a zip archive with a manifest, making it suitable for import into other tools and for archival purposes.
+Change reports are diff-driven: Change reports are generated from the compile diff record — the added, modified, and removed entity sets computed during compilation. They do not require a separate diff computation step. A change report can be generated for any pair of compile records on any branch.
+LLM-assisted prose for Confluence and HTML: The natural language explanation output from the LLM Advisory Layer is optionally embedded in Confluence domain pages and HTML reports as architecture prose sections. When present, these sections are clearly labelled as AI-generated and are subject to the same acknowledgement gate as other advisory outputs.
+1.2 Artifact Type Summary
+2. Confluence Domain Pages
+Confluence domain pages are the primary external documentation surface for the EAMS ecosystem. One page is generated per domain per successful main branch compile (if the domain has any changed entities). Pages are structured, consistently formatted, and always current — they reflect the compiled graph state as of the triggering compile.
+2.1 Page Structure
+2.2 Generated-Page Banner
+2.3 Confluence Publishing Model
+Each domain maps to a single Confluence page in a configured Confluence space. The page ID is stored in the Artifact Generator's DynamoDB table after first creation and reused on subsequent updates. If the page is deleted from Confluence, the next compile creates a new page and updates the stored page ID.
+3. Dynamic HTML Reports
+Dynamic HTML reports are self-contained single-file artifacts. All entity data, relationship data, and diagram definitions are embedded as JSON in the HTML file. The browser renders the report interactively — no server, no Workbench, no Confluence access required. The file can be emailed, placed on a file share, or committed to a repository.
+3.1 Report Types
+3.2 Dynamic HTML Architecture
+The HTML report is generated server-side as a single file with embedded data and a self-contained JavaScript runtime. The runtime provides filtering, search, relationship navigation, and diagram rendering without any external dependencies.
+3.3 HTML Report — Section Structure
+4. Viewpoint Diagram Bundles
+A viewpoint diagram bundle is a zip archive containing a set of diagrams in all supported formats for a specified scope. Bundles are used for distribution to teams who need diagrams for presentations, documentation tools, or architecture tooling that imports specific formats.
+4.1 Bundle Contents
+4.2 SVG and PNG Generation
+SVG files are generated by rendering the canonical render graph JSON using a headless Chromium instance (via Puppeteer) running in a Lambda layer. The D3.js rendering code from the Workbench is reused — the headless browser loads a minimal HTML harness, renders the diagram, and extracts the SVG element. PNG files are generated by rasterising the SVG at 2x resolution.
+5. Change Reports
+Change reports summarise what changed in the architecture graph between two compile records. They are the primary artifact for communicating architectural changes to stakeholders at release time, during branch reviews, or as part of governance reporting.
+5.1 Change Report Scope
+5.2 Change Report Structure
+5.3 LLM Change Narrative
+The change narrative is an optional LLM-generated section that provides architectural context for the changes — explaining the intent, the impact, and the significance of what changed in language a business or executive audience can understand. It is distinct from the structural diff sections, which are purely data-driven.
+6. Pipeline Architecture
+The Artifact Generator is a Lambda-based pipeline. Auto-triggered artifacts (Confluence domain pages) are invoked by an SQS event published by the Compiler at the end of a successful main branch compile. On-demand artifacts are invoked via the Architecture API's /v1/artifacts/generate endpoint, which enqueues a generation job and returns a job ID for polling.
+6.1 Pipeline Stages
+6.2 Auto-Publish Flow (Confluence Domain Pages)
+6.3 On-Demand Flow
+7. API Reference
+8. CLI Reference
+9. Workbench — Artifact Panel
+The Workbench Artifact panel is accessible from the entity detail panel (system or domain scope) and from the main navigation. It surfaces the artifact generation workflow for Architects without requiring CLI access.
+10. Infrastructure
+11. Performance
+Appendix A — Artifact Job Record Schema
+Artifact Type | Trigger | Primary Audience | Format | LLM Prose
+Confluence Domain Page | Auto (post-compile) | All stakeholders with Confluence access | Confluence wiki markup | Optional
+Dynamic HTML Report | On-demand | External reviewers, auditors, exec stakeholders without Confluence | Single-file HTML | Optional
+Viewpoint Diagram Bundle | On-demand | Development teams, architects, external tools | ZIP (DSL + Mermaid + D2 + SVG + PNG) | No
+Change Report | On-demand | Architects, release managers, review boards | Confluence page or HTML | Optional
+Section | Contents | Generated From | LLM?
+Page header | Domain name, last compiled timestamp, compile SHA, EAMS Workbench link, generated-page banner. | Compile record | No
+Domain summary | Entity counts by kind and status. Compliance health summary (% entities compliant). Tier-1 system count. Open compliance violations count. | OpenSearch aggregations | No
+Architecture overview prose | 2–4 paragraph natural language description of the domain's purpose, key systems, and integration patterns. Audience: business stakeholder. | LLM Advisory Layer — explanation type, domain scope, business audience | Yes — optional
+Systems | One section per system entity: name, status badge, criticality badge, description, business owner, key NFRs (availability, data classification). Inbound and outbound integration summary (counts by type). | Architecture API entity records | No
+Key integrations | Domain interaction diagram embedded as Mermaid macro. Table of cross-domain relationships: from system, to system, rel_type, criticality, protocol. | Viewpoint: domain-interactions (Mermaid format) | No
+Capabilities | Capability list with realising systems. Status (active/proposed). Business goals linked. | Entity records — capabilities kind | No
+Compliance status | Per-standard compliance summary. Active violations table: entity, standard, finding, severity, remediation hint. Compliant standards list. | Compile record — compliance_findings | No
+Active decisions | ADR list: title, status, date, linked systems, summary (first 200 chars). Link to full ADR entity in Workbench. | Entity records — decisions kind | No
+Change history | Last 5 compile diffs for this domain: date, added/modified/removed counts, linked change report (if generated). | Compile records | No
+Confluence generated-page banner — rendered on every page
+This page is automatically generated from the EAMS architecture graph. It is refreshed after every successful compile and reflects the graph state as of the timestamp shown in the header.
+Do not edit this page directly — changes will be overwritten on the next compile. To update the architecture, edit the DSL source files in Git and submit a branch for review.
+To view the live interactive architecture graph, open the EAMS Workbench.
+Operation | Condition | Confluence API Call
+Create page | No page ID stored for this domain (first compile or page was deleted) | POST /wiki/rest/api/content — creates page under configured parent page
+Update page | Page ID stored and domain has changed entities since last compile | PUT /wiki/rest/api/content/{id} — updates page content and version
+Skip update | Page ID stored and domain has no changed entities since last compile | No API call — page is current
+LLM prose insert | Advisory explanation exists for this domain with acknowledged disposition and audience=business | Page content includes prose section with AI-generated label and generation timestamp
+Confluence page configuration — .eams/artifacts/confluence.yaml
+eams_version: 1.0
+kind: confluence_config
+
+confluence:
+base_url: https://company.atlassian.net
+space_key: ARCH
+parent_page_id: 123456789  # Parent page under which domain pages are created
+auth_secret: arn:aws:secretsmanager:...:eams/confluence-token
+
+page_options:
+include_llm_prose: true  # Include AI-generated overview prose if acknowledged advisory exists
+llm_prose_audience: business
+include_change_history: true
+max_violations_shown: 10  # Cap violation table rows — links to Workbench for full list
+diagram_format: mermaid  # mermaid | png — mermaid is interactive in Confluence; png is static
+
+domain_pages:
+- domain: claims
+page_id: 987654321  # populated by generator on first publish
+enabled: true
+- domain: policy
+page_id: 987654322
+enabled: true
+- domain: billing
+page_id:
+enabled: false
+
+Report Type | Scope | Contents | Primary Use Case
+Domain Report | Single domain | Full domain entity inventory, relationships, compliance summary, diagrams, decisions. Same structure as Confluence domain page but interactive HTML. | External stakeholder review, governance board preparation, auditor access without Confluence
+System Report | Single system | System entity detail, all containers, all cross-domain relationships, compliance status, linked decisions, NFR profile, active advisory outputs (if acknowledged). | Vendor review, technical due diligence, team onboarding
+Capability Report | Single capability or all capabilities | Capability inventory, realising systems, linked goals, domain map. | Business architecture review, strategy alignment sessions
+Architecture Summary | All domains | Executive-facing summary: domain count, entity counts, compliance health, tier-1 systems, top open violations. No entity-level detail. | CIO/CTO briefing, enterprise architecture overview
+Component | Technology | Notes
+Shell | Hand-crafted HTML/CSS | No framework dependency — must work offline and in restricted browser environments. Tailwind CSS compiled and inlined.
+Entity data | JSON embedded in <script> tag | Full entity records for the report scope. Relationships embedded as adjacency list. Stringified at generation time.
+Diagram rendering | Mermaid.js (CDN or inlined) | Diagrams embedded as Mermaid source strings, rendered client-side. Fallback to SVG if Mermaid fails.
+Interactivity | Vanilla JS | Entity filtering (by kind, status, criticality), search (client-side, no API), relationship click-through within report scope, collapsible sections.
+LLM prose | Static HTML sections | If architect-acknowledged advisory explanation exists, prose embedded as static HTML with AI-generated label and timestamp.
+Navigation | Table of contents with anchor links | Auto-generated from report sections. Fixed sidebar on wide viewports, collapsible on narrow.
+No external requests from the HTML report
+The generated HTML file makes no external network requests. All assets (CSS, JS, diagrams) are inlined. This is a firm requirement: the report must be usable in air-gapped environments and must not leak architecture data to third-party CDNs.
+The one exception is the optional Mermaid.js CDN path for environments where file size matters. The default is inlined Mermaid. The CDN option is explicitly configured in the artifact generator config and displays a warning banner when active.
+HTML report — page structure (system report example)
+<html>
+<head>
+<title>Claims Processing System — Architecture Report — 10 Mar 2026</title>
+<style>/* inlined Tailwind + report styles */</style>
+</head>
+<body>
+<script id="eams-data" type="application/json">
+/* embedded entity JSON — system, containers, relationships, findings */
+</script>
+
+<header>  <!-- EAMS logotype, report title, generated timestamp, compile SHA, Workbench link -->
+<nav>    <!-- Fixed sidebar TOC: Overview, Systems, Containers, Relationships, Compliance, Decisions -->
+<main>
+<section id="overview">
+<!-- Status badges, criticality, domain, business owner, architect -->
+<!-- NFR profile table -->
+<!-- LLM prose section (if present) with AI-generated label -->
+</section>
+<section id="containers">
+<!-- Container cards: filterable by kind, status, data_classification -->
+<!-- Each card: name, kind badge, status, technology, interfaces summary -->
+</section>
+<section id="diagrams">
+<!-- C4 Context diagram (Mermaid) -->
+<!-- C4 Container diagram (Mermaid) -->
+<!-- Integration Surface diagram (Mermaid) -->
+</section>
+<section id="relationships">
+<!-- Outbound and inbound relationship tables -->
+<!-- Clickable target entity names — opens entity section within report -->
+</section>
+<section id="compliance">
+<!-- Per-standard compliance status. Violation detail cards. -->
+</section>
+<section id="decisions">
+<!-- ADR cards: title, status, summary, link to Workbench for full detail -->
+</section>
+</main>
+<script>/* inlined report.js — filtering, search, diagram init, click-through nav */</script>
+</body>
+</html>
+
+Diagram bundle — zip archive structure
+eams-diagrams-claims-2026-03-10.zip
+├── manifest.json                  # Bundle manifest — see schema below
+├── structurizr/
+│   ├── c4-context-claims-processing.dsl
+│   ├── c4-container-claims-processing.dsl
+│   └── domain-interactions-claims.dsl
+├── mermaid/
+│   ├── c4-context-claims-processing.mmd
+│   ├── c4-container-claims-processing.mmd
+│   └── domain-interactions-claims.mmd
+├── d2/
+│   ├── capability-map-claims.d2
+│   ├── blast-radius-claims-processing.d2
+│   └── domain-interactions-claims.d2
+├── svg/
+│   ├── c4-context-claims-processing.svg
+│   ├── c4-container-claims-processing.svg
+│   └── ...
+└── png/
+├── c4-context-claims-processing@2x.png
+├── c4-container-claims-processing@2x.png
+└── ...
+
+manifest.json — bundle manifest schema
+bundle_id: bundle-claims-2026-03-10T09-15-00Z
+generated_at: 2026-03-10T09:15:00Z
+compile_sha: f7b2e4c9a1d3...
+branch: main
+scope_domain: claims
+scope_system:   # populated for system-scoped bundles
+
+diagrams:
+- viewpoint_id: viewpoint.c4-context
+scope_entity: system.claims-processing
+title: C4 Context — Claims Processing System
+files:
+- {format: structurizr_dsl, path: structurizr/c4-context-claims-processing.dsl}
+- {format: mermaid,        path: mermaid/c4-context-claims-processing.mmd}
+- {format: svg,            path: svg/c4-context-claims-processing.svg}
+- {format: png,            path: png/c4-context-claims-processing@2x.png}
+
+- viewpoint_id: viewpoint.capability-map
+scope_entity:   # static viewpoint — no scope parameter
+title: Capability Heat Map — Claims Domain
+files:
+- {format: d2,  path: d2/capability-map-claims.d2}
+- {format: svg, path: svg/capability-map-claims.svg}
+- {format: png, path: png/capability-map-claims@2x.png}
+
+Headless rendering adds latency
+SVG/PNG generation via headless Chromium adds 2–5 seconds per diagram. For a domain bundle with 10 diagrams, this is 20–50 seconds of additional generation time. Bundles with SVG/PNG are generated asynchronously — the CLI command returns immediately with a bundle job ID and the architect polls or receives a notification when the bundle is ready.
+Bundles with source-format files only (Structurizr DSL, Mermaid, D2) are generated synchronously and are typically ready in under 5 seconds.
+Scope Mode | Description | Common Use Case
+Branch vs main | Changes introduced by a specific branch — all entities added, modified, or removed relative to the main branch HEAD at the time of the branch's last compile. | Pre-merge review, PR summary, impact communication
+Compile-to-compile | Changes between two named compile records on the same branch (typically consecutive main branch compiles). | Release notes, sprint change summary, governance reporting
+Domain-filtered | Either of the above scopes, filtered to a single domain. | Domain-specific change communication
+Time-windowed | All changes on main between two dates — aggregated across all intervening compiles. | Monthly architecture governance report, quarterly review
+Section | Contents | Notes
+Header | Report scope, date range or branch name, compile SHAs, generated timestamp. | Always included
+Executive summary | Total entity changes (added/modified/removed). Compliance findings introduced and resolved. Tier-1 system changes highlighted. | Always included — 3–5 sentences, no LLM
+Added entities | New entity cards: name, kind, domain, description, key attributes. Grouped by kind. | Omitted if no additions
+Modified entities | Change tables: entity name, field changed, previous value, new value. Relationship additions/removals shown separately. | Omitted if no modifications
+Removed entities | Removed entity list: name, kind, domain, last status, last business owner. | Omitted if no removals
+Compliance delta | Violations introduced: entity, standard, finding, severity. Violations resolved. Net compliance change summary. | Omitted if no compliance changes
+LLM change narrative | 2–4 paragraph natural language description of what the changes mean architecturally — not just what changed, but why it matters. Audience: business or executive. | Optional — generated by LLM Advisory Layer on demand. Requires architect acknowledgement.
+Affected teams | Business owners of all entities in the change set, grouped by team. Link to Workbench entity detail for each. | Always included if ownership data is populated in DSL
+Change narrative — LLM prompt template excerpt (.eams/prompts/change-narrative.prompt.yaml)
+output_type: change_narrative
+model_tier: large
+temperature: 0.3
+
+# System prompt excerpt:
+You are an enterprise architect explaining architectural changes to a business audience.
+You have access to a structured diff of architecture changes:
+- Added entities: systems, containers, capabilities, or decisions that are new
+- Modified entities: existing entities with field or relationship changes
+- Removed entities: entities that have been retired or removed
+
+Write 2-4 paragraphs that explain:
+1. What architectural intent these changes represent (not just what changed)
+2. Which business capabilities or domains are affected
+3. Any significant risks or dependencies introduced
+4. What remains unchanged and stable
+
+Ground every claim in the provided diff data. Do not invent changes not present in the data.
+Respond ONLY with the prose narrative. No headers. No bullet points. No markdown.
+
+Stage | Name | Description | Failure Behaviour
+1 | Job initialisation | Read job parameters. Validate scope entity/domain exists. Acquire compile record for the specified branch and SHA. Resolve applicable viewpoints for scope. | Job fails with INVALID_SCOPE. No external writes.
+2 | Data assembly | Fetch entity records, relationship records, compliance findings, decisions from Architecture API context bundle. Assemble into generation context. | Job fails with CONTEXT_UNAVAILABLE. No external writes.
+3 | LLM prose generation | If LLM prose requested and an acknowledged advisory explanation exists: fetch from advisory record. If not: optionally request new explanation and wait (on-demand only). Auto-publish jobs skip LLM prose if no acknowledged advisory exists. | LLM failure: skip prose section, continue with data-only artifact. Log gap.
+4 | Diagram resolution | Call Architecture API viewpoint resolve endpoint for each applicable viewpoint. Collect canonical render graphs. | Individual viewpoint failure: skip that diagram, continue. Log skipped viewpoints.
+5 | Artifact rendering | Render the artifact (Confluence markup, HTML, ZIP bundle). For SVG/PNG: invoke headless Chromium Lambda layer. | Rendering failure: job fails with RENDER_ERROR. No partial publish.
+6 | Publishing | Publish to target: Confluence API (page create/update), S3 presigned URL (HTML/ZIP), or return inline (small artifacts). | Confluence API failure: retry twice with exponential backoff. On third failure: job marked failed with PUBLISH_ERROR, compile not rolled back.
+7 | Job record finalisation | Write completed job record to DynamoDB. Publish artifact-ready event. Notify architect (on-demand) or log (auto). | Always runs even on failure — ensures job record reflects final state.
+Auto-publish sequence — triggered by compile completion
+# Compiler (Stage 8) publishes compile-complete event to SNS:
+CompileComplete {
+branch: 'main'
+compile_id: 'compile-main-2026-03-10T09-15-00-f7b2e'
+outcome: 'success'
+changed_domains: ['claims', 'policy']
+git_sha: 'f7b2e4c9a1d3'
+}
+
+# SNS -> SQS -> Artifact Generator Lambda
+# Lambda spawns one generation job per changed domain:
+for (const domain of changed_domains) {
+enqueueJob({
+artifact_type: 'confluence_domain_page'
+scope_domain: domain
+compile_id: event.compile_id
+trigger: 'auto'
+})
+}
+
+# Each job runs the 7-stage pipeline independently.
+# LLM prose is included only if a pre-existing acknowledged advisory exists.
+# No new LLM requests are made during auto-publish — avoids cost/latency on every compile.
+
+On-demand generation — API and CLI
+# API: POST /v1/artifacts/generate
+Request: {
+artifact_type: 'html_report'  // confluence_domain_page | html_report | diagram_bundle | change_report
+scope: {
+domain: 'claims'
+system: 'system.claims-processing'  // optional, for system-scoped artifacts
+}
+branch: 'main'
+options: {
+include_llm_prose: true  // request new LLM explanation if no acknowledged one exists
+llm_audience: 'executive'
+formats: ['svg', 'png', 'mermaid']  // for diagram_bundle
+}
+}
+
+Response (202 Accepted): {
+job_id: 'artjob-2026-03-10T09-30-00-a1b2c'
+status: 'queued'
+estimated_completion_seconds:
+poll_url: '/v1/artifacts/jobs/artjob-2026-03-10T09-30-00-a1b2c'
+}
+
+# CLI: eams artifact generate --type html_report --domain claims --include-prose --audience executive
+# CLI polls job status and downloads result on completion.
+
+Method | Path | Description | Min Role
+POST | /v1/artifacts/generate | Submit an on-demand artifact generation job. Returns job ID for polling. | Architect
+GET | /v1/artifacts/jobs/{job_id} | Poll job status. Returns status, progress stage, and download URL on completion. | Architect
+GET | /v1/artifacts/jobs | List artifact generation jobs for the current user. Filter by type, domain, status. | Architect
+GET | /v1/artifacts/domain/{domain}/confluence | Get the current Confluence page URL and last published timestamp for a domain. | Reviewer
+GET | /v1/artifacts/domain/{domain}/history | List all artifact generation jobs for a domain (all types) ordered by generation time. | Reviewer
+POST | /v1/artifacts/domain/{domain}/confluence/refresh | Trigger an immediate Confluence page refresh for a domain (bypasses changed-entity check). | Architect
+eams artifact — command reference
+# ─── Generate artifacts ──────────────────────────────────────────────
+eams artifact generate --type confluence_domain_page --domain claims
+eams artifact generate --type html_report --domain claims --audience executive
+eams artifact generate --type html_report --system system.claims-processing --include-prose
+eams artifact generate --type diagram_bundle --domain claims --formats mermaid,svg,png
+eams artifact generate --type change_report --branch project/claims-rt-adjudication
+eams artifact generate --type change_report --from compile-main-2026-03-01 --to compile-main-2026-03-10
+
+# ─── Job management ─────────────────────────────────────────────────
+eams artifact status --job artjob-2026-03-10T09-30-00-a1b2c
+eams artifact list --domain claims --type html_report
+eams artifact download --job artjob-2026-03-10T09-30-00-a1b2c --output ./reports/
+
+# ─── Confluence management ───────────────────────────────────────────
+eams artifact confluence status --domain claims
+eams artifact confluence refresh --domain claims  # force immediate republish
+eams artifact confluence refresh --all              # republish all enabled domains
+
+# ─── Flags ───────────────────────────────────────────────────────────
+--branch       Branch to generate from (default: main)
+--include-prose  Request LLM prose section (on-demand only; prompts for acknowledgement)
+--audience     LLM prose audience: business | executive | developer | regulator
+--formats      Comma-separated list of diagram formats for bundles
+--wait         Block until job completes (default: poll and report)
+--json         JSON output for CI integration
+--output       Local path for downloaded artifact
+
+Panel Section | Contents
+Confluence status | Last published timestamp and Confluence page link for the current domain. Refresh button (triggers immediate republish). Enabled/disabled toggle.
+Generate report | Report type selector (Domain Report, System Report, Capability Report, Architecture Summary). Audience selector. Include LLM prose toggle (with acknowledgement reminder if no acknowledged advisory exists). Generate button. Recent generated reports list with download links.
+Diagram bundle | Scope selector (domain or system). Format checkboxes (Structurizr DSL, Mermaid, D2, SVG, PNG). Generate bundle button. Active and recent bundle jobs with download links.
+Change report | Scope selector (branch vs main, or compile-to-compile). Domain filter. Include LLM narrative toggle. Generate button. Recent change reports list.
+Job queue | Active generation jobs with stage progress. Completed jobs (last 10) with download links and status.
+Component | Technology | Configuration | Notes
+Artifact Generator Lambda | AWS Lambda (Node.js 22) | 1GB memory, 5min timeout for source-format bundles; 15min timeout for SVG/PNG bundles (headless render) | Two Lambda functions: artifact-generator-fast (no headless) and artifact-generator-full (with headless Chromium layer)
+Headless render layer | Chromium Lambda layer (chromium-aws-lambda) | ~80MB layer — shared across full Lambda invocations | Reuses Workbench D3 rendering code in a headless Node.js harness
+Artifact storage | S3 (eams-artifacts bucket) | Generated artifacts stored at s3://eams-artifacts/{domain}/{artifact_type}/{job_id}/. Presigned URL (24hr TTL) returned to caller. | Artifacts are point-in-time — not updated in place. Each generation creates a new S3 path.
+Job records | DynamoDB (on-demand) | eams-artifact-jobs table. TTL: 90 days | Job status, input parameters, output S3 paths, stage timings
+Confluence config | DynamoDB (eams-confluence-config table) | Domain → Confluence page ID mapping. Updated on first page creation. | Seeded from .eams/artifacts/confluence.yaml on compile
+Compile-complete trigger | SNS → SQS → Lambda | SNS topic: eams-compile-complete. SQS queue: eams-artifact-jobs. Lambda trigger on queue. | Only fires for main branch, outcome=success
+Confluence API credentials | AWS Secrets Manager | Secret: eams/confluence-token. Rotated via Confluence API token rotation. | Least-privilege: page create, page update in ARCH space only
+Artifact Type | Scope | Target p50 | Target p95 | Bottleneck
+Confluence domain page | Single domain, no LLM prose | < 15s | < 45s | Confluence API write
+Confluence domain page | Single domain, with LLM prose | < 30s | < 90s | LLM inference + Confluence API
+HTML report — domain | Domain scope, no LLM prose | < 10s | < 30s | Data assembly from API
+HTML report — system | System scope, no LLM prose | < 8s | < 20s | Data assembly from API
+Diagram bundle (source formats only) | 10 viewpoints | < 5s | < 15s | Viewpoint resolution API calls
+Diagram bundle (with SVG/PNG) | 10 viewpoints | < 60s | < 120s | Headless Chromium render (10 × 5s)
+Change report — branch vs main | Single branch | < 10s | < 30s | Diff record read + entity fetch
+Auto Confluence publish — full domain set | 5 domains, no LLM prose | < 90s total (parallel) | < 3min | Parallel Lambda invocations
+Auto-publish parallelism
+When a compile changes multiple domains, the Artifact Generator spawns one Lambda invocation per changed domain simultaneously (up to 5 concurrent — configurable). This means the total auto-publish time is bounded by the slowest single domain, not the sum of all domains.
+If all 5 domains change in a single compile and each takes 30s, the total auto-publish time is 30s, not 150s.
+Artifact Job Record — DynamoDB
+PK: artjob-2026-03-10T09-30-00-a1b2c
+artifact_type: html_report
+trigger: on_demand  # on_demand | auto
+triggered_by: j.smith@company.com
+branch: main
+compile_id: compile-main-2026-03-10T09-15-00-f7b2e
+compile_sha: f7b2e4c9a1d3...
+
+scope:
+domain: claims
+system: system.claims-processing
+
+options:
+include_llm_prose: true
+llm_audience: executive
+advisory_id: adv.exp.2026-03-10.claims-processing.001  # acknowledged advisory used for prose
+
+status: complete  # queued | running | complete | failed
+current_stage: 7
+started_at: 2026-03-10T09:30:00Z
+completed_at: 2026-03-10T09:30:42Z
+duration_ms: 42000
+
+output:
+s3_path: s3://eams-artifacts/claims/html_report/artjob-2026-03-10T09-30-00-a1b2c/report.html
+presigned_url: https://eams-artifacts.s3.amazonaws.com/...  # 24hr TTL
+file_size_bytes: 284930
+
+stage_timings:
+initialisation_ms: 320
+data_assembly_ms: 3200
+llm_prose_ms: 8100
+diagram_resolution_ms: 12400
+rendering_ms: 14200
+publishing_ms: 3780
+finalisation_ms: 200
+
+warnings:
+- Viewpoint viewpoint.blast-radius skipped — resolution timed out

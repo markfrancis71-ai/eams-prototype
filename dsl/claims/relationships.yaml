@@ -1,0 +1,24 @@
+# Claims Domain — Relationships
+domain: claims
+
+relationships:
+  - from: container.adjudication-api
+    to: container.rules-engine
+    type: uses
+    criticality: synchronous-critical
+    protocol: gRPC
+    description: Evaluates claim rules
+
+  - from: container.adjudication-api
+    to: container.claims-database
+    type: stores_in
+    criticality: synchronous-critical
+    protocol: PostgreSQL
+    description: Reads/writes claim data
+
+  - from: container.adjudication-api
+    to: container.event-router
+    type: publishes_to
+    criticality: async
+    protocol: Kafka
+    description: Publishes adjudication events

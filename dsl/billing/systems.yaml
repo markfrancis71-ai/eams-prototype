@@ -1,0 +1,13 @@
+# Billing Domain — Systems
+domain: billing
+
+systems:
+  - eams_id: system.billing
+    name: Billing System
+    status: active
+    criticality: tier-1
+
+  - eams_id: system.payment-gateway
+    name: Payment Gateway
+    status: active
+    criticality: tier-1

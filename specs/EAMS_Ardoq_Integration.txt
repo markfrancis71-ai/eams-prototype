@@ -1,0 +1,608 @@
+Table of Contents
+1. Overview
+The EAMS Ardoq Integration Layer is the boundary between the EAMS ecosystem and the Ardoq graph database. It owns all reads and writes to Ardoq. No other EAMS component — not the compiler pipeline, not the Workbench, not the Architecture API — interacts with Ardoq directly. This isolation is the foundational design decision that protects the rest of the ecosystem from Ardoq's operational constraints.
+The integration layer is responsible for five concerns, each addressed by a distinct sub-component:
+1.1 Architectural Position
+The following shows where the integration layer sits in the full EAMS write path:
+2. Ardoq Data Model Mapping
+Ardoq's native data model is flat relative to the EAMS metamodel. The integration layer is responsible for translating between the two. Understanding this translation is the foundation of everything else in this document.
+2.1 Ardoq Primitives
+2.2 EAMS Entity → Ardoq Component Mapping
+All EAMS entity types map to Ardoq Components. The entity type is encoded in the Ardoq component type, using the EAMS:: namespace prefix to prevent collision with any existing Ardoq component types in the tenant.
+2.3 Component Hierarchy — C4 Nesting in Ardoq
+Ardoq's component parent/child relationship is used to represent the C4 containment hierarchy. This enables Ardoq's native tree navigation and tree-style viewpoints to work correctly without custom configuration.
+2.4 EAMS Relationship → Ardoq Reference Mapping
+Fifteen DSL relationship types compress to five Ardoq reference types. The DSL relationship type is preserved as the eams_rel_type field on the Ardoq reference. This is the mechanism that keeps Ardoq Viewpoint definitions manageable — viewpoints filter on eams_rel_type rather than requiring a distinct Ardoq reference type per semantic.
+2.5 Standard Ardoq Field Schema
+Every EAMS component in Ardoq carries the following standard fields, regardless of entity type. These fields are provisioned on the workspace component type model during workspace setup.
+3. ID Registry
+The ID Registry is the most operationally critical component of the integration layer. It maintains the durable, bidirectional mapping between DSL qualified IDs and Ardoq internal _id values. Without this mapping, the upsert engine cannot reliably locate existing components to update — it would be forced to query Ardoq by name, which is neither reliable nor performant.
+3.1 Why DynamoDB
+3.2 DynamoDB Table Schema
+3.3 Registry Operations
+4. Workspace Manager
+The Workspace Manager is responsible for provisioning and maintaining Ardoq workspaces. Workspaces are created once and then maintained — they are not created per-run. Workspace configuration is treated as infrastructure code and managed in the EAMS repository under .eams/workspaces/.
+4.1 Workspace Inventory
+4.2 Workspace Configuration File
+Each domain workspace is governed by a configuration file in the DSL repository. This file is the authoritative specification for the workspace's component type model and field schema.
+4.3 Workspace Provisioning Sequence
+Read workspace configuration from .eams/workspaces/{domain}.workspace.yaml
+Check ID Registry for existing workspace entry. If exists → skip to step 5.
+Create Ardoq workspace via POST /api/workspace with name and description.
+Register new workspace _id in DynamoDB with entry_type: workspace.
+Provision component types: for each type in component_types, POST /api/component-type if not present. Component types are identified by EAMS:: prefixed name — if name already exists, skip.
+Provision reference types: for each type in reference_types, POST /api/reference-type if not present.
+Provision standard EAMS field schema on each component type (see Section 2.5). Fields are identified by name — if field name already exists on type, verify type matches, skip if correct, raise alert if type mismatch.
+Enable cross-workspace references if configured.
+Set access control permissions per access_control block.
+5. Upsert Engine
+The Upsert Engine is the core of the integration layer. It receives a validated, compiled entity graph from the DSL compiler and writes it to Ardoq. It operates in two modes: diff-aware (default) and force-full-sync (explicit flag).
+5.1 Diff-Aware Mode
+In diff-aware mode, the engine only writes components and references that have changed since the last successful compile. Change detection uses a content hash of the compiled entity's Ardoq field values, stored in DynamoDB alongside the Ardoq ID.
+The content hash is a SHA-256 of the JSON serialization of the entity's Ardoq field values (excluding eams_git_sha and eams_compiled_at which change on every compile regardless of content). This means a pure metadata change like a commit timestamp does not trigger a write to Ardoq.
+5.2 Write Ordering — Dependency Resolution
+Ardoq references require both the source and target components to exist before the reference can be created. The upsert engine processes entities in strict dependency order to avoid write failures on cross-component references.
+5.3 Force-Full-Sync Mode
+Force-full-sync bypasses the content hash check and writes every entity in the compiled graph. It is invoked with eams compile --force-full-sync. It should be used for:
+Initial bootstrap: First compile of a new domain, new branch workspace, or fresh Ardoq environment.
+Recovery: After a detected drift between the DSL state and Ardoq state (identified by the nightly audit job).
+Schema migration: After changes to the Ardoq component type field schema (new fields added, field types changed) that require re-writing all component field values.
+Explicit architect request: Via the eams CLI when an architect suspects inconsistency and wants a clean reconciliation.
+5.4 Component Write Operations
+CREATE — New component
+UPDATE — Existing component
+RETIRE — Status transition to retired
+Retiring an entity in EAMS does not delete the Ardoq component. Deletion of architecture history is destructive and non-recoverable. Instead, the upsert engine:
+Sets eams_status to retired on the component
+Sets eams_compiled_at to the retirement compile timestamp
+Removes all outbound references from the retired component (references from other components to the retired component are preserved as historical context, flagged with eams_target_retired: true)
+Adds the component to a dedicated Ardoq tag: EAMS::Retired
+5.5 Batched Write Strategy
+The upsert engine never makes individual sequential API calls. All writes are batched and executed with controlled concurrency to respect Ardoq API rate limits.
+5.6 Reference Write Operations
+Cross-workspace references
+When a relationship in the DSL crosses domain boundaries (e.g. Claims container consuming a Policy interface), the Ardoq reference spans two workspaces. Ardoq supports this via its cross-workspace reference API, which requires both the source workspace ID and the target workspace ID.
+6. Branch Manager
+The Branch Manager handles the Ardoq representation of non-main Git branches. The strategy differs by branch intent, as specified in .eams/branch.yaml:
+6.1 Scenario Management (Proposal & Experiment Branches)
+Ardoq Scenarios are overlays on an existing workspace. They record additions, modifications, and deletions as a delta against the baseline workspace state. The EAMS compiler writes branch changes as Scenario entries rather than modifying the baseline.
+6.2 Full Workspace Copy (Project Branches)
+Project branches receive a full Ardoq workspace copy. This gives architects and reviewers the full Ardoq Viewpoint experience — running viewpoints, generating reports, validating NFR profiles — against the project's proposed architecture without affecting the production workspace.
+7. Migration Controller
+The Migration Controller manages the domain-by-domain transition from legacy Ardoq content (created by the existing Salesforce TPM sync and any manual Ardoq entries) to EAMS-managed content. It is not a one-time migration tool — it manages the coexistence period and the eventual cutover for each domain.
+7.1 Coexistence Model
+During migration, two Ardoq workspaces exist for a domain simultaneously:
+7.2 Domain Migration Phases
+7.3 Migration Controller — Component Mapping
+The migration controller reads from the legacy workspace and generates DSL files for architect review. It does not write directly to the EAMS workspace — all writes go through the standard DSL compile pipeline after architect review.
+8. Error Handling & Operational Runbook
+8.1 Error Categories
+8.2 Nightly Audit Job
+A scheduled Lambda function runs nightly to detect drift between the DynamoDB registry, the DSL repository, and the Ardoq workspaces.
+Orphan detection: Components present in Ardoq EAMS workspaces but not in DynamoDB registry. Indicates a component was created in Ardoq directly (bypass of integration layer) or a registry write failed.
+Ghost detection: Registry entries pointing to Ardoq IDs that no longer exist in Ardoq. Indicates a component was deleted from Ardoq manually.
+Staleness detection: Registry entries whose last_compiled_at is more than 30 days older than the corresponding DSL file's last Git commit. Indicates a compile failure left the entity unsynced.
+Field drift detection: Samples 5% of EAMS components per domain, compares Ardoq field values against current DSL content. Detects direct Ardoq field edits bypassing the integration layer.
+8.3 Key Operational Metrics
+Appendix A — Ardoq API Reference Summary
+The following Ardoq REST API endpoints are used by the EAMS integration layer. All endpoints use base URL https://{tenant}.ardoq.com/api/v1 and require Bearer token authentication via the EAMS compiler service account.
+Appendix B — DynamoDB Access Patterns
+Appendix C — Reference Type Field Schema
+The following fields are provisioned on Ardoq reference types. All five EAMS reference types share the standard fields; type-specific fields are only present on the relevant reference type.
+Standard Reference Fields (all 5 types)
+Type-Specific Reference Fields
+Concern | Sub-Component | Description
+Entity & relationship write | Upsert Engine | Writes compiled DSL entities and relationships to Ardoq. Idempotent. Diff-aware by default.
+Identity mapping | ID Registry | Maintains the durable mapping between DSL qualified IDs and Ardoq internal _id values. Stored in DynamoDB.
+Workspace management | Workspace Manager | Creates, configures, and maintains Ardoq workspaces. One workspace per domain. Manages component type schemas.
+Branch representation | Branch Manager | Manages Ardoq Scenarios (for proposals/experiments) and full workspace copies (for project branches).
+Legacy coexistence | Migration Controller | Manages the parallel operation of EAMS-managed and legacy TPM-sync workspaces during domain-by-domain migration.
+Scope boundary
+This document covers: the integration layer's internal design, API contracts, data mappings, and operational behavior.
+This document does not cover: the DSL compiler pipeline (covered in the Compiler Specification), the Architecture API read layer (covered in the API Specification), or Ardoq Viewpoint definitions (covered in the Viewpoint Engine Specification).
+The integration layer is write-path only. The Architecture API reads from Ardoq independently via the Ardoq REST API.
+Stage | Component | Output
+1 | Architect commits DSL files to Git branch | Git commit triggers CI pipeline
+2 | DSL Compiler — Schema & referential integrity validation | Validated entity and relationship graph (in-memory)
+3 | DSL Compiler — Standards & NFR compliance checks | Compliance report (does not block pipeline)
+4 | ▶  Ardoq Integration Layer — Diff Engine | Change set: adds, updates, deletes vs. current Ardoq state
+5 | ▶  Ardoq Integration Layer — Upsert Engine | Ardoq components and references written/updated
+6 | ▶  Ardoq Integration Layer — ID Registry update | DynamoDB ID map updated with any new Ardoq _id values
+7 | ▶  Ardoq Integration Layer — Diff Report | Structured diff artifact attached to pipeline build
+8 | OpenSearch Indexer | Architecture search index updated
+9 | Artifact Generator | Confluence pages regenerated for affected entities
+Ardoq Primitive | Description | EAMS Usage
+Workspace | A named container holding components and references. Has a component type model — the list of valid component types within the workspace. | One workspace per EAMS domain (claims, policy, billing, etc.) plus shared workspaces for cross-cutting entities (standards, goals, actors).
+Component | An entity within a workspace. Has a type (from the workspace's type model), a name, a parent (optional, for hierarchy), and an arbitrary set of typed fields. | Maps to all EAMS entity types: System, Container, Component, Capability, Process, Data Entity, Actor, etc.
+Reference | A directed edge between two components, within or across workspaces. Has a type (from a reference type model) and an arbitrary set of typed fields. | Maps to all EAMS relationship types, compressed to 5 Ardoq reference types.
+Field | A typed attribute on a component or reference. Types: Text, Number, URL, List (single-select), Tags (multi-select), Date, Boolean, Email. | Used to carry all EAMS entity attributes and all semantic metadata for relationship types.
+Scenario | A named overlay on a workspace that records proposed additions, modifications, and deletions without altering the baseline workspace. | Used for proposal and experiment branches.
+Tag | A label that can be applied to any component across workspaces. | Used for cross-domain tagging (e.g. pii-bearing, tier-1-dependency).
+EAMS Entity Kind | Ardoq Component Type | Ardoq Workspace | Hierarchy
+system | EAMS::System | Domain workspace | Top-level (no parent)
+container | EAMS::Container | Domain workspace | Child of its EAMS::System component
+component | EAMS::Component | Domain workspace | Child of its EAMS::Container component
+infrastructure | EAMS::Infrastructure | Domain workspace | Top-level
+capability | EAMS::Capability | Domain workspace | Top-level, or child of parent EAMS::Capability
+process | EAMS::Process | Domain workspace | Top-level
+data_entity | EAMS::DataEntity | Domain workspace | Top-level
+data_product | EAMS::DataProduct | Domain workspace | Top-level
+data_contract | EAMS::DataContract | Domain workspace | Top-level
+actor | EAMS::Actor | Domain workspace | Top-level
+goal | EAMS::Goal | eams-shared | Top-level (shared workspace)
+decision | EAMS::Decision | Domain workspace | Top-level
+Interface (inline) | EAMS::Interface` | Domain workspace | Child of its EAMS::Container component
+The shared workspace
+Goals, Standards, and NFR Profiles are cross-cutting entities that do not belong to a single domain.
+These entity types are written to a dedicated `eams-shared` workspace.
+All domain workspaces can hold cross-workspace references to components in `eams-shared`.
+The `eams-shared` workspace is the only workspace that the EAMS architect role (not domain architects) owns for content.
+C4 Hierarchy → Ardoq Component Parent Chain
+# DSL entity:  system.claims-processing
+#              └── container.adjudication-api
+#                  └── component.claim-validator
+
+# Ardoq component structure:
+Workspace: claims
+Component [EAMS::System]         name: Claims Processing System  parent: null
+Component [EAMS::Container]    name: Adjudication API  parent: → Claims Processing System
+Component [EAMS::Interface]  name: Submit Claim  parent: → Adjudication API
+Component [EAMS::Interface]  name: Claim State Events  parent: → Adjudication API
+Component [EAMS::Component]  name: Claim Validator  parent: → Adjudication API
+Component [EAMS::Component]  name: Payment Calculator  parent: → Adjudication API
+
+# Capabilities sit alongside systems at workspace top level:
+Component [EAMS::Capability]     name: Claim Adjudication  parent: null
+Component [EAMS::Process]        name: First Notice of Loss  parent: null
+
+Ardoq Reference Type | DSL Types That Map To It | Semantic Axis | Key Reference Fields
+eams:integration | uses`
+`consumes`
+`publishes-to`
+`subscribes-to | System/container interaction | eams_rel_type`, `criticality`, `protocol`, `sla_dependency_ms`, `circuit_breaker
+eams:data-flow | stores-in`
+`reads-from`
+`produces | Data movement & persistence | eams_rel_type`, `access_pattern`, `data_classification
+eams:deployment | deployed-on | Infrastructure placement | eams_rel_type`, `aws_region`, `environment
+eams:realization | supported-by`
+`realized-by`
+`invokes`
+`contracts-with | Business↔technical traceability | eams_rel_type`, `coverage`, `contribution`, `channel
+eams:governance | governed-by`
+`constrains | Rule & standard enforcement | eams_rel_type`, `mandatory`, `exception_adr
+ADR-INT-001: Five reference types, not fifteen
+Decision: Compress 15 DSL relationship types to 5 Ardoq reference types, carrying semantic type as a reference attribute.
+Context: Ardoq Viewpoints require explicit configuration for each reference type they include. The more reference types exist, the more complex each Viewpoint definition becomes. With 15 types, every Viewpoint update requires managing a combinatorial matrix of type inclusions.
+Consequence: Viewpoints filter on eams_rel_type attribute values rather than Ardoq reference types. This shifts filtering logic from the Ardoq Viewpoint definition to the EAMS Viewpoint Engine query layer, where it is easier to maintain. The tradeoff is that Ardoq's native UI shows all integration relationships the same color unless a field-based color rule is configured.
+Alternative rejected: One Ardoq reference type per DSL type. Rejected due to Viewpoint complexity and the ongoing maintenance burden of adding new Ardoq reference types when the metamodel is extended.
+Field Name | Ardoq Type | Description | Required
+eams_id | Text | DSL qualified ID (e.g. system.claims-processing). Primary lookup key. | Yes
+eams_kind | List | DSL entity kind. Values: system, container, component, infrastructure, capability, process, data_entity, data_product, data_contract, actor, goal, decision. | Yes
+eams_domain | Text | Owning domain slug. | Yes
+eams_status | List | active | proposed | deprecated | retired | Yes
+eams_version | Text | DSL schema version that produced this component. | Yes
+eams_git_sha | Text | Git commit SHA of the last compile that wrote this component. | Yes
+eams_compiled_at | Text | ISO 8601 timestamp of last compile. | Yes
+eams_architect | Email | Accountable architect email. | Yes
+eams_business_owner | Text | Business owner name or team. | No
+eams_review_due | Date | Date this entity is due for architect review. | No
+eams_tags | Tags | Free-form tags from the DSL metadata.tags array. | No
+eams_description | Text | Entity description from the DSL. | Yes
+eams_tpm_id | Text | Salesforce TPM application ID (system entities only). | No
+eams_migrated | Boolean | True if component was created via the migration controller, not authored in DSL. | No
+eams_migration_source | List | Source of migrated content: ardoq-legacy | confluence | gliffy. Only set when eams_migrated=true. | No
+Option | Pros | Cons | Decision
+Ardoq attribute lookup
+(query by eams_id field) | No external dependency. Self-contained. | Every lookup = Ardoq API call. Rate limits apply. Attribute search performance at scale unverified. Single point of failure. | Rejected
+Git sidecar file
+(.eams/ardoq-id-map.json) | No infrastructure cost. Visible in version history. | Noisy Git commits on every compile. Merge conflicts on concurrent branch compiles. File grows unbounded. | Rejected
+DynamoDB
+(selected) | Sub-millisecond lookups. No API rate limit impact. Survives Ardoq data migrations. Trivial in AWS Lambda context. Point-in-time recovery available. | Additional infrastructure component. Requires IAM policy configuration. | Selected
+DynamoDB Table: eams-ardoq-id-registry
+# Table name: eams-ardoq-id-registry
+# Billing:    On-demand (PAY_PER_REQUEST)
+# Encryption: AWS managed key (SSE)
+# PITR:       Enabled
+
+Primary Key:
+Partition key (PK): eams_id  # DSL qualified ID  e.g. system.claims-processing
+Sort key (SK): entry_type  # component | reference | workspace
+
+Attributes (component entries):
+eams_id: system.claims-processing  # DSL qualified ID
+entry_type: component
+ardoq_id: 5f3a8b2c1d4e...  # Ardoq internal _id
+ardoq_workspace: 63a1f2b4c5d...  # Ardoq workspace _id
+ardoq_type: EAMS::System  # Ardoq component type
+domain: claims
+kind: system
+created_at: 2026-03-05T14:22:00Z
+last_compiled_at: 2026-03-05T14:22:00Z
+git_sha: a3f8c2d1b4e9...  # Git SHA of compile that created/last updated
+
+Attributes (reference entries):
+eams_id: rel.adjudication-api--consumes--policy-coverage-api
+entry_type: reference
+ardoq_ref_id: 6b2d9e1f4a7...  # Ardoq reference _id
+ardoq_ref_type: eams:integration  # Ardoq reference type
+from_ardoq_id: 5f3a8b2c1d4e...  # Ardoq _id of source component
+to_ardoq_id: 7c4e1b3d9f2...  # Ardoq _id of target component
+domain: claims
+created_at: 2026-03-05T14:22:00Z
+last_compiled_at: 2026-03-05T14:22:00Z
+
+Attributes (workspace entries):
+eams_id: workspace.claims  # Logical workspace key
+entry_type: workspace
+ardoq_workspace_id: 63a1f2b4c5d...
+domain: claims
+workspace_type: domain  # domain | branch-copy | shared
+branch_name: null  # Set for branch-copy workspaces
+created_at: 2026-01-10T09:00:00Z
+
+GSI-1: ardoq_id → eams_id (reverse lookup):
+Index name: ardoq-id-index
+PK: ardoq_id
+Purpose: Look up DSL ID when only the Ardoq _id is known (e.g. during Ardoq webhook processing)
+
+GSI-2: domain + kind → all entries:
+Index name: domain-kind-index
+PK: domain
+SK: kind
+Purpose: List all components of a given type in a domain (used by force-full-sync and workspace audit)
+
+Operation | Trigger | Behavior
+lookup_by_eams_id(eams_id) | Upsert engine, before every Ardoq write | Returns ardoq_id if exists. Returns null if not yet registered (→ triggers create path).
+lookup_by_ardoq_id(ardoq_id) | Webhook handler, reverse resolution | Returns eams_id for a given Ardoq _id. Used when Ardoq sends change events.
+register(eams_id, ardoq_id, ...) | After successful Ardoq component create | Writes new entry. Idempotent — safe to call on update as well.
+update_compiled_at(eams_id, sha) | After every successful Ardoq write | Updates last_compiled_at and git_sha. Used by diff engine to detect stale entries.
+list_by_domain(domain, kind?) | Force-full-sync, workspace audit | Returns all registry entries for a domain, optionally filtered by kind.
+delete(eams_id) | Entity retirement processing | Removes registry entry after Ardoq component is deleted/archived.
+audit(domain) | Scheduled nightly job | Compares registry entries to actual Ardoq workspace contents. Flags orphaned Ardoq components (in Ardoq but not in registry) and ghost entries (in registry but not in Ardoq).
+Workspace Name Pattern | Type | Created By | Description
+eams-{domain}`
+e.g. eams-claims, eams-policy | Domain | Workspace Manager on first compile of domain | One per business domain. Holds all EAMS entity types for that domain.
+eams-shared | Shared | Workspace Manager at platform init | Cross-cutting entities: Goals, Standards, NFR Profiles, shared Actors.
+eams-{domain}-branch-{slug}`
+e.g. eams-claims-branch-rt-adj | Branch copy | Branch Manager on first compile of a project branch | Full workspace copy for project branches. Deleted after merge or abandonment.
+eams-legacy-{domain}`
+e.g. eams-legacy-claims | Legacy | Preserved from existing Ardoq config | Read-only during migration. Archived after domain migration completes.
+.eams/workspaces/claims.workspace.yaml
+eams_version: 1.0
+workspace_id: workspace.claims
+domain: claims
+ardoq_workspace_name: eams-claims
+description: EAMS architecture data for the Claims domain.
+
+component_types:
+# Each type inherits the standard EAMS field schema plus type-specific fields
+- name: EAMS::System  fields: [eams_standard, system_fields]
+- name: EAMS::Container  fields: [eams_standard, container_fields]
+- name: EAMS::Component  fields: [eams_standard, component_fields]
+- name: EAMS::Infrastructure  fields: [eams_standard, infra_fields]
+- name: EAMS::Capability  fields: [eams_standard, capability_fields]
+- name: EAMS::Process  fields: [eams_standard, process_fields]
+- name: EAMS::DataEntity  fields: [eams_standard, data_entity_fields]
+- name: EAMS::DataProduct  fields: [eams_standard, data_product_fields]
+- name: EAMS::DataContract  fields: [eams_standard, data_contract_fields]
+- name: EAMS::Actor  fields: [eams_standard, actor_fields]
+- name: EAMS::Decision  fields: [eams_standard, decision_fields]
+- name: EAMS::Interface  fields: [eams_standard, interface_fields]
+
+reference_types:
+- name: eams:integration  color: #0F7173
+- name: eams:data-flow  color: #5B2D8E
+- name: eams:deployment  color: #4A6080
+- name: eams:realization  color: #1A6B3C
+- name: eams:governance  color: #E87722
+
+cross_workspace_references: enabled  # Allows references to/from eams-shared and other domain workspaces
+
+access_control:
+- domain-architect-claims  # Read-write
+- eams-compiler-service  # Read-write (service account)
+- eams-api-reader  # Read-only (Architecture API service account)
+- all-architects  # Read-only
+
+Workspace provisioning is not idempotent by default
+Steps 3–9 must check for existence before creating. Creating duplicate component types or reference types in Ardoq requires manual cleanup.
+The Workspace Manager runs in --dry-run mode by default outside of the CI pipeline. Always review dry-run output before executing workspace provisioning against production Ardoq.
+Workspace provisioning is a privileged operation requiring the eams-compiler-service account. It is separated from the normal compile pipeline and run explicitly by the platform engineer.
+Diff-Aware Write Decision Logic (per entity)
+function shouldWrite(eamsId, compiledHash):
+entry = registry.lookup_by_eams_id(eamsId)
+
+if entry == null:
+# Entity is new — not yet in Ardoq
+return { action: CREATE, ardoqId: null }
+
+if entry.content_hash != compiledHash:
+# Entity exists but has changed — content hash mismatch
+return { action: UPDATE, ardoqId: entry.ardoq_id }
+
+# Entity exists and is unchanged — skip write
+return { action: SKIP, ardoqId: entry.ardoq_id }
+
+Pass | Entities Written | Rationale
+1 | Workspaces (if new domains present) | Workspaces must exist before any components can be written to them.
+2 | Shared entities: Goals, Standards, NFR Profiles, Actors | Cross-cutting entities in eams-shared workspace. Domain entities reference these — they must exist first.
+3 | Systems (C4 L1), Capabilities, Processes, Data Entities, Data Products, Infrastructure Nodes, Decisions | Top-level domain entities with no intra-domain parent dependencies.
+4 | Containers (C4 L2), Interfaces | Require parent System to exist. Containers are children of Systems in Ardoq hierarchy.
+5 | Components (C4 L3) | Require parent Container to exist.
+6 | All relationships (all types) | All source and target components are guaranteed to exist after passes 1–5.
+7 | Retirements / deletions | Processed last to avoid breaking references that are being simultaneously updated.
+Force-full-sync rate limit risk
+Writing thousands of components in a single pipeline run will approach or exceed Ardoq's API rate limits.
+Force-full-sync must use the batched write strategy (Section 5.5) with conservative concurrency settings.
+For full-tenant syncs (all domains), force-full-sync should be run domain by domain, not all at once.
+Schedule force-full-sync runs outside of business hours when possible.
+POST /api/v1/component
+POST /api/v1/component
+Authorization: Token {ardoq_api_token}
+Content-Type: application/json
+
+{
+"rootWorkspace": "63a1f2b4c5d..."  // Ardoq workspace _id from registry
+"name": "Claims Processing System"
+"typeId": "EAMS::System"  // Ardoq component type name
+"parent": null  // null for top-level; Ardoq _id for children
+"fields": {
+"eams_id": "system.claims-processing"
+"eams_kind": "system"
+"eams_domain": "claims"
+"eams_status": "active"
+"eams_git_sha": "a3f8c2d1b4e9..."
+"eams_tpm_id": "APP-00842"
+...
+}
+}
+
+# On success (201): extract _id from response, register in DynamoDB
+# On 409 conflict: component with this name already exists → fall back to UPDATE path
+
+PATCH /api/v1/component/{ardoq_id}
+PATCH /api/v1/component/5f3a8b2c1d4e...
+
+{
+"fields": {
+// Only changed fields are sent — PATCH semantics
+"eams_status": "deprecated"  // Previously 'active'
+"eams_git_sha": "b7d2e9f1a3c5..."
+"eams_compiled_at": "2026-03-10T09:15:00Z"
+}
+}
+
+# On success (200): update content_hash and last_compiled_at in DynamoDB
+# On 404: component was deleted from Ardoq externally → fall back to CREATE path, log alert
+
+Physical deletion policy
+Physical deletion from Ardoq is a manual, privileged operation performed by the EAMS platform engineer after a domain architect review.
+A component may be physically deleted only after it has been retired for a minimum of 12 months and has no active inbound references.
+Physical deletion requires removing the registry entry from DynamoDB and the DSL file from Git history is preserved.
+Batched Write Pseudocode
+function batchWrite(changeSet, options):
+const { concurrency = 5, batchSize = 50, retryMax = 3 } = options
+
+# Group changes by pass (dependency order)
+const passes = groupByWritePass(changeSet)
+
+for (pass of passes):
+const batches = chunk(pass.changes, batchSize)
+
+for (batch of batches):  // Process batches sequentially within a pass
+await Promise.allSettled(  // Concurrent within batch
+batch.map(change => writeWithRetry(change, retryMax))
+)
+await sleep(200)  // 200ms between batches — rate limit headroom
+
+# Collect results
+return { written, skipped, failed, alerts }
+
+Parameter | Default | Force-Full-Sync | Rationale
+concurrency | 5 | 3 | Concurrent writes within a batch. Reduced for force-full-sync to leave headroom for other API consumers.
+batchSize | 50 | 25 | Components per batch. Ardoq processes component writes synchronously — smaller batches for full sync avoids timeout.
+inter-batch delay | 200ms | 500ms | Pause between batches. Increased for full-sync to reduce sustained API pressure.
+retry max | 3 | 3 | Retry attempts on 429 (rate limit) or 5xx responses.
+retry backoff | 1s/2s/4s | 2s/4s/8s | Exponential backoff. Longer for full-sync where rate limit recovery is slower.
+Cross-Workspace Reference — POST /api/v1/reference
+{
+"rootWorkspace": "claims-workspace-id"  // Source component's workspace
+"source": "adjudication-api-ardoq-id"
+"target": "policy-coverage-api-ardoq-id"
+"targetWorkspace": "policy-workspace-id"  // Required for cross-workspace refs
+"type": 42  // Ardoq reference type numeric ID for eams:integration
+"fields": {
+"eams_rel_type": "consumes"
+"eams_rel_id": "rel.adjudication-api--consumes--policy-coverage-api#get-coverage"
+"criticality": "synchronous-critical"
+"protocol": "REST"
+"sla_dependency_ms": 500
+"circuit_breaker": "true"
+}
+}
+
+Branch Intent | Ardoq Representation | Created By | Deleted By
+proposal | Ardoq Scenario on the affected domain workspace(s) | Branch Manager on first compile | Branch Manager on branch merge or close
+experiment | Ardoq Scenario on the affected domain workspace(s) | Branch Manager on first compile | Branch Manager on branch close or expiry
+project | Full Ardoq workspace copy: eams-{domain}-branch-{slug} | Branch Manager on first compile | Branch Manager 30 days after merge to main
+migration | Written directly to main domain workspace (no branch) | Upsert Engine with eams_migrated=true flag | N/A — migration content goes to production workspace
+Scenario Lifecycle
+# 1. BRANCH CREATED (first compile of proposal/experiment branch)
+POST /api/v1/scenario
+{ "name": "EAMS — [proposal] Claims RT Adjudication", "mainWorkspace": "claims-workspace-id" }
+# → Store scenario_id in DynamoDB workspace entry for branch
+
+# 2. SUBSEQUENT COMPILES (incremental changes to the branch)
+POST /api/v1/scenario/{scenario_id}/component  // Add new component to scenario
+PATCH/api/v1/scenario/{scenario_id}/component/{component_id}  // Modify existing
+DELETE/api/v1/scenario/{scenario_id}/component/{component_id}  // Mark for deletion in scenario
+
+# 3. BRANCH MERGED → main  (after review approval)
+#    The merge to main triggers a main-branch compile — changes are
+#    written to the production workspace by the standard upsert engine.
+#    The Scenario is then deleted.
+DELETE /api/v1/scenario/{scenario_id}
+
+# 4. BRANCH ABANDONED / REJECTED
+DELETE /api/v1/scenario/{scenario_id}
+# → Remove workspace entry from DynamoDB
+
+Scenario naming convention
+Format: EAMS — [{intent}] {branch.name from branch.yaml}
+Examples:
+  EAMS — [proposal] Claims Real-Time Adjudication Initiative
+  EAMS — [experiment] Explore Event Mesh for Claims
+The EAMS prefix ensures EAMS-managed Scenarios are visually distinguishable from manually created Scenarios in the Ardoq UI.
+Project Branch Workspace Lifecycle
+# 1. PROJECT BRANCH CREATED (first compile)
+#    Clone the current main workspace state to a new workspace
+POST /api/v1/workspace/{main_workspace_id}/copy
+{ "name": "eams-claims-branch-rt-adjudication" }
+# → Register new workspace in DynamoDB with workspace_type: branch-copy
+# → Provision same component types and reference types as main workspace
+
+# 2. COMPILE BRANCH CONTENT
+#    Force-full-sync the branch DSL content to the copy workspace
+#    (All entities in scope of .eams/branch.yaml are written)
+#    Entities NOT in the branch scope are inherited from the workspace copy
+
+# 3. SUBSEQUENT COMMITS — diff-aware writes to the copy workspace
+#    Uses a branch-specific DynamoDB partition to track copy workspace IDs
+
+# 4. DIFF REPORT — generated against main workspace
+#    Comparison: branch copy workspace vs main workspace
+#    Output: structured diff report (added / modified / removed entities and relationships)
+#    Posted to Git pull request as a rendered Markdown summary
+
+# 5. APPROVED AND MERGED TO MAIN
+#    Main branch compile runs — writes approved changes to main workspace
+#    Branch copy workspace is retained for 30 days (audit trail), then deleted
+DELETE /api/v1/workspace/{branch_workspace_id}  // After 30-day retention
+# → Remove workspace entry and all branch-partition entries from DynamoDB
+
+ADR-INT-002: Full workspace copy for project branches
+Decision: Project branches (intent: project) receive a full Ardoq workspace copy, not a Scenario.
+Context: Scenarios cannot support the full Ardoq Viewpoint experience. A project branch represents architecture that will be implemented — reviewers need to run Viewpoints, assess NFR profiles, and validate integration surfaces with the same tooling they use for production architecture.
+Consequence: Branch workspace copies consume Ardoq workspace quota. Long-lived project branches with many domains in scope will create multiple workspace copies. Mitigation: scope branches narrowly (per .eams/branch.yaml scope block) and enforce branch lifetime limits.
+Alternative rejected: Scenarios for all branch types. Rejected because Scenario limitations (no full Viewpoint support, no cross-workspace scenario references) would make project branch review significantly less rigorous than main branch review.
+Workspace | Content | Managed By | Write Access
+eams-{domain}` (new) | EAMS-authored entities. Growing as architects create DSL files. | EAMS compiler pipeline | EAMS compiler only (service account)
+eams-legacy-{domain}` (existing) | Pre-EAMS entities from TPM sync and manual entry. Read-only during migration period. | Frozen — TPM sync disabled for domain on migration start | Read-only (all users)
+Why freeze the legacy workspace rather than continuing the TPM sync?
+Allowing the legacy TPM sync to continue writing to the legacy workspace during migration creates a moving target — architects are trying to migrate content that keeps changing.
+Freezing the legacy workspace gives a stable baseline to assess, migrate from, and eventually deprecate.
+The Salesforce TPM → EAMS sync is re-established after domain migration, routing through the EAMS integration layer rather than the legacy direct sync.
+Phase | Activities | Duration | Exit Criterion
+1
+Assess | Run migration audit tool against legacy workspace. Produce component inventory report: component count by type, relationship count, field population rates, unmapped component types. | 1–2 weeks per domain | Inventory report reviewed and accepted by domain architect.
+2
+Map | Map legacy component types to EAMS metamodel entity types. Identify unmappable content (document for disposition). Define field value translations (legacy field names → EAMS field names). | 1–2 weeks per domain | Mapping specification document complete and reviewed.
+3
+Migrate | Run migration controller in --dry-run mode. Review generated DSL files. Correct issues. Run in --execute mode. New DSL files committed to migration branch. Compile to eams-{domain} workspace. | 1–3 weeks per domain | All mappable legacy components present in EAMS workspace. eams_migrated=true flag set. Architect review annotations complete.
+4
+Validate | Run parallel viewpoints against both legacy and EAMS workspace. Validate equivalence for all key viewpoints. Identify gaps and address in DSL. | 1 week per domain | Domain architect sign-off that EAMS workspace is a complete and accurate representation of domain architecture.
+5
+Cutover | Redirect all consumer tooling (Architecture API, Workbench, Confluence integration) to EAMS workspace. Archive legacy workspace (read-only, not deleted). Update domain status to migrated. | 1 day | All consumers confirmed to be reading from EAMS workspace. Legacy workspace archived.
+Migration Controller Output — Generated DSL Stub
+# Generated by: eams migrate --domain claims --source eams-legacy-claims
+# Status: DRAFT — requires architect review before commit
+# Source component: legacy Ardoq component ID 4a2b1c3d
+# Mapping confidence: HIGH (type=Application → EAMS::System, all required fields populated)
+
+eams_version: 1.0
+kind: system
+id: system.claims-processing  # GENERATED — verify this is the correct slug
+name: Claims Processing System
+domain: claims
+status: active
+ownership:
+architect: UNKNOWN  # REVIEW — assign accountable architect
+business_owner: UNKNOWN  # REVIEW — assign business owner
+metadata:
+created: 2024-03-15  # From legacy component created_at
+last_reviewed: 2026-03-01
+review_due: 2026-09-01
+description: Migrated from legacy Ardoq. REVIEW — replace with accurate description.
+
+tpm_id: APP-00842  # From legacy field: tpm_application_id
+criticality: tier-1  # Mapped from legacy field: business_criticality=Critical
+lifecycle: production  # Mapped from legacy field: lifecycle_status=Live
+
+# MIGRATION METADATA — do not remove until migration validated
+_migration:
+source: ardoq-legacy
+legacy_ardoq_id: 4a2b1c3d
+legacy_workspace: eams-legacy-claims
+migrated_at: 2026-03-10T11:30:00Z
+mapping_confidence: HIGH  # HIGH | MEDIUM | LOW — LOW requires mandatory architect review
+unmapped_fields:   # Fields present in legacy that had no mapping — list below if any
+
+Mapping Confidence | Criteria | Required Action
+HIGH | Legacy component type maps cleanly to exactly one EAMS entity kind. All required EAMS fields are populated from legacy fields. No ambiguous field values. | Architect review recommended but not mandatory before commit.
+MEDIUM | Component type maps to an EAMS entity kind but one or more required fields are missing or derived from non-obvious legacy fields. Mapping rule was applied with a default value. | Architect review mandatory. Review fields marked REVIEW in generated stub.
+LOW | Component type has no direct EAMS mapping (unmapped legacy type) or multiple possible EAMS kinds. Migration controller has made a best-guess mapping. | Architect decision required before any commit. Consider whether entity belongs in EAMS metamodel or should be retired.
+Category | Examples | Pipeline Behavior | Recovery
+Hard failure
+(compile blocked) | Schema validation failure, referential integrity failure, ID stability violation, Ardoq workspace not found | Pipeline fails immediately. No writes attempted. Error report posted to PR. | Fix DSL files or workspace config. Re-push to trigger pipeline.
+Soft failure
+(compile continues) | Standards compliance finding, NFR regression warning, review date overdue | Pipeline continues. Findings written to compliance report artifact. PR comment includes summary. | Architect acknowledges findings. Exception ADR created if applicable.
+Write failure
+(partial compile) | Ardoq API 4xx/5xx on specific component write, rate limit hit after retries exhausted | Upsert engine continues with remaining entities. Failed writes collected in failure report. DynamoDB not updated for failed entities. | Re-run pipeline (idempotent). Failed entities will be retried on next compile. If persistent, check Ardoq status and API credentials.
+Registry drift
+(Ardoq diverged from DSL) | Component deleted from Ardoq manually, Ardoq field edited directly, registry entry corrupt | Detected by nightly audit job. Alert posted to EAMS ops channel. | Run eams compile --force-full-sync --domain {domain} for affected domain.
+Workspace missing | Ardoq workspace deleted, workspace ID changed after Ardoq migration | Hard failure on any compile for that domain. | Run eams workspace provision --domain {domain} then eams compile --force-full-sync.
+Direct Ardoq editing policy
+Architects must not edit components in EAMS-managed Ardoq workspaces directly via the Ardoq UI.
+All architecture data changes must go through the DSL → compile pipeline.
+The nightly audit job will detect and alert on direct edits. Repeated violations are escalated to the EAMS governance process.
+The only permitted direct Ardoq operations are: read-only browsing, Viewpoint configuration, and Scenario management for EAMS-managed Scenarios.
+Metric | Source | Alert Threshold
+Compile pipeline duration (p95) | CodePipeline metrics | > 10 minutes for diff-aware; > 60 minutes for force-full-sync
+Ardoq API write failures per compile | Upsert engine CloudWatch | > 5 failures in a single compile run
+DynamoDB registry audit: orphan count | Nightly audit job | > 0 orphans (any orphan is unexpected)
+DynamoDB registry audit: ghost count | Nightly audit job | > 0 ghosts for active/proposed entities
+DynamoDB registry audit: stale entry count | Nightly audit job | > 10 stale entries per domain
+Ardoq API rate limit hits (429) per day | Lambda CloudWatch | > 20 per day (indicates batching config needs tuning)
+Branch workspace count | Workspace Manager | > 20 active branch workspaces (indicates branch hygiene issue)
+Migration coverage: % domain components migrated | Migration Controller | Dashboard metric — no alert, tracked weekly
+Endpoint | Method | Used By | Notes
+/workspace | POST | Workspace Manager | Create workspace
+/workspace/{id} | GET | Workspace Manager | Get workspace details
+/workspace/{id}/copy | POST | Branch Manager | Clone workspace for project branches
+/workspace/{id} | DELETE | Branch Manager | Delete branch copy workspace after retention period
+/component | POST | Upsert Engine | Create component
+/component/{id} | GET | Audit job | Verify component exists
+/component/{id} | PATCH | Upsert Engine | Update component fields
+/component?workspace={id} | GET | Audit / full-sync | List all components in workspace
+/reference | POST | Upsert Engine | Create reference
+/reference/{id} | PATCH | Upsert Engine | Update reference fields
+/reference/{id} | DELETE | Upsert Engine | Delete reference (retirement processing)
+/scenario | POST | Branch Manager | Create Scenario for proposal/experiment branch
+/scenario/{id}/component | POST | Branch Manager | Add component to Scenario
+/scenario/{id}/component/{compId} | PATCH | Branch Manager | Modify component in Scenario
+/scenario/{id} | DELETE | Branch Manager | Delete Scenario on branch merge/close
+/field | POST | Workspace Manager | Create custom field on component type
+/tag | POST | Upsert Engine | Create/apply tag (e.g. EAMS::Retired)
+Access Pattern | Operation | Index Used | Called By
+Look up Ardoq ID by DSL qualified ID | GetItem(PK=eams_id, SK=component) | Primary | Upsert Engine (before every write)
+Look up DSL ID by Ardoq internal ID | Query(GSI-1, PK=ardoq_id) | GSI-1 | Webhook handler, audit job
+List all components for a domain | Query(GSI-2, PK=domain, SK=kind?) | GSI-2 | Force-full-sync, domain audit
+Register new component | PutItem | Primary | Upsert Engine (post-create)
+Update compiled_at and git_sha | UpdateItem | Primary | Upsert Engine (post-write)
+Update content_hash | UpdateItem | Primary | Upsert Engine (post-write)
+Look up workspace Ardoq ID by domain | GetItem(PK=workspace.{domain}, SK=workspace) | Primary | Upsert Engine, Branch Manager
+List all active branch workspaces | Query(GSI-2, PK=branch-copy) | GSI-2 | Branch cleanup job
+Delete registry entry on component retirement | DeleteItem | Primary | Upsert Engine (retirement)
+Field | Ardoq Type | Description
+eams_rel_id | Text | DSL relationship ID (e.g. rel.adjudication-api--consumes--policy-coverage-api)
+eams_rel_type | List | DSL semantic relationship type. Values: uses, consumes, publishes-to, subscribes-to, stores-in, reads-from, deployed-on, supported-by, realized-by, invokes, governed-by, constrains, produces, contracts-with
+eams_domain | Text | Source entity domain
+eams_git_sha | Text | Git SHA of compile that last wrote this reference
+eams_compiled_at | Text | ISO 8601 timestamp of last compile
+eams_description | Text | Relationship description from DSL
+Reference Type | Additional Fields
+eams:integration | criticality` (List: synchronous-critical | synchronous-non-critical | async | batch | reference), `protocol` (Text), `sla_dependency_ms` (Number), `circuit_breaker` (Boolean)
+eams:data-flow | access_pattern` (List: read-write | read-only | write-only | append), `data_classification` (List: public | internal | confidential | pii | phi | pci)
+eams:deployment | aws_region` (Text), `environment` (List: production | staging | development | dr)
+eams:realization | coverage` (List: full | partial | planned), `contribution` (List: primary | contributing | indirect), `channel` (Text)
+eams:governance | mandatory` (Boolean), `exception_adr` (Text — decision.* ID if exception granted)

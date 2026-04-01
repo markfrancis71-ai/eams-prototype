@@ -1,0 +1,691 @@
+Table of Contents
+1. Overview
+The EAMS Viewpoint Engine is the layer that transforms the raw architecture graph into diagrams, rendered outputs, and stakeholder-appropriate views. It sits between the Architecture API's query layer and the rendering targets (Structurizr, Mermaid, D2, Confluence). Given a viewpoint definition and a scope, the engine resolves the applicable entities and relationships, applies styling and layout hints, and produces a canonical render graph that projects to one or more output formats.
+The engine has four responsibilities:
+1.1 Design Decisions
+Full query expressiveness: Viewpoint scope expressions support attribute filters and relationship traversal rules, not just domain/kind scoping. This enables security, compliance, and impact viewpoints that require conditional graph traversal.
+Both static and parameterised viewpoints: Static viewpoints produce one diagram for a fixed scope (e.g. enterprise capability map). Parameterised viewpoints are templates instantiated with a scope argument (e.g. C4 container view for system.claims-processing). Both are expressed in the same definition language.
+Split authoring ownership: A standard library of viewpoints is maintained by the EAMS platform engineer. Domain architects can author custom viewpoints in their domain DSL directory, subject to the same Git review process as entity changes.
+Layout hints, not pinned layout: Viewpoint definitions carry layout hints (direction, grouping, rank) that are advisory to the renderer. Stable, predictable diagrams without requiring a coordinate persistence layer. Pinned layout is a future phase capability.
+Structurizr DSL as primary renderer: C4 is the architectural modeling language. Structurizr DSL is C4's native format. All C4 viewpoints use Structurizr as the primary renderer. Mermaid is the secondary renderer for Confluence embedding. D2 handles non-C4 viewpoints.
+Canonical render graph as intermediate: All format projectors share a single canonical intermediate representation. Adding a new output format requires only a new projector — no changes to resolution logic.
+1.2 Engine Position in the Architecture
+2. Viewpoint Definition Language (VDL)
+The Viewpoint Definition Language is a YAML-based declarative language for authoring viewpoint specifications. A viewpoint definition is a .viewpoint.yaml file that specifies: what to include (scope), what to show (filters and traversal), how it looks (styling), how it is laid out (layout hints), and how it renders (output configuration).
+2.1 File Location and Naming
+2.2 Viewpoint Definition Schema — Full Reference
+3. Scope Expression Reference
+The scope expression in a viewpoint definition controls the resolution pipeline. It has two parts: the scope strategy (which seeds the resolution) and the include rules (which expand from the seed).
+3.1 Scope Strategies
+3.2 Include Rule Types
+3.3 Filter Operators
+3.4 Named Sets — Result Set References
+Include rules can reference previously resolved sets by name. This allows rules to be composed. Named sets are referenced in the from field of traverse rules and in the sets field of union rules.
+4. Standard Viewpoint Library
+The standard library ships with the EAMS platform and covers the viewpoints required for the most common architecture review, communication, and governance tasks. Library viewpoints are maintained by the platform engineer and versioned in .eams/viewpoints/standard/.
+4.1 C4 Model Viewpoints
+P = Parameterised, S = Static
+4.2 Business Architecture Viewpoints
+4.3 Governance & Compliance Viewpoints
+4.4 Integration Viewpoints
+4.5 Annotated Standard Library Entry — Blast Radius
+The blast radius viewpoint illustrates how relationship traversal rules and attribute filters combine to produce a non-trivial view. It cannot be expressed with simple domain/kind scoping.
+5. Resolution Engine
+The Resolution Engine evaluates a viewpoint definition against the architecture graph and produces a raw entity set and relationship set. It is the computational core of the Viewpoint Engine.
+5.1 Resolution Pipeline
+5.2 Scope Strategy Execution
+parameter-seed
+Executes a GetItem against the OpenSearch eams-entities index using the bound entity ID as the document key. Returns one entity document. This is a direct document fetch — sub-5ms.
+domain-query
+entity-query
+5.3 Traverse Rule Execution
+Traverse rules follow relationship edges from a named result set. For depth ≤ 2, the engine uses the outbound_rel_index and inbound_rel_index arrays pre-indexed on each OpenSearch entity document (described in the Architecture API specification). For depth > 2, the engine falls through to an Ardoq graph traversal API call.
+5.4 Relationship Resolution
+After all include rules have been evaluated, the engine resolves the relationship set. It fetches all relationships where both the from_id and to_id are in the entity set, using the relationship index.
+6. Canonical Render Graph
+The Render Graph Builder takes the resolved entity and relationship sets, applies the viewpoint's styling rules and layout hints, and assembles the canonical render graph — a format-agnostic intermediate representation that all format projectors consume. The canonical render graph is also the full_json response format returned by the API.
+6.1 Canonical Render Graph Schema
+7. Format Projectors
+Format projectors translate the canonical render graph to a target output format. Each projector is a pure function: render_graph → string. Projectors do not query the architecture graph — all data they need is in the canonical render graph.
+7.1 Structurizr DSL Projector
+The Structurizr DSL projector is the primary projector for C4 viewpoints. It produces a valid Structurizr DSL workspace definition that can be rendered by the Structurizr CLI, Structurizr Lite, or the Structurizr cloud service. The projector maps C4 view types from the viewpoint definition's c4_view_type field.
+7.2 Mermaid Projector
+The Mermaid projector produces Mermaid diagram syntax for embedding in Confluence, GitHub, and Notion. It maps to flowchart for most viewpoints, classDiagram for data model viewpoints, and sequenceDiagram for process flow viewpoints. Mermaid does not natively support C4 component boundaries, so groups are rendered as subgraphs.
+7.3 D2 Projector
+The D2 projector is the primary output for non-C4 viewpoints: capability maps, blast radius diagrams (radial layout), domain interaction maps, and process flow diagrams. D2's flexible layout engine and container support make it well-suited to these use cases.
+7.4 Format Projector Decision Matrix
+8. Custom Viewpoint Authoring Guide
+Domain architects can author custom viewpoints for their domain. Custom viewpoints follow the same VDL syntax as the standard library. They live in .eams/viewpoints/{domain}/ and go through the same Git review process as entity changes.
+8.1 Authoring Workflow
+Identify the stakeholder concern the viewpoint addresses. A viewpoint without a clear stakeholder is usually not needed.
+Determine whether the viewpoint is static (one fixed diagram) or parameterised (instantiated per entity).
+Check the standard library first — a custom viewpoint may not be needed if a standard viewpoint covers the use case with a different scope parameter.
+Create the .viewpoint.yaml file in .eams/viewpoints/{domain}/.
+Validate locally: eams viewpoint validate --file path/to/viewpoint.yaml
+Test resolution: eams viewpoint resolve --id viewpoint.my-viewpoint --scope-system system.claims-processing --dry-run. Inspect the resolved entity and relationship counts.
+Preview output: eams viewpoint preview --id viewpoint.my-viewpoint --scope-system system.claims-processing --format structurizr_dsl
+Commit and submit for review. Pull request includes the rendered preview as a diagram artifact.
+8.2 Custom Viewpoint Validation Rules
+8.3 Governance Limits on Custom Viewpoints
+9. Staleness & Refresh Model
+Viewpoint renders are point-in-time snapshots of the architecture graph. The graph changes on every compile. The staleness model defines how the Workbench knows when a rendered diagram is out of date and how it communicates that to the architect.
+9.1 Staleness Detection
+Every canonical render graph carries a compiled_at timestamp and a git_sha for the compile that produced it. Staleness is detected via the Architecture API's entityUpdated GraphQL subscription, which fires whenever the compile pipeline writes entity changes to OpenSearch.
+9.2 Refresh Behaviour
+Manual refresh: Architect clicks refresh on the diagram. The Workbench calls GET /viewpoints/{id}/resolve with the same parameters. The new render graph replaces the current one. If the diagram changed, a brief change summary is shown (N entities added, M relationships changed).
+Auto-refresh: Disabled by default. Architects can enable auto-refresh per diagram in the Workbench. Auto-refresh fires on the entityUpdated subscription event, subject to a 30-second debounce to prevent rapid sequential refreshes during a bulk compile.
+Stale age warning: If a rendered diagram has not been refreshed and its git_sha is more than 5 commits behind the current main branch HEAD, the Workbench shows an elevated stale warning with the number of commits behind.
+Appendix A — VDL Quick Reference
+Scope Strategies
+Include Rule Types
+Layout Algorithms
+C4 View Type Mapping
+Responsibility | Component | Description
+Viewpoint definition management | Definition Registry | Stores, validates, and serves viewpoint definitions. Manages the standard library and custom viewpoints authored by domain architects.
+Query resolution | Resolution Engine | Executes the viewpoint's scope expression and filter rules against the OpenSearch index and Ardoq graph. Produces a raw entity and relationship set.
+Render graph assembly | Render Graph Builder | Applies styling rules, computes display properties, resolves layout hints, and assembles the canonical render graph.
+Format projection | Format Projectors | Translates the canonical render graph to Structurizr DSL, Mermaid, D2, or the full JSON payload consumed by the Workbench.
+Scope of this document
+Covers: viewpoint definition language (VDL), the resolution pipeline, the canonical render graph schema, format projectors, the standard viewpoint library, and the staleness and refresh model.
+Does not cover: the Workbench interactive editor (covered in the Workbench Specification), the Confluence rendering integration (covered in the Artifact Generator Specification), or the Architecture API endpoint contract (covered in the Architecture API Specification).
+Layer | Component | Consumes | Produces
+Input | Architecture API /viewpoints/{id}/resolve | HTTP request with viewpoint ID, scope parameters, format, branch | —
+1 | Definition Registry | Viewpoint ID | Viewpoint definition (VDL document)
+2 | Resolution Engine | VDL scope expression + filters + branch | Raw entity set + relationship set
+3 | Render Graph Builder | Raw entity/relationship sets + VDL styling rules + layout hints | Canonical render graph
+4 | Format Projector | Canonical render graph + requested format | Structurizr DSL | Mermaid | D2 | Full JSON
+Output | Architecture API response | Format projector output | Rendered payload to consumer
+Viewpoint Type | Location | File Pattern | Who Authors
+Standard library | .eams/viewpoints/standard/ | .viewpoint.yaml | Platform engineer
+Domain custom | .eams/viewpoints/{domain}/ | .viewpoint.yaml | Domain architect
+Shared custom | .eams/viewpoints/shared/ | .viewpoint.yaml | Any architect, reviewed by platform
+Viewpoint Definition — All Sections Annotated
+# ═══ HEADER ══════════════════════════════════════════════════════════
+eams_version: 1.0
+kind: viewpoint
+id: viewpoint.c4-container  # Globally unique viewpoint ID
+name: C4 Container View
+description: Shows the internal containers of a software system, their technologies, and their interactions. C4 Level 2.
+version: 1.2  # Viewpoint definition version — increment on breaking changes
+metadata:
+author: platform-engineering@company.com
+last_reviewed: 2026-02-01
+tags:
+- c4
+- technical
+
+# ═══ STAKEHOLDERS ════════════════════════════════════════════════════
+# Who this viewpoint is designed for. Informational — used for catalogue filtering.
+stakeholders:
+- developer  # primary
+- architect  # primary
+- business  # secondary
+
+# ═══ PARAMETERS ══════════════════════════════════════════════════════
+# Parameterised viewpoints declare their scope inputs here.
+# Static viewpoints omit this section entirely.
+parameters:
+- name: scope_system  type: entity_id  kind: system  required: true
+description: The system whose containers will be rendered.
+- name: branch  type: string  required: false  default: main
+
+# ═══ SCOPE ═══════════════════════════════════════════════════════════
+# Defines the seed entity set. This is the starting point for resolution.
+scope:
+strategy: parameter-seed  # parameter-seed | domain-query | entity-query
+# parameter-seed: seed from a declared parameter value
+# domain-query:   seed from a domain + kind filter
+# entity-query:   seed from an explicit attribute filter expression
+seed:
+from_parameter: scope_system  # Use the scope_system parameter as the seed entity
+
+# ═══ RESOLUTION RULES ════════════════════════════════════════════════
+# What to include relative to the seed. Evaluated in declared order.
+include:
+
+# Rule 1: Include the seed entity itself
+- rule: seed_entity  label: The system being viewed
+
+# Rule 2: Include all containers belonging to the seed system
+- rule: related_entities
+relationship_types: [container_of]  # synthetic rel: system→its containers via Ardoq parent hierarchy
+direction: children          # children: traverse into Ardoq component hierarchy
+entity_kinds: [container]
+label: Containers of the system
+
+# Rule 3: Include external systems that containers interact with
+- rule: traverse
+from: containers             # 'containers' = entities matched by rule 2
+relationship_types: [uses, consumes, publishes-to, subscribes-to]
+direction: outbound
+entity_kinds: [system, container]
+depth:
+label: External dependencies
+
+# Rule 4: Include actors that interact with the seed system at boundary
+- rule: traverse
+from: seed  relationship_types: [uses, invokes]
+direction: inbound  entity_kinds: [actor]  depth:
+label: Users and actors
+
+# ═══ FILTERS ═════════════════════════════════════════════════════════
+# Applied after resolution. Entities not passing filters are excluded.
+filters:
+entity_filters:
+# Exclude retired entities
+- field: status  operator: not_in  values: [retired]
+relationship_filters:
+# Only show relationships between entities that are IN the resolved set
+- rule: internal_only  # Exclude rels where one endpoint is not in the entity set
+
+# ═══ STYLING ═════════════════════════════════════════════════════════
+# Display rules applied to nodes and edges in the render graph.
+styling:
+node_styles:
+# Style by entity kind
+- match: {kind: system, role: seed}  # The seed system
+shape: box  color: #1B3A5C  font_color: #FFFFFF  border: bold
+
+- match: {kind: container}      # All containers
+shape: box  color: #0F7173  font_color: #FFFFFF
+
+- match: {kind: system, role: external} # External systems
+shape: box  color: #4A6080  font_color: #FFFFFF  border: dashed
+
+- match: {kind: actor}              # Actors/users
+shape: person  color: #344E6E  font_color: #FFFFFF
+
+# Conditional style: highlight PII-bearing containers
+- match: {kind: container, field: nfr_profile.data_classification, values: [pii, phi, pci]}}
+badge: {text: PII, color: #8B1A1A, background: #FDF0F0}
+
+edge_styles:
+- match: {rel_type: synchronous-critical} # via eams_rel_type attribute
+style: solid  color: #1B3A5C  thickness:
+
+- match: {rel_type_group: async}          # publishes-to, subscribes-to
+style: dashed  color: #5B2D8E
+
+- match: {kind: actor, direction: inbound} # Actor→system edges
+style: solid  color: #344E6E  arrow: open
+
+# ═══ LABELS ══════════════════════════════════════════════════════════
+labels:
+node_label:
+primary: ${name}  # Entity display name
+secondary: ${technology.primary}  # Technology — shown below name for containers
+secondary_condition: kind == 'container'  # Only show secondary label for containers
+edge_label:
+primary: ${description}  # Relationship description — truncated to 60 chars
+max_length: 60
+show_protocol: true  # Append protocol in brackets if present: [REST]
+
+# ═══ LAYOUT ══════════════════════════════════════════════════════════
+layout:
+algorithm: hierarchical  # hierarchical | force-directed | radial | manual
+direction: left-right  # left-right | top-bottom | right-left | bottom-top
+groups:
+# Group containers inside their parent system boundary
+- label: ${seed.name}  contains: containers  border: solid
+rank_hints:
+# Rank hints control vertical (or horizontal) ordering within a layer
+- entity_role: actor      rank:  # Actors first (leftmost in left-right layout)
+- entity_role: seed       rank:  # Seed system second
+- entity_role: containers  rank:
+- entity_role: external   rank:  # External systems last (rightmost)
+
+# ═══ OUTPUT ══════════════════════════════════════════════════════════
+output:
+formats:
+- format: structurizr_dsl  primary: true
+c4_view_type: ContainerView     # SystemContextView | ContainerView | ComponentView | DeploymentView
+include_description: true
+- format: mermaid          primary: false
+diagram_type: flowchart         # flowchart | classDiagram | sequenceDiagram
+- format: full_json        primary: false  # Always available — do not need to declare explicitly
+title_template:
+value: ${scope_system.name} — Container View
+description_template:
+value: C4 Level 2 container view for the ${scope_system.name}. Generated ${compiled_at}.
+
+Strategy | Description | When To Use | Example
+parameter-seed | Seeds resolution from the value of a declared parameter. The parameter value is an entity ID. | Parameterised viewpoints that scope to a specific system, container, or capability. | C4 Container View, Component View, Capability Detail
+domain-query | Seeds resolution from all entities in a domain matching kind and status filters. | Domain-scoped static viewpoints showing all entities of a type within a domain. | Domain System Landscape, Domain Capability Map
+entity-query | Seeds resolution from entities matching an attribute filter expression. | Enterprise-wide viewpoints filtering by entity attributes across all domains. | Tier-1 System Inventory, PII Data Map, All Deprecated Systems
+Rule Type | Description | Key Fields | Notes
+seed_entity | Includes the seed entity or entities themselves in the result set. | — | Always the first rule. Without it the seed does not appear in the diagram.
+related_entities | Includes entities connected to the current result set via a specific relationship type or Ardoq hierarchy (parent/children). | relationship_types, direction, entity_kinds | Use direction: children to traverse Ardoq component hierarchy (system→containers).
+traverse | Traverses relationship edges from a named result set to a specified depth, following specified relationship types. | from (named set), relationship_types, direction, depth, entity_kinds | Named sets: 'seed', 'containers', 'capabilities', or any rule label value. depth max: 5.
+attribute_filter | Adds entities from the full graph matching an attribute expression, independent of the current result set. | field, operator, values | Used to pull in related entities by attribute rather than by graph edge. E.g. 'include all standards governing any entity in result set'.
+union | Combines multiple named result sets into one. Useful for assembling complex scopes from simpler parts. | sets (list of rule labels) | Result is the union of all named sets. Duplicates are deduplicated by eams_id.
+Operator | Applies To | Description | Example
+eq | Any field | Exact equality. | field: status, operator: eq, value: active
+not_eq | Any field | Exact inequality. | field: lifecycle, operator: not_eq, value: retired
+in | Any field | Value is in a list. | field: criticality, operator: in, values: [tier-1, tier-2]
+not_in | Any field | Value is not in a list. | field: status, operator: not_in, values: [retired]
+contains | String fields | Field value contains substring. | field: name, operator: contains, value: Claims
+exists | Any field | Field is present and non-null. | field: tpm_id, operator: exists
+not_exists | Any field | Field is absent or null. | field: business_owner, operator: not_exists
+gt` / `lt | Numeric fields | Greater / less than. | field: nfr_profile.availability_target, operator: gt, value: 99.9
+internal_only | Relationship filter | Exclude relationships where either endpoint is not in the resolved entity set. | Used to prevent dangling edges to entities outside the viewpoint scope.
+Reserved Name | Refers To
+seed | The entities produced by the scope strategy (the starting point).
+all | All entities resolved so far across all rules. Updated after each rule is evaluated.
+Rule label value | Any rule that declares a label field creates a named set with that label. E.g. a rule with label: containers creates a set named containers.
+Viewpoint ID | Name | Type | Scope Strategy | Primary Renderer | Stakeholders
+viewpoint.c4-context | C4 System Context | P | parameter-seed
+(scope_system) | Structurizr DSL
+SystemContextView | Business
+Executive
+viewpoint.c4-container | C4 Container View | P | parameter-seed
+(scope_system) | Structurizr DSL
+ContainerView | Developer
+Architect
+viewpoint.c4-component | C4 Component View | P | parameter-seed
+(scope_container) | Structurizr DSL
+ComponentView | Developer
+viewpoint.c4-deployment | C4 Deployment View | P | parameter-seed
+(scope_system) | Structurizr DSL
+DeploymentView | Architect
+Ops
+viewpoint.system-landscape | System Landscape | S | domain-query
+(all systems) | Structurizr DSL
+SystemLandscapeView | Executive
+Business
+Viewpoint ID | Name | Type | Scope Strategy | Primary Renderer | Stakeholders
+viewpoint.capability-map | Capability Heat Map | S | domain-query
+(all capabilities) | D2 | Executive
+Business
+viewpoint.capability-detail | Capability Detail | P | parameter-seed
+(scope_capability) | D2 | Architect
+Business
+viewpoint.goal-lineage | Goal to System Lineage | P | parameter-seed
+(scope_goal) | D2 | Executive
+Architect
+viewpoint.process-systems | Process System Map | P | parameter-seed
+(scope_process) | Mermaid
+flowchart | Business
+Architect
+viewpoint.actor-interactions | Actor Interaction Map | P | parameter-seed
+(scope_actor) | Structurizr DSL | Business
+Viewpoint ID | Name | Type | Scope Strategy | Description
+viewpoint.pii-data-flow | PII Data Flow Map | S | entity-query
+(data_classification in [pii,phi,pci]) | All PII/PHI/PCI-bearing containers enterprise-wide, their data store relationships, and inbound integrations. Security architecture essential.
+viewpoint.tier1-dependency | Tier-1 Dependency Graph | S | entity-query
+(criticality=tier-1) | All tier-1 systems and their synchronous-critical dependencies. Executive resilience view.
+viewpoint.compliance-violations | Compliance Violations | S | entity-query
+(compliance.status=violation) | All entities with active compliance violations and the standards they violate. Governance remediation view.
+viewpoint.deprecated-inventory | Deprecated Component Inventory | S | entity-query
+(status=deprecated) | All deprecated entities with their current dependency count. Drives decommissioning decisions.
+viewpoint.adr-coverage | ADR Coverage Map | P | parameter-seed
+(scope_system) | System and its containers, showing which containers have accepted ADRs and which do not. Standards enforcement view.
+viewpoint.standard-governed | Standard Governance Map | P | parameter-seed
+(scope_standard) | All entities governed by a specific standard, their compliance status, and any exception ADRs. Standards stewardship view.
+Viewpoint ID | Name | Type | Scope Strategy | Description
+viewpoint.integration-surface | System Integration Surface | P | parameter-seed
+(scope_system) | All inbound and outbound integration relationships for a system, grouped by criticality. Integration review essential.
+viewpoint.blast-radius | Blast Radius | P | parameter-seed
+(scope_system) | All systems that depend on the seed system via synchronous-critical paths. Incident impact assessment.
+viewpoint.domain-interactions | Domain Interaction Map | S | domain-query
+(all systems) | All cross-domain integration relationships between system-level entities. Enterprise integration topology.
+viewpoint.async-event-flow | Async Event Flow | P | parameter-seed
+(scope_system) | All event publication and subscription relationships for a system and its containers. Event-driven architecture view.
+viewpoint.blast-radius.viewpoint.yaml
+eams_version: 1.0
+kind: viewpoint
+id: viewpoint.blast-radius
+name: Blast Radius
+description: Shows all systems and containers that depend on the seed system via synchronous-critical paths. Used for incident impact assessment and resilience planning.
+version: 1.0
+
+stakeholders:
+- architect  # primary
+- ops  # primary
+- executive  # secondary
+
+parameters:
+- name: scope_system  type: entity_id  kind: system  required: true
+description: The system whose blast radius will be assessed.
+
+scope:
+strategy: parameter-seed
+seed:
+from_parameter: scope_system
+
+include:
+- rule: seed_entity  label: seed
+
+# Traverse inbound synchronous-critical relationships at system level
+- rule: traverse  label: direct_dependents
+from: seed
+relationship_types: [uses, consumes]
+relationship_filters:
+- field: criticality  operator: in  values: [synchronous-critical]
+direction: inbound  entity_kinds: [system, container]  depth:
+
+# Recurse: find dependents of dependents (2nd-order blast radius)
+- rule: traverse  label: indirect_dependents
+from: direct_dependents
+relationship_types: [uses, consumes]
+relationship_filters:
+- field: criticality  operator: in  values: [synchronous-critical]
+direction: inbound  entity_kinds: [system, container]  depth:
+
+filters:
+entity_filters:
+- field: status  operator: not_in  values: [retired]
+
+styling:
+node_styles:
+- match: {kind: system, role: seed}
+shape: box  color: #1B3A5C  font_color: #FFFFFF  border: bold
+label_override: ${name} [IMPACTED]
+
+- match: {rule_label: direct_dependents}
+shape: box  color: #8B1A1A  font_color: #FFFFFF # Red: direct dependents
+
+- match: {rule_label: indirect_dependents}
+shape: box  color: #E87722  font_color: #FFFFFF # Amber: indirect dependents
+
+edge_styles:
+- match: {rel_type: synchronous-critical}
+style: solid  color: #8B1A1A  thickness:   arrow: open
+
+layout:
+algorithm: radial  # Radial layout: seed at centre, dependents radiating outward
+rank_hints:
+- entity_role: seed       rank:
+- rule_label: direct_dependents   rank:
+- rule_label: indirect_dependents rank:
+
+output:
+formats:
+- format: d2          primary: true   # D2 handles radial layout better than Structurizr for this viewpoint
+- format: mermaid     primary: false
+- format: full_json   primary: false
+title_template:
+value: Blast Radius: ${scope_system.name}
+
+Stage | Operation | Data Source | Output
+1 | Parameter binding — resolve parameter values to entity IDs | DynamoDB ID Registry (fast lookup by eams_id) | Bound parameter map: { scope_system: 'system.claims-processing' }
+2 | Scope strategy execution — produce the seed entity set | OpenSearch eams-entities index | Seed entity set (one or more entity documents)
+3 | Include rule evaluation — expand the result set rule by rule | OpenSearch (depth ≤ 2), Ardoq passthrough (depth 3–5) | Accumulated entity set, updated after each rule
+4 | Entity filter application — remove excluded entities | In-memory filter over accumulated set | Filtered entity set
+5 | Relationship resolution — fetch all relationships between entities in the set | OpenSearch eams-relationships index (lookup by from_id/to_id) | Relationship set connecting entities in the result
+6 | Relationship filter application — remove excluded relationships | In-memory filter over relationship set | Filtered relationship set
+7 | External entity enrichment — fetch display fields for traversal targets not yet fully loaded | OpenSearch multi-get | Complete entity documents for all entities in result set
+domain-query execution — OpenSearch
+GET eams-entities/_search
+{
+"query": {"bool": {"filter": [
+{"term": {"domain.keyword": "claims"}},
+{"terms": {"kind.keyword": ["system", "capability"]}},
+{"terms": {"status.keyword": ["active", "proposed"]}}
+]}}
+}
+
+entity-query execution — OpenSearch (PII data map example)
+GET eams-entities/_search
+{
+"query": {"bool": {"filter": [
+{"terms": {"nfr_profile.data_classification.keyword": ["pii", "phi", "pci"]}}
+]}},
+"size": 500  // entity-query returns up to 500 seed entities
+}
+
+Traverse rule — OpenSearch multi-hop execution (depth 2)
+# Step 1: Read outbound_rel_index from all entities in the 'from' set
+#         Filter to matching relationship_types and criticality
+const targetIds = fromSet
+.flatMap(e => e.outbound_rel_index)
+.filter(rel => matchingRelTypes.includes(rel.rel_type))
+.filter(rel => passesRelationshipFilters(rel))
+.map(rel => rel.to_id)
+.filter(id => !alreadyInResultSet(id))
+
+# Step 2: Multi-get entity documents for all target IDs
+const newEntities = await opensearch.mget({
+index: "eams-entities", ids: targetIds
+})
+
+# Step 3: If depth == 2, repeat from Step 1 with newEntities as the 'from' set
+#         If depth > 2, switch to Ardoq passthrough
+if (remainingDepth > 0 && depthSoFar <= 2) {
+executeTraverseRule(newEntities, remainingDepth - 1)
+} else if (remainingDepth > 0) {
+return ardoqPassthrough(newEntities, remainingDepth, filters)
+}
+
+Relationship resolution — OpenSearch
+GET eams-relationships/_search
+{
+"query": {"bool": {"should": [
+{"terms": {"from_id.keyword": [...entitySetIds]}},
+{"terms": {"to_id.keyword": [...entitySetIds]}}
+], "minimum_should_match": }}
+// Both from_id AND to_id must be in the entity set — not OR
+}
+
+Relationship resolution and the internal_only filter
+The query above returns all relationships where BOTH endpoints are in the resolved entity set. This is what the internal_only relationship filter does implicitly.
+Viewpoints without internal_only can show 'dangling' relationships to entities outside the viewpoint scope — valid for some views (e.g. integration surface) but confusing for others (e.g. C4 container view).
+The internal_only filter is recommended as the default for all C4 viewpoints and any viewpoint where the boundary of the diagram is semantically meaningful.
+Canonical Render Graph — Full JSON Structure
+render_graph:
+viewpoint_id: viewpoint.c4-container
+title: Claims Processing System — Container View
+description: C4 Level 2 container view. Generated 2026-03-10T09:15:00Z.
+scope: system.claims-processing
+branch: main
+compiled_at: 2026-03-10T09:15:00Z
+git_sha: a3f8c2d1b4e9...
+
+nodes:
+# One entry per entity in the resolved set
+- id: system.claims-processing
+kind: system  name: Claims Processing System
+role: seed              # seed | container | external | actor
+rule_label: seed_entity   # Which include rule added this node
+labels:
+primary: Claims Processing System
+secondary:           # null for systems; set for containers
+display:
+shape: box  color: #1B3A5C  font_color: #FFFFFF
+border: bold  badges: []
+layout:
+rank:   group: Claims Processing System  # Group boundary label
+
+- id: container.adjudication-api
+kind: container  name: Adjudication API  role: container
+labels:
+primary: Adjudication API
+secondary: Java 21 / Spring Boot 3
+display:
+shape: box  color: #0F7173  font_color: #FFFFFF
+badges:
+- {text: PII, color: #8B1A1A, background: #FDF0F0}
+layout:
+rank:   group: Claims Processing System
+
+edges:
+# One entry per relationship in the resolved set
+- id: rel.adjudication-api--consumes--policy-coverage-api
+from: container.adjudication-api
+to: container.policy-coverage-api
+rel_type: consumes  criticality: synchronous-critical
+labels:
+primary: Retrieves policy coverage [REST]
+display:
+style: solid  color: #1B3A5C  thickness:   arrow: filled
+
+groups:
+# Boundary boxes / swimlanes in the diagram
+- id: group.claims-processing  label: Claims Processing System
+contains: [container.adjudication-api, container.rules-engine, container.claims-db]
+display: {border: solid, color: #D0D7DE}
+
+layout:
+algorithm: hierarchical
+direction: left-right
+
+meta:
+node_count: 6
+edge_count: 8
+group_count: 1
+traversal_sources:
+- opensearch  # nodes from opensearch
+- ardoq-passthrough  # none for this viewpoint
+resolution_time_ms: 87
+
+Structurizr DSL Output — C4 Container View (claims-processing)
+workspace "Claims Processing System — Container View" {
+
+model {
+# Actors
+claimsAdjudicator = person "Claims Adjudicator" {
+description "Internal user who reviews and adjudicates claims"
+}
+
+# Seed system — with container children
+claimsProcessing = softwareSystem "Claims Processing System" {
+description "Receives, validates, adjudicates, and settles insurance claims"
+tags "EAMS::System" "tier-1"
+
+adjudicationApi = container "Adjudication API" {
+technology "Java 21 / Spring Boot 3"
+description "REST API exposing claim adjudication operations"
+tags "EAMS::Container" "pii"
+}
+
+rulesEngine = container "Rules Engine" {
+technology "Drools / Java"
+description "Embedded rules evaluation engine"
+}
+claimsDb = container "Claims Database" {
+technology "Amazon Aurora PostgreSQL"
+tags "EAMS::Container" "pii"
+}
+}
+
+# External systems (traversal targets)
+policyAdmin = softwareSystem "Policy Admin System" {
+tags "External"
+}
+
+# Relationships
+claimsAdjudicator -> claimsProcessing "Adjudicates claims via" "HTTPS"
+adjudicationApi -> rulesEngine   "Delegates rule evaluation to"
+adjudicationApi -> claimsDb     "Reads/writes claim records" "SQL"
+adjudicationApi -> policyAdmin  "Retrieves policy coverage [REST]" "HTTPS"
+}
+
+views {
+container claimsProcessing {
+include *
+autolayout lr
+description "C4 Level 2 container view. Generated 2026-03-10."
+}
+
+styles {
+element "EAMS::System" { background #1B3A5C; color #FFFFFF; border Bold }
+element "EAMS::Container" { background #0F7173; color #FFFFFF }
+element "External" { background #4A6080; color #FFFFFF; border Dashed }
+element "pii" { border Dashed; } # PII badge via Structurizr tag styling
+}
+}
+}
+
+Mermaid Output — C4 Container View (simplified)
+flowchart LR
+claimsAdjudicator([Claims Adjudicator])
+
+subgraph claimsProcessing [Claims Processing System]
+adjudicationApi[Adjudication API\nJava 21 / Spring Boot 3]
+rulesEngine[Rules Engine\nDrools]
+claimsDb[(Claims Database\nAurora PostgreSQL)]
+end
+
+policyAdmin[Policy Admin System]:::external
+
+claimsAdjudicator --> adjudicationApi -->|rules| rulesEngine
+adjudicationApi -->|SQL| claimsDb
+adjudicationApi ==>|REST| policyAdmin # ==> = synchronous-critical
+
+classDef external fill:#4A6080,color:#FFFFFF,stroke-dasharray:5
+
+D2 Output — Blast Radius (claims-processing, simplified)
+# D2 diagram — Blast Radius: Claims Processing System
+
+direction: right
+
+claimsProcessing: Claims Processing System {
+style: {fill: "#1B3A5C"; font-color: "#FFFFFF"; stroke-width: }
+}
+
+# Direct dependents — red
+claimsPortal: Claims Portal { style: {fill: "#8B1A1A"; font-color: "#FFFFFF"} }
+billingSystem: Billing System { style: {fill: "#8B1A1A"; font-color: "#FFFFFF"} }
+
+# Indirect dependents — amber
+customerPortal: Customer Portal { style: {fill: "#E87722"; font-color: "#FFFFFF"} }
+
+# Edges (inbound — arrows point TO claimsProcessing)
+claimsPortal -> claimsProcessing: synchronous-critical {style.stroke: "#8B1A1A"; style.stroke-width: }
+billingSystem -> claimsProcessing: synchronous-critical
+customerPortal -> claimsPortal: synchronous-critical
+
+Viewpoint Category | Primary Format | Rationale | Secondary
+C4 Context, Container, Component, Deployment | Structurizr DSL | Native C4 support. Hierarchical boundaries. Proper C4 notation. | Mermaid
+System Landscape | Structurizr DSL | C4 System Landscape view type. | Mermaid
+Capability Map, Capability Detail | D2 | Heat map and grouping layouts. Colour overlays for maturity. | Mermaid
+Goal Lineage, Blast Radius | D2 | Radial and hierarchical chain layouts not well supported in Structurizr. | Mermaid
+Process System Map | Mermaid flowchart | Process flows map well to flowchart. Wide Confluence compatibility. | D2
+Domain Interaction Map | D2 | Cross-domain topology benefits from D2's flexible container layout. | Structurizr DSL
+Compliance, Governance viewpoints | D2 | Tabular/matrix-style layouts not supported in C4 tools. | Mermaid
+Rule | Severity | Description
+VPT-001 | Error | id field is present, follows viewpoint.{slug} pattern, and is unique across the repository.
+VPT-002 | Error | All parameter names referenced in scope and include rules are declared in the parameters block.
+VPT-003 | Error | All rule label references in from fields and union sets match a declared rule label.
+VPT-004 | Error | include block contains at least one seed_entity rule.
+VPT-005 | Error | All entity_kinds values are valid EAMS entity kind enum values.
+VPT-006 | Error | All relationship_types values are valid EAMS relationship type enum values.
+VPT-007 | Warning | depth > 3 in a traverse rule without an explicit entity_kinds filter. Deep traversals without kind filtering may return very large result sets.
+VPT-008 | Warning | No stakeholders declared. Viewpoint will not appear in filtered catalogue queries.
+VPT-009 | Warning | output.formats does not include full_json. The full JSON format is always available regardless — this is informational.
+VPT-010 | Error | c4_view_type is declared on a Structurizr format but the entity_kinds in the scope do not match the expected C4 level for that view type.
+Custom viewpoint governance
+Custom viewpoints are scoped to their authoring domain by default — they cannot query entities in other domains without explicit cross-domain scope declaration.
+Custom viewpoints with depth > 3 traverse rules require platform engineer review before merge.
+Custom viewpoints must not duplicate an existing standard library viewpoint with only a scope change — use the standard viewpoint with a scope parameter instead.
+Viewpoints with entity-query scope strategy that return > 500 seed entities require a performance review annotation in the viewpoint file.
+The total number of custom viewpoints per domain is soft-capped at 20. Beyond this, platform engineer review is required to assess whether consolidation is needed.
+Event | Staleness Impact | Workbench Behaviour
+Entity in the render graph is modified | Render is stale | Workbench displays stale indicator on diagram. Offers one-click refresh.
+New entity is added to a domain in scope | Render may be stale | Workbench offers refresh if new entity would be included by the viewpoint's scope expression. Evaluated client-side against scope metadata.
+Relationship between two entities in the render graph changes | Render is stale | Stale indicator shown. Refresh re-runs full resolution.
+Compile completes with no changes to entities in the render graph | Render is current | No indicator. compiled_at and git_sha updated silently.
+Branch compile completes | Branch render is stale | Branch-specific renders display stale indicator for that branch.
+Staleness does not mean incorrectness
+A stale diagram is one that was accurate as of a previous compile. It may still be entirely accurate — if the changes since the last compile do not affect any entity in the diagram's scope.
+The Workbench communicates staleness as informational, not as an error. Architects working in a fast-moving team may prefer to refresh diagrams deliberately rather than continuously.
+Strategy | Required Fields | Notes
+parameter-seed | scope.seed.from_parameter | Parameter must be declared in parameters block.
+domain-query | scope.seed.domain`, `scope.seed.kinds | kind filter is required; status defaults to [active, proposed].
+entity-query | scope.seed.filters` (array of filter expressions) | At least one filter required. Results capped at 500 entities.
+Rule | Required Fields | Optional Fields
+seed_entity | — | label
+related_entities | relationship_types, direction | entity_kinds, label, relationship_filters
+traverse | from, relationship_types, direction, depth | entity_kinds, relationship_filters, label
+attribute_filter | field, operator, value/values | label
+union | sets (list of rule labels) | label
+Algorithm | Best For | Renderer Support
+hierarchical | C4 views, lineage chains, dependency flows with clear directionality | Structurizr (autolayout lr/tb), D2 (direction), Mermaid (LR/TD)
+force-directed | Integration maps, domain interactions where hierarchy is not meaningful | D2 only (elk layout)
+radial | Blast radius, impact maps where seed is the central node | D2 only (elk radial)
+manual | Pinned layout — future capability. Not available in v1. | N/A (v1)
+c4_view_type | Structurizr View Type | Required Seed Kind | Required include Rules
+SystemContextView | SystemContext | system | seed system + actors + external systems (1-hop)
+ContainerView | Container | system | seed system + its containers + external systems
+ComponentView | Component | container | seed container + its components
+DeploymentView | Deployment | system | seed system containers + infrastructure nodes
+SystemLandscapeView | SystemLandscape | domain (all systems) | all systems in scope + actors

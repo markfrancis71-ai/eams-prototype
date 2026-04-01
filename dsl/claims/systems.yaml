@@ -1,0 +1,38 @@
+# Claims Domain — Systems
+domain: claims
+
+systems:
+  - eams_id: system.claims-processing
+    name: Claims Processing System
+    status: active
+    criticality: tier-1
+    technology:
+      primary: Java/Spring Boot
+      language: Java 17
+      framework: Spring Boot 3.2
+      runtime: JVM 17
+      hosting: AWS ECS Fargate
+    nfr:
+      availability: "99.95%"
+      throughput: "500 claims/min"
+      latency: "p99 < 200ms"
+      data_classification: pii
+    ownership:
+      architect: Sarah Chen
+      business_owner: Mike Rodriguez
+
+  - eams_id: system.claims-portal
+    name: Claims Portal
+    status: active
+    criticality: tier-1
+    technology:
+      primary: React/Node.js
+      language: TypeScript
+      framework: Next.js 14
+
+  - eams_id: system.claims-data-platform
+    name: Claims Data Platform
+    status: active
+    criticality: tier-2
+    technology:
+      primary: Snowflake/dbt

@@ -1,0 +1,688 @@
+Table of Contents
+1. Overview
+The EAMS Architecture API is the read layer of the EAMS ecosystem. It exposes the compiled architecture graph — maintained in OpenSearch and Ardoq — to all consumers: the Architect Workbench, the diagram renderer, the Confluence artifact generator, the LLM advisory layer, the signal enrichment pipeline, and future external integrations. No consumer interacts with Ardoq or OpenSearch directly.
+The API exposes two complementary surfaces that share a single underlying query layer:
+1.1 Read Strategy: Hybrid OpenSearch + Ardoq
+1.2 Consumer Inventory
+1.3 Architectural Position
+The API is strictly read-only. The write path flows exclusively through the DSL compiler pipeline → Ardoq Integration Layer. The API enforces this at the infrastructure level: API Gateway and AppSync are configured with no mutation resolvers and no POST endpoints that accept entity data.
+2. Authentication & Authorization
+2.1 Authentication
+All API requests require authentication via AWS Cognito. Two token types are supported:
+2.2 Role Definitions
+2.3 Service Token Scoping
+Service tokens are issued with an explicit endpoint_scope claim that restricts which endpoint groups the token may call. This limits blast radius if a service credential is compromised.
+2.4 Authorization Enforcement
+Authorization is enforced at the API Gateway and AppSync authorizer layer before any resolver executes. The following rules apply to all endpoints:
+Requests without a valid JWT or service token receive 401 Unauthorized.
+Requests with a valid token but insufficient role or scope receive 403 Forbidden.
+Service tokens attempting to call endpoints outside their scope receive 403 Forbidden with error code SCOPE_INSUFFICIENT.
+Reader role requests to endpoints that return sensitive fields (data_classification, compliance_status, eams_architect email) have those fields redacted from the response. The entity is returned with redacted fields set to null and a redacted: true flag.
+All authorization decisions are logged to CloudWatch with token identity, endpoint, and decision. Failed authorization generates a CloudWatch metric alarm after 10 failures per minute per token.
+3. REST API — Endpoint Reference
+All REST endpoints are versioned under /v1/. The base URL is https://api.eams.{company}.com/v1. Responses are JSON. All list endpoints support pagination via limit and cursor query parameters (default limit: 50, max: 200).
+3.1 Entity Endpoints
+Returns the full entity record for the given qualified ID. Includes all metadata fields. Sensitive fields (data_classification, compliance_status, eams_architect) are redacted for Reader role.
+Looks up an entity by an external identifier rather than the EAMS qualified ID. Designed for the signal enrichment pipeline, which knows TPM IDs and system names but not EAMS IDs. Returns a minimal entity record — use GET /entities/{eams_id} for the full record.
+Returns a paginated list of all entities belonging to the specified domain. The primary endpoint for the Confluence artifact generator when refreshing domain-level architecture pages.
+Returns all DSL relationships involving this entity. Supports filtering by relationship type, direction, and target domain. Used by the Workbench to render the relationship panel for a selected entity.
+Returns a structured context bundle containing the entity, its direct relationships (1 hop), related entities summary, applicable standards, open compliance findings, and linked decisions. Designed as a single-call payload that gives the LLM advisory layer sufficient context for architectural assessment without requiring multiple API calls.
+3.2 Graph Traversal Endpoints
+Returns a subgraph rooted at the starting entity. Traversal follows relationship edges in the specified direction to the specified depth. The response includes all encountered entities and the relationships between them — suitable for feeding into the diagram renderer or the Workbench graph view.
+Returns the upward lineage (Goal → Capability → System → Container) and downward lineage (Container → Data Entity → Data Product) for the specified entity. This is a specialised traversal following only realization and data-flow relationship types, designed for the Workbench lineage panel and the executive traceability viewpoint.
+3.3 Viewpoint Endpoints
+Returns the catalogue of all viewpoint definitions registered in the EAMS system. Each viewpoint has a stable ID, a name, a description of the stakeholder concern it addresses, and the entity kinds and relationship types it includes.
+Applies the viewpoint definition to the specified scope (a domain, a system, or a set of entity IDs) and returns a render-ready payload. The payload contains nodes (entities with display properties) and edges (relationships with display properties) ready for consumption by the diagram renderer. Layout hints are included but are advisory — the renderer may override them.
+3.4 Search Endpoints
+Searches across entity names, descriptions, and indexed attributes using OpenSearch full-text search. Supports faceted filtering by domain, kind, status, criticality, lifecycle, data_classification, and standard compliance. Returns ranked results with match highlights.
+3.5 Branch & Diff Endpoints
+Returns all active non-main branches registered in the EAMS system, with their branch intent, review status, Ardoq representation type, and scope.
+Returns the diff report generated by the last compile of the specified branch. The diff describes all entity additions, modifications, removals, relationship changes, standards violations introduced, and NFR regressions relative to the base branch.
+4. GraphQL API
+The GraphQL API is served via AWS AppSync at https://api.eams.{company}.com/v1/graphql. It shares authentication with the REST API — the same Cognito tokens are accepted. AppSync resolvers call the same underlying query layer as the REST endpoints.
+4.1 Schema Overview
+4.2 Example Queries
+Workbench — Load System with all Containers and their outbound relationships
+Diagram Renderer — Resolve C4 Container Viewpoint
+Workbench — Real-time subscription for domain updates
+5. OpenSearch Index Design
+The Architecture API reads primarily from an OpenSearch index maintained by the compile pipeline. The index design determines query performance and the richness of search and traversal capabilities. This section defines the index structure that the compile pipeline must produce and the API query layer consumes.
+5.1 Index Structure
+5.2 Entity Document Schema
+6. Signals Endpoint
+The signals endpoint is the exception to the read-only rule. It accepts operational telemetry from the signal ingestion pipeline and stores it for the Workbench signal queue and the LLM advisory layer. Signal data does not modify the entity graph — it is stored in a separate DynamoDB signals table and linked to entities by eams_id.
+Accepts an enriched signal from the signal ingestion pipeline. Signals are operational events (incidents, performance alerts, technology lifecycle events) that have been enriched with architecture entity context by the signal enrichment pipeline. The API stores the signal and makes it available to architects via the Workbench signal queue.
+7. Error Reference
+8. Performance & Caching
+8.1 SLA Targets
+8.2 Caching Strategy
+Appendix A — REST Endpoint Quick Reference
+Appendix B — Rate Limits
+Surface | Technology | Primary Consumers | Strengths
+GraphQL | /v1/graphql
+(AWS AppSync) | Architect Workbench, Diagram Renderer, LLM Advisory Layer | Flexible graph traversal, single request for nested entity graphs, strongly typed schema, introspectable
+REST | /v1/ (API Gateway + Lambda) | Confluence Generator, Signal Pipeline, CLI, External Integrations | Predictable, cacheable, stable contracts, easy to consume without a GraphQL client
+Single query layer
+Both the GraphQL and REST surfaces are projections of the same underlying query layer — an OpenSearch-backed graph query engine that resolves entity graphs from the materialized architecture index.
+Neither surface has independent data access logic. Adding a new REST endpoint or a new GraphQL field does not require changes to data access — only to the projection layer.
+Query Type | Data Source | Rationale
+Entity lookup by ID or domain | OpenSearch | Sub-10ms response. Satisfies signal pipeline <200ms SLA.
+Full-text and faceted search | OpenSearch | Native capability. Powers architecture discovery in Workbench.
+Relationship traversal (1–3 hops) | OpenSearch | Pre-indexed relationship edges. Fast for the majority of viewpoint queries.
+Deep graph traversal (4+ hops) | Ardoq REST API passthrough | Ardoq's graph engine handles arbitrary-depth traversal more efficiently than OpenSearch join chains.
+Branch/Scenario comparison | Ardoq REST API passthrough | Branch diffs require comparing two Ardoq graph states — Ardoq Scenario API is purpose-built for this.
+Viewpoint resolution | OpenSearch (query) + Viewpoint Engine (logic) | Viewpoint Engine applies filter and projection logic on top of OpenSearch graph query results.
+Provenance / compile history | DynamoDB ID Registry (read) | Git SHA, compiled_at, and migration source are in the registry, not OpenSearch.
+Consumer | Primary Surface | Key Endpoints | Latency SLA
+Architect Workbench | GraphQL | entities, graph traversal, viewpoints/resolve, search | < 2s p95
+Diagram Renderer | GraphQL | viewpoints/resolve | < 3s p95
+Confluence Generator | REST | GET /domains/{d}/entities, GET /viewpoints/{id}/resolve | Batch — no strict SLA
+Signal Enrichment Pipeline | REST | GET /entities/lookup | < 200ms p99
+LLM Advisory Layer | REST | GET /entities/{id}/context-bundle | < 5s p95 (async OK)
+eams CLI | REST | GET /entities/{id}, GET /diff/{branch} | < 1s p95
+External Integrations | REST | All stable /v1/ REST endpoints | < 2s p95
+ADR-API-001: API is read-only by design
+Decision: The Architecture API exposes no write operations for entity or relationship data.
+Context: All architecture data changes must flow through the DSL → Git → compile pipeline to maintain version history, referential integrity, and standards compliance. An API write path would bypass all of these controls.
+Consequence: Clients that need to modify architecture data (e.g. the Workbench editor) generate DSL files and submit them via Git, not via the API. The API may expose a /draft endpoint in a future version that accepts DSL snippets and returns validation results without committing — but this is advisory only, not a write path.
+Exception: The /feedback endpoint (Section 6) accepts signal data from the signal enrichment pipeline. This is operational telemetry, not architecture data, and does not modify the entity graph.
+Token Type | Issued To | Mechanism | Expiry
+User JWT | Human users (architects, reviewers, readers) authenticated via company SSO | Cognito User Pool — SAML/OIDC federation to company IdP | 1 hour (refresh token: 30 days)
+Service token | Machine consumers: Confluence generator, signal pipeline, LLM layer, CLI | Cognito App Client credentials flow (client_id + client_secret) | 24 hours (non-refreshable — re-issue daily via Secrets Manager rotation)
+Role | Assigned To | Permissions | Token Type
+Architect | Practicing architects (application, infrastructure, security, data) | Read all domains. Access all endpoints. Access branch/scenario data. Access compliance reports. | User JWT
+Reviewer | Architecture review board members, domain stakeholders | Read all domains. All read endpoints. No compliance report details. No branch workspace data. | User JWT
+Reader | Business stakeholders, product managers, developers consuming architecture data | Read all domains. Entity and viewpoint endpoints only. No search filters on sensitive fields (data_classification, compliance status). | User JWT
+Service | Automated consumers: Confluence generator, signal pipeline, LLM layer, CLI | Endpoint-group scoped at token issuance. See Section 2.3. | Service token
+Scope Name | Permitted Endpoint Groups | Issued To
+scope:entity-read | GET /entities/*, GET /domains/*, GET /graph/* | Signal pipeline, external read integrations
+scope:viewpoint-resolve | GET /viewpoints/*, GET /entities/*, GET /domains/* | Confluence generator, diagram renderer
+scope:context-bundle | GET /entities/{id}/context-bundle, GET /entities/{id}/relationships | LLM advisory layer
+scope:search | GET /search/*, GET /entities/*, GET /domains/* | eams CLI, Workbench (service mode)
+scope:signal-ingest | POST /signals/* only | Signal ingestion services (Jira, ServiceNow webhooks)
+scope:full-read | All GET endpoints (no POST except /signals) | EAMS platform engineering tooling only
+Response envelope
+All REST responses are wrapped in a standard envelope:
+{ "data": { ... }, "meta": { "request_id": "...", "compiled_at": "...", "git_sha": "..." } }
+List responses include: { "data": [...], "meta": { ..., "total": N, "next_cursor": "..." } }
+Error responses: { "error": { "code": "ENTITY_NOT_FOUND", "message": "...", "request_id": "..." } }
+GET  /entities/{eams_id}
+Retrieve a single entity by its DSL qualified ID.
+Auth: Architect | Reviewer | Reader | Service:scope:entity-read
+Parameter | Type | Required | Description
+eams_id | path | Yes | DSL qualified ID e.g. system.claims-processing
+branch | query | No | Git branch name or 'main' (default: main). Returns entity state as of the latest compile of that branch.
+include_relationships | query | No | Boolean. If true, includes a summary of outbound relationship counts by type (default: false).
+Response
+data:
+id: system.claims-processing
+kind: system
+name: Claims Processing System
+domain: claims
+status: active
+description: Receives, validates, adjudicates, and settles insurance claims.
+ownership:
+architect: j.smith@company.com
+business_owner: VP Claims Operations
+tpm_id: APP-00842
+criticality: tier-1
+lifecycle: production
+_meta:
+compiled_at: 2026-03-10T09:15:00Z
+git_sha: a3f8c2d1b4e9...
+ardoq_id: 5f3a8b2c1d4e...
+redacted: false
+
+GET  /entities/lookup
+Fast entity lookup by external identifier. Optimised for sub-200ms response (signal pipeline SLA).
+Auth: Architect | Reviewer | Reader | Service:scope:entity-read
+Parameter | Type | Required | Description
+tpm_id | query | One of these three required | Salesforce TPM application ID
+name | query |  | Exact system name match
+ardoq_id | query |  | Ardoq internal component _id
+Response
+data:
+id: system.claims-processing
+kind: system
+name: Claims Processing System
+domain: claims
+status: active
+tpm_id: APP-00842
+criticality: tier-1
+_meta:
+lookup_source: tpm_id
+response_ms: 12
+
+GET  /domains/{domain}/entities
+List all entities in a domain, optionally filtered by kind and status.
+Auth: Architect | Reviewer | Reader | Service:scope:entity-read
+Parameter | Type | Required | Description
+domain | path | Yes | Domain slug e.g. claims
+kind | query | No | Filter by entity kind. Comma-separated for multiple. e.g. kind=system,container
+status | query | No | Filter by status. Default: active,proposed. Pass status=all for all statuses.
+branch | query | No | Branch name (default: main)
+limit | query | No | Page size (default: 50, max: 200)
+cursor | query | No | Pagination cursor from previous response
+Response
+data:
+- system.claims-processing  # → full entity objects
+- system.claims-portal
+- system.claims-data-platform
+# ... additional entities
+meta:
+total: 147
+returned: 50
+next_cursor: eyJza2lwIjo1MH0=
+domain: claims
+compiled_at: 2026-03-10T09:15:00Z
+
+GET  /entities/{eams_id}/relationships
+Retrieve all relationships where the entity is the source or target.
+Auth: Architect | Reviewer | Reader | Service:scope:entity-read
+Parameter | Type | Required | Description
+eams_id | path | Yes | DSL qualified ID
+direction | query | No | outbound | inbound | both (default: both)
+rel_type | query | No | Filter by DSL relationship type e.g. rel_type=uses,consumes
+target_domain | query | No | Filter relationships to/from a specific domain
+branch | query | No | Branch name (default: main)
+Response
+data:
+outbound:
+- id: rel.adjudication-api--consumes--policy-coverage-api#get-coverage
+rel_type: consumes  to: container.policy-coverage-api
+criticality: synchronous-critical  protocol: REST
+inbound:
+- id: rel.claims-portal--uses--claims-processing
+rel_type: uses  from: system.claims-portal
+meta:
+outbound_count: 4
+inbound_count: 2
+
+GET  /entities/{eams_id}/context-bundle
+Retrieve a rich context bundle for LLM advisory and advisory layer consumption.
+Auth: Architect | Service:scope:context-bundle
+Parameter | Type | Required | Description
+eams_id | path | Yes | DSL qualified ID
+depth | query | No | Relationship traversal depth for context. 1 (default) or 2. Depth 2 includes neighbours-of-neighbours summary.
+branch | query | No | Branch name (default: main)
+Response
+data:
+entity:
+# Full entity record
+relationships:
+# All direct relationships with target entity summaries
+applicable_standards:
+- standard.rest-api-first
+- standard.pii-data-handling
+compliance_findings:
+- standard: standard.pii-data-handling  status: violation
+finding: auth_mechanism is 'none' — PII containers require oauth2-jwt or stronger
+decisions:
+- decision.ADR-0042  # → full decision record
+related_capabilities:
+- capability.claim-adjudication  # → capability summary
+_meta:
+bundle_generated_at: 2026-03-10T09:15:00Z
+token_count_estimate: 3200
+
+GET  /graph/traverse
+Traverse the architecture graph from a starting entity to a specified depth.
+Auth: Architect | Reviewer | Service:scope:entity-read
+Parameter | Type | Required | Description
+from | query | Yes | Starting entity qualified ID
+depth | query | No | Traversal depth 1–5 (default: 2). Depths > 3 use Ardoq passthrough.
+direction | query | No | outbound | inbound | both (default: outbound)
+rel_types | query | No | Comma-separated DSL relationship types to follow. Default: all.
+entity_kinds | query | No | Comma-separated entity kinds to include in result. Default: all.
+branch | query | No | Branch name (default: main)
+Response
+data:
+nodes:
+# Array of entity objects encountered during traversal
+- system.claims-processing  # → full entity
+- container.adjudication-api
+- container.rules-engine
+- system.policy-admin  # → entity from target domain, included as traversal target
+edges:
+# Array of relationship objects between nodes in result
+- id: rel.adjudication-api--consumes--policy-coverage-api
+from: container.adjudication-api  to: container.policy-coverage-api
+rel_type: consumes  criticality: synchronous-critical
+meta:
+node_count: 12
+edge_count: 18
+traversal_source: opensearch  # opensearch | ardoq-passthrough
+depth_reached: 2
+
+GET  /graph/lineage/{eams_id}
+Retrieve the full traceability lineage for an entity in both directions.
+Auth: Architect | Reviewer | Reader | Service:scope:entity-read
+Parameter | Type | Required | Description
+eams_id | path | Yes | DSL qualified ID — any entity kind
+direction | query | No | up | down | both (default: both). Up follows realization edges toward Goals. Down follows data-flow edges toward Data Products.
+branch | query | No | Branch name (default: main)
+Response
+data:
+upward_chain:
+# goal → capability → system → container chain
+- kind: goal
+id: goal.reduce-claims-cycle-time
+- kind: capability
+id: capability.claim-adjudication
+- kind: system
+id: system.claims-processing
+- kind: container
+id: container.adjudication-api
+downward_chain:
+- kind: data_entity
+id: entity.claim-record
+- kind: data_product
+id: product.claims-data-product
+meta:
+chain_complete: true  # false if any link in the chain is missing — indicates traceability gap
+
+GET  /viewpoints
+List all available viewpoint definitions.
+Auth: Architect | Reviewer | Reader | Service:scope:viewpoint-resolve
+Parameter | Type | Required | Description
+domain | query | No | Filter viewpoints applicable to a specific domain
+stakeholder | query | No | Filter by stakeholder tag e.g. stakeholder=executive,developer
+Response
+data:
+- id: viewpoint.c4-context  name: C4 System Context
+description: Shows a system, its users, and the systems it interacts with at C4 Level 1.
+stakeholders: [business, developer, executive]
+entity_kinds: [system, actor]  rel_types: [uses, invokes]
+
+- id: viewpoint.c4-container  name: C4 Container View
+description: Shows the internal containers of a system and their interactions.
+stakeholders: [developer, architect]
+
+- id: viewpoint.capability-heat-map  name: Capability Heat Map
+description: Business capability map with maturity and strategic importance overlays.
+stakeholders: [executive, business]
+
+GET  /viewpoints/{viewpoint_id}/resolve
+Resolve a viewpoint for a specific scope, returning a render-ready payload.
+Auth: Architect | Reviewer | Reader | Service:scope:viewpoint-resolve
+Parameter | Type | Required | Description
+viewpoint_id | path | Yes | Viewpoint definition ID e.g. viewpoint.c4-container
+scope_system | query | One of these scope params required | System qualified ID for system-scoped viewpoints
+scope_domain | query |  | Domain slug for domain-scoped viewpoints
+scope_entities | query |  | Comma-separated entity IDs for custom scope
+branch | query | No | Branch name (default: main)
+format | query | No | Response format: full (default) | structurizr-dsl | d2 | mermaid
+Response
+data:
+viewpoint_id: viewpoint.c4-container
+scope: system.claims-processing
+title: Claims Processing System — Container View
+nodes:
+- id: container.adjudication-api  label: Adjudication API
+kind: container  container_type: api
+technology: Java 21 / Spring Boot 3  hosting: eks
+display: {shape: box, color: #0F7173}
+edges:
+- from: container.adjudication-api  to: container.claims-db
+rel_type: stores-in  label: Reads/writes claim records
+display: {style: solid, color: #5B2D8E}
+layout_hints:
+algorithm: hierarchical
+direction: left-right
+meta:
+node_count: 5
+edge_count: 7
+compiled_at: 2026-03-10T09:15:00Z
+format: full
+
+GET  /search
+Full-text and faceted search across all architecture entities.
+Auth: Architect | Reviewer | Reader | Service:scope:search
+Parameter | Type | Required | Description
+q | query | Yes | Full-text search query string
+domain | query | No | Filter by domain (comma-separated for multiple)
+kind | query | No | Filter by entity kind
+status | query | No | Filter by status (default: active,proposed)
+criticality | query | No | Filter by criticality tier
+data_classification | query | No | Filter by data classification (Architect role only; redacted for Reader)
+standard | query | No | Filter to entities governed by a specific standard
+limit | query | No | Page size (default: 20, max: 100)
+cursor | query | No | Pagination cursor
+Response
+data:
+- id: container.adjudication-api  score: 0.94
+kind: container  domain: claims
+highlight: ...the <em>adjudication</em> API orchestrates rules evaluation...
+
+- id: process.first-notice-of-loss  score: 0.87
+kind: process  domain: claims
+meta:
+total: 14
+query_time_ms: 23
+facets:
+domain: {claims: 9, policy: 3, billing: 2}
+kind: {container: 6, process: 4, system: 4}
+
+GET  /branches
+List all active EAMS Git branches with their Ardoq representation status.
+Auth: Architect | Reviewer
+Parameter | Type | Required | Description
+intent | query | No | Filter by branch intent: proposal | project | experiment | migration
+status | query | No | Filter by review status: draft | in-review | approved | merged
+domain | query | No | Filter branches that include a specific domain in scope
+Response
+data:
+- branch: project/claims-rt-adjudication
+intent: project  review_status: in-review
+ardoq_representation: workspace-copy
+ardoq_workspace: eams-claims-branch-rt-adjudication
+scope: [domain.claims]
+submitted: 2026-03-05  author: j.smith@company.com
+
+GET  /diff/{branch}
+Retrieve the structured diff report for a branch against its base branch.
+Auth: Architect | Reviewer
+Parameter | Type | Required | Description
+branch | path | Yes | Branch name e.g. project/claims-rt-adjudication
+domain | query | No | Filter diff to a specific domain
+kind | query | No | Filter diff to specific entity kinds
+changes_only | query | No | Boolean. If true, omit UNCHANGED entries (default: true)
+Response
+data:
+summary:
+entities_added: 3
+entities_modified: 7
+entities_removed: 0
+relationships_added: 5
+relationships_removed: 1
+compliance_findings_introduced: 1
+nfr_regressions: 0
+entity_changes:
+- id: container.rules-engine  change: ADDED
+kind: container  domain: claims
+
+- id: container.adjudication-api  change: MODIFIED
+changed_fields: [technology.primary, nfr_profile.throughput_rps]
+compliance_findings:
+- entity: container.rules-engine  standard: standard.adr-required
+finding: No accepted ADR references this new container
+severity: warning
+
+GraphQL vs REST — when to use which
+Use GraphQL when: you need multiple nested entity types in a single request (Workbench entity panel, diagram subgraph fetch), you need to specify exactly which fields to return, or you need subscription-based updates (Workbench real-time refresh).
+Use REST when: you need stable URLs for caching or sharing, you are building an external integration with a predictable access pattern, or you are using a non-JavaScript client without a mature GraphQL library.
+GraphQL Schema — Core Types
+# ═══ ROOT TYPES ══════════════════════════════════════════════════════
+type Query {
+entity(id: ID!, branch: String): Entity
+entities(domain: String, kind: [EntityKind!], status: [Status!], branch: String, limit: Int, cursor: String): EntityPage
+search(q: String!, filters: SearchFilters, limit: Int): SearchResults
+traverse(from: ID!, depth: Int, direction: Direction, relTypes: [RelType!], branch: String): Graph
+lineage(id: ID!, direction: LineageDirection, branch: String): Lineage
+viewpoints(domain: String, stakeholder: [String!]): [ViewpointDef]
+viewpoint(id: ID!): ViewpointDef
+resolveViewpoint(viewpointId: ID!, scope: ViewpointScope!, branch: String, format: RenderFormat): ResolvedViewpoint
+diff(branch: String!): DiffReport
+branches(intent: BranchIntent, status: ReviewStatus): [Branch]
+}
+
+type Subscription {
+entityUpdated(domain: String, kind: [EntityKind!]): EntityUpdate  # Real-time Workbench refresh
+compileCompleted(branch: String): CompileEvent
+}
+
+# ═══ ENTITY TYPE (polymorphic via inline fragments) ══════════════════
+interface Entity {
+id: ID!
+kind: EntityKind!
+name: String!
+domain: String!
+status: Status!
+description: String
+ownership: Ownership
+metadata: Metadata
+relationships(direction: Direction, relTypes: [RelType!]): [Relationship]
+}
+
+type System implements Entity {
+# All Entity interface fields +
+tpmId: String
+criticality: Criticality
+lifecycle: Lifecycle
+containers: [Container]
+capabilities: [Capability]
+goals: [Goal]
+compliance: ComplianceSummary
+}
+
+type Container implements Entity {
+# All Entity interface fields +
+parentSystem: System!
+containerType: ContainerType
+technology: Technology
+nfrProfile: NfrProfile
+interfaces: [Interface]
+stores: [DataEntity]
+infrastructure: [Infrastructure]
+components: [Component]
+compliance: ComplianceSummary
+}
+
+# ... Capability, Process, DataEntity, DataProduct, Actor, Goal, Decision
+#     follow the same pattern — Entity interface + type-specific fields
+
+# ═══ GRAPH TYPE ═══════════════════════════════════════════════════════
+type Graph {
+nodes: [Entity]!
+edges: [Relationship]!
+meta: GraphMeta
+}
+
+type Relationship {
+id: ID!
+relType: RelType!
+from: Entity!
+to: Entity!
+criticality: Criticality
+protocol: String
+slaDependencyMs: Int
+description: String
+}
+
+# ═══ ENUMS ════════════════════════════════════════════════════════════
+enum EntityKind { SYSTEM CONTAINER COMPONENT INFRASTRUCTURE CAPABILITY PROCESS DATA_ENTITY DATA_PRODUCT DATA_CONTRACT ACTOR GOAL DECISION }
+enum RelType { USES CONSUMES PUBLISHES_TO SUBSCRIBES_TO STORES_IN READS_FROM DEPLOYED_ON SUPPORTED_BY REALIZED_BY INVOKES GOVERNED_BY CONSTRAINS PRODUCES CONTRACTS_WITH }
+enum Status       { ACTIVE PROPOSED DEPRECATED RETIRED }
+enum Direction    { OUTBOUND INBOUND BOTH }
+enum RenderFormat { FULL STRUCTURIZR_DSL D2 MERMAID }
+
+GraphQL Query: System Detail Panel
+query SystemDetail($systemId: ID!, $branch: String) {
+entity(id: $systemId, branch: $branch) {
+id  name  status  description
+... on System {
+criticality  lifecycle  tpmId
+compliance { status  findings { standard  severity } }
+containers {
+id  name  containerType  technology { primary  hosting }
+nfrProfile { availabilityTarget  dataClassification }
+relationships(direction: OUTBOUND) {
+id  relType  criticality  protocol
+to { id  name  kind  domain }
+}
+}
+capabilities { id  name  maturity }
+}
+}
+}
+
+GraphQL Query: Viewpoint Resolution
+query RenderContainerView($systemId: ID!, $branch: String) {
+resolveViewpoint(
+viewpointId: "viewpoint.c4-container"
+scope: { scopeSystem: $systemId }
+branch: $branch
+format: STRUCTURIZR_DSL
+) {
+viewpointId  title  format
+nodes {
+id  label  kind  display { shape  color }
+... on Container { technology { primary } hosting }
+}
+edges { from  to  relType  label  display { style  color } }
+layoutHints { algorithm  direction }
+meta { nodeCount  edgeCount  compiledAt }
+# format: STRUCTURIZR_DSL → structurizrDsl field is populated
+structurizrDsl  # Ready-to-render DSL string for Structurizr
+}
+}
+
+GraphQL Subscription: Live Architecture Updates
+subscription WatchClaimsDomain {
+entityUpdated(domain: "claims") {
+entityId  changeType  # CREATED | MODIFIED | RETIRED
+entity {
+id  name  status  kind
+}
+triggeredByBranch  triggeredByGitSha
+}
+}
+
+Index Name | Contents | Primary Key | Update Frequency
+eams-entities | All entity records from main branch. One document per entity. | eams_id | On every main branch compile that changes entities
+eams-relationships | All relationship records from main branch. One document per relationship. | eams_rel_id | On every main branch compile that changes relationships
+eams-entities-{branch} | Entity records for active non-main branches. Separate index per branch. | eams_id | On every branch compile
+eams-search | Denormalised search documents. Combines entity core fields with related entity names for cross-entity search matching. | eams_id | On every main branch compile
+OpenSearch Entity Document — eams-entities index
+# Index: eams-entities / eams-entities-{branch}
+# Document ID: eams_id (e.g. system.claims-processing)
+
+eams_id: system.claims-processing
+kind: system
+name: Claims Processing System
+domain: claims
+status: active
+description: Receives, validates, adjudicates, and settles insurance claims.
+ownership:
+architect: j.smith@company.com
+business_owner: VP Claims Operations
+metadata:
+created: 2025-06-01
+last_reviewed: 2026-02-15
+review_due: 2026-08-15
+tags:
+- claims
+- core-platform
+
+# Kind-specific fields (flattened for OpenSearch)
+tpm_id: APP-00842
+criticality: tier-1
+lifecycle: production
+
+# Compiled metadata
+git_sha: a3f8c2d1b4e9...
+compiled_at: 2026-03-10T09:15:00Z
+ardoq_id: 5f3a8b2c1d4e...
+
+# Denormalised relationship index (for 1-hop traversal without a join)
+outbound_rel_index:
+- rel_id: rel.claims-processing--uses--policy-admin
+rel_type: uses  to_id: system.policy-admin  to_domain: policy
+criticality: synchronous-critical  ardoq_ref_type: eams:integration
+inbound_rel_index:
+- rel_id: rel.claims-portal--uses--claims-processing
+rel_type: uses  from_id: system.claims-portal  from_domain: claims
+
+# Compliance summary (denormalised from compliance check results)
+compliance:
+status: violation  # compliant | warning | violation | unchecked
+findings:
+- standard: standard.pii-data-handling  severity: violation
+
+Denormalised relationship index
+The outbound_rel_index and inbound_rel_index arrays on each entity document are the key performance mechanism for 1–2 hop traversal queries.
+For a 1-hop traversal, the API performs a single OpenSearch GetById, reads outbound_rel_index, and performs a multi-get for the target entity IDs. This avoids a graph join query entirely.
+For 2-hop traversal, the API fetches the 1-hop targets, reads their outbound_rel_index arrays, and performs a second multi-get. Still no graph join.
+For 3+ hops, the API falls through to Ardoq passthrough (Section 1.1).
+POST  /signals
+Ingest an operational signal linked to one or more architecture entities.
+Auth: Service:scope:signal-ingest only
+Field | Type | Required | Description
+signal_type | string | Yes | incident | performance | lifecycle | compliance | feedback
+source | string | Yes | Source system e.g. jira, servicenow, cloudwatch, tpm
+source_id | string | Yes | ID in source system e.g. Jira ticket key
+title | string | Yes | Signal title
+description | string | No | Signal details
+affected_entities | array | Yes | Array of EAMS entity IDs this signal is linked to
+severity | string | Yes | low | medium | high | critical
+timestamp | string | Yes | ISO 8601 event timestamp
+Response
+data:
+signal_id: sig.jira-PROD-4421
+status: accepted
+linked_entities:
+- system.claims-processing
+- container.adjudication-api
+workbench_queue_position:
+
+Signal Type | Source Examples | Architecture Impact Assessment
+incident | Jira PROD tickets, PagerDuty alerts, ServiceNow incidents | Links incident to affected entities. Tracks incident frequency by entity. Surfaces recurring incident patterns for architectural review.
+performance | CloudWatch metric alarms, APM threshold breaches | Links metric breach to entity NFR profile. Flags if breach violates committed availability/throughput SLA.
+lifecycle | TPM technology retirement notices, AWS service deprecations, CVE alerts for component versions | Links lifecycle event to all entities using the affected technology. Generates migration evaluation queue items.
+compliance | Automated compliance scan results from external tools | Links compliance finding to entity. Cross-references against EAMS standards compliance record.
+HTTP Status | Error Code | Description | Common Causes
+400 | INVALID_PARAMETERS | Request parameters failed validation | Missing required parameter, invalid enum value, malformed eams_id
+400 | INVALID_SCOPE | Viewpoint scope parameters are invalid or conflicting | Providing both scope_system and scope_domain
+401 | UNAUTHENTICATED | No valid token provided | Missing Authorization header, expired JWT, invalid service token
+403 | INSUFFICIENT_ROLE | Valid token but role does not permit this endpoint | Reader attempting a diff or compliance endpoint
+403 | SCOPE_INSUFFICIENT | Service token lacks required endpoint scope | Signal pipeline token calling a viewpoint endpoint
+404 | ENTITY_NOT_FOUND | No entity exists with the given ID | Typo in eams_id, entity on a different branch, entity retired
+404 | VIEWPOINT_NOT_FOUND | No viewpoint definition with the given ID | Invalid viewpoint ID, viewpoint not yet registered
+404 | BRANCH_NOT_FOUND | Branch not registered in EAMS | Branch not yet compiled, or branch name typo
+409 | SIGNAL_DUPLICATE | Signal with this source_id already ingested | Duplicate webhook delivery from source system
+429 | RATE_LIMITED | Request rate limit exceeded | Consumer exceeding per-token rate limit
+503 | OPENSEARCH_UNAVAILABLE | OpenSearch cluster unavailable | Cluster maintenance or failure — fall-through to Ardoq attempted
+503 | ARDOQ_UNAVAILABLE | Ardoq API unavailable (passthrough queries only) | Ardoq maintenance window
+Endpoint Group | p50 | p95 | p99
+GET /entities/lookup (signal pipeline) | < 15ms | < 50ms | < 200ms
+GET /entities/{id} (single entity) | < 30ms | < 150ms | < 500ms
+GET /domains/{d}/entities (domain list) | < 100ms | < 500ms | < 1s
+GET /entities/{id}/relationships | < 50ms | < 200ms | < 500ms
+GET /graph/traverse (depth 1–2, OpenSearch) | < 100ms | < 500ms | < 1s
+GET /graph/traverse (depth 3–5, Ardoq passthrough) | < 500ms | < 2s | < 5s
+GET /viewpoints/{id}/resolve | < 200ms | < 1s | < 3s
+GET /search | < 100ms | < 500ms | < 1s
+GET /entities/{id}/context-bundle | < 300ms | < 1.5s | < 5s
+POST /signals | < 50ms | < 200ms | < 500ms
+Cache Layer | Scope | TTL | Invalidation
+API Gateway response cache | GET /entities/{id}, GET /domains/{d}/entities, GET /viewpoints | 5 minutes | Purged on compile pipeline completion for affected domain
+AppSync caching | GraphQL query results (per-resolver) | 2 minutes | Purged on entityUpdated subscription event
+Lambda in-memory | Viewpoint definition catalog, standard catalog, entity kind schemas | 15 minutes (Lambda warm lifetime) | Cache invalidated on Lambda cold start — acceptable for low-change metadata
+CloudFront (future) | Public-facing read endpoints for external integrations | 10 minutes | CDN cache invalidation via compile pipeline webhook
+Branch endpoint caching
+Endpoints called with a non-main branch parameter are never cached at the API Gateway layer.
+Branch data changes on every commit — caching branch responses would cause architects to see stale branch state in the Workbench.
+The AppSync resolver for branch queries bypasses the response cache and always reads from the branch-specific OpenSearch index.
+Method | Path | Summary | Min Role
+GET | /entities/{eams_id} | Single entity by qualified ID | Reader
+GET | /entities/lookup | Fast lookup by tpm_id, name, or ardoq_id | Reader
+GET | /entities/{eams_id}/relationships | All relationships for an entity | Reader
+GET | /entities/{eams_id}/context-bundle | Rich LLM context bundle | Architect
+GET | /domains/{domain}/entities | All entities in a domain | Reader
+GET | /graph/traverse | Subgraph traversal from a starting entity | Reviewer
+GET | /graph/lineage/{eams_id} | Full traceability lineage for an entity | Reader
+GET | /viewpoints | Viewpoint catalogue | Reader
+GET | /viewpoints/{viewpoint_id}/resolve | Render-ready viewpoint payload | Reader
+GET | /search | Full-text and faceted entity search | Reader
+GET | /branches | Active branch list with review status | Reviewer
+GET | /diff/{branch} | Structured diff report for a branch | Reviewer
+POST | /signals | Ingest operational signal | Service:signal-ingest
+Consumer Type | Rate Limit | Burst | Notes
+Architect (user JWT) | 120 req/min | 200 req/min | Per user token. Workbench makes ~10–20 requests per page load.
+Reviewer (user JWT) | 60 req/min | 100 req/min | 
+Reader (user JWT) | 30 req/min | 50 req/min | 
+Service:entity-read | 600 req/min | 1000 req/min | Signal pipeline needs sustained throughput for enrichment batches.
+Service:viewpoint-resolve | 60 req/min | 100 req/min | Confluence generator runs in batch — high per-request cost justified.
+Service:context-bundle | 20 req/min | 30 req/min | LLM context bundles are large — rate limit protects OpenSearch.
+Service:signal-ingest | 200 req/min | 500 req/min | Burst headroom for incident spikes.
+Global (all consumers) | 2000 req/min | 3000 req/min | API Gateway throttle protecting OpenSearch and Lambda concurrency.

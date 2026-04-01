@@ -1,0 +1,17 @@
+# Policy Domain — Systems
+domain: policy
+
+systems:
+  - eams_id: system.policy-admin
+    name: Policy Admin System
+    status: active
+    criticality: tier-1
+    technology:
+      primary: Java/Spring Boot
+
+  - eams_id: system.policy-rating-engine
+    name: Policy Rating Engine
+    status: active
+    criticality: tier-1
+    technology:
+      primary: Go

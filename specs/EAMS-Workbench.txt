@@ -1,0 +1,359 @@
+Table of Contents
+1. Overview
+The EAMS Architect Workbench is the browser-based interface through which architects, reviewers, and business stakeholders interact with the compiled architecture graph. It provides four integrated workflow surfaces: graph exploration (navigating entities, relationships, and domains), diagram viewing (rendering and browsing viewpoint diagrams with click-through navigation), entity editing (guided form-based editing that commits directly to Git), and advisory review (requesting, reviewing, and acknowledging LLM advisory outputs).
+The Workbench is a read surface for most of its users — reviewers and business stakeholders who navigate the architecture without authoring DSL. It progressively reveals authoring and advisory features for users with the Architect role. This separation is reflected in the interface: the core navigation and diagram experience is clean and accessible; editing and advisory controls appear contextually for architects without cluttering the reviewer experience.
+1.1 Design Decisions
+Split-panel layout: Left panel provides persistent navigation and entity context. Right panel is the active content area, context-switched by navigation actions. This gives architects a stable reference point (left) while the right panel responds to their exploration. The split is resizable; both panels are independently scrollable.
+Guided forms for DSL editing: The Workbench provides structured field-input forms for common entity edits. Forms commit to Git via the GitHub API, creating a proper commit with the architect's identity. The DSL file remains the source of truth. Complex edits — new entities, structural changes, relationship additions — are directed to VS Code via a deep-link that opens the file at the correct location.
+Navigable diagrams: Clicking a node in a viewpoint diagram opens the corresponding entity detail in the right panel. Hovering an edge shows relationship attributes in a tooltip. Diagrams are rendered from the canonical render graph (SVG) and are never static images. Navigation from diagram to entity and back is seamless.
+Progressive disclosure by role: Reader and Reviewer roles see navigation, diagrams, and entity detail. The Architect role additionally sees the advisory panel, the branch and compile workflow, entity edit controls, and the review submission flow. Role is determined at login from Cognito group membership.
+Real-time compile status: The Workbench subscribes to the Architecture API's entityUpdated GraphQL subscription. Stale diagrams and entity panels show a staleness indicator with a one-click refresh. The compile status bar shows the current branch's compile state without requiring a page reload.
+Branch context persistence: The active branch is persisted in the URL and in localStorage. Navigating to the Workbench always restores the last active branch. The branch switcher is always visible in the top bar.
+1.2 User Roles and Feature Access
+2. Layout and Navigation
+2.1 Application Shell
+The application shell is persistent across all views. It contains the top bar and the split-panel workspace. The top bar is always visible; it does not scroll with panel content.
+2.2 Left Panel — Navigation Sections
+The left panel has five navigation sections, accessible via tab icons at the top of the panel. The active section persists across right-panel context switches.
+2.3 Domain Navigation Tree
+The Domains section presents the architecture graph as a navigable tree. The tree is lazy-loaded: domain nodes expand to reveal entity kind groups, which expand to reveal individual entities. Entity nodes show a status indicator (active, proposed, deprecated, retired) and a compliance badge if the entity has active violations.
+3. Entity Detail Panel
+The entity detail panel is the most-visited view in the Workbench. It opens in the right panel when an entity is selected from the navigation tree, clicked in a diagram, or found via search. It presents the entity's complete compiled state, its relationships, its compliance findings, its linked decisions, and its advisory outputs.
+3.1 Entity Detail Sections
+3.2 Relationship Tab Detail
+Each relationship entry in the entity detail panel shows all relationship attributes. Clicking the target entity name opens that entity's detail panel, replacing the current right panel content (with a back navigation breadcrumb). This is the primary graph navigation mechanism.
+4. Diagram Panel
+The diagram panel renders viewpoint diagrams from the Architecture API's /viewpoints/{id}/resolve endpoint. Diagrams are rendered as interactive SVG in the browser using a lightweight rendering layer over the canonical render graph JSON. The Structurizr DSL, Mermaid, and D2 formats are available as export targets from the diagram panel, but the Workbench renders from the canonical JSON directly rather than embedding a renderer iframe.
+4.1 Diagram Panel Controls
+4.2 Diagram Node Interactions
+4.3 Diagram Rendering Architecture
+The Workbench renders diagrams client-side from the canonical render graph JSON returned by the Architecture API. It does not embed Structurizr, Mermaid, or D2 renderers as iframes — these tools are used for export only. Client-side rendering gives the Workbench full control over interactivity, node click handling, and tooltip behaviour.
+5. Entity Edit Forms
+The entity edit form is the Workbench's primary authoring surface. It provides structured field inputs for common entity edits, validates changes inline before commit, shows a YAML diff preview, and commits to Git via the GitHub API. The form covers the most common edit scenarios — field updates, status changes, relationship additions — without replacing the full expressiveness of the DSL file.
+5.1 What the Form Covers
+5.2 Edit Form Flow
+Architect clicks Edit on an entity detail panel, or double-clicks a diagram node.
+Edit form opens as a right-panel overlay (the entity detail remains visible behind a semi-transparent backdrop). The form header shows the entity name and kind.
+Form sections correspond to the entity detail sections: Overview, Technology, NFR Profile, Relationships. Sections are collapsible; only sections with editable fields are shown.
+Each field input validates inline on change. Validation errors appear below the field with the specific error message and remediation hint (same messages as eams validate).
+As the architect edits, a YAML diff preview pane shows the exact change that will be committed, formatted as a unified diff against the current file content.
+Commit message field: pre-populated with 'Update {entity_name}: {changed_fields_summary}'. Architect can edit. Required field.
+Architect clicks Commit. The Workbench calls the GitHub API to create a commit on the current branch. The form closes. The entity detail panel shows a 'Commit pending — waiting for compile' indicator.
+On compile completion (via entityUpdated subscription), the entity detail panel refreshes automatically. The 'Commit pending' indicator clears.
+5.3 Relationship Edit Form
+Adding or editing a relationship has its own sub-form within the entity edit form. The relationship form is the most complex part of the editing surface because relationships have many optional fields and require entity ID autocomplete for the target.
+5.4 VS Code Deep-Link
+For edit types not supported in the form, the Workbench provides a deep-link that opens the entity's DSL file in VS Code at the correct line. This requires the VS Code EAMS extension to be installed.
+6. Advisory Panel
+The advisory panel is the Workbench surface for requesting, reviewing, and acknowledging LLM advisory outputs. It is accessible from the left panel navigation (Advisory section) and contextually from entity detail panels and diagram node right-click menus. The review gate logic defined in the LLM Advisory Layer specification is enforced here.
+6.1 Requesting an Advisory Output
+An architect can request an advisory output from three entry points: the Advisory section in the left panel (domain-scoped requests), the entity detail panel's Advisory section (entity-scoped requests), or the diagram node right-click menu (entity-scoped, specific type).
+6.2 Advisory Output Display
+Advisory outputs are displayed in the right panel. The display format varies by output type but follows a consistent structure: a header bar with output type, scope entity, generated timestamp, and model tier; a review gate banner for acknowledge-required outputs; the structured output rendered in human-readable form; and the data gaps notice.
+Acknowledge-required output — review gate banner
+6.3 Advisory Output Rendering by Type
+6.4 Advisory Queue
+The Advisory section in the left panel shows the architect's advisory queue: outputs that have been generated but not yet acknowledged. The queue is ordered by generation time descending. Each queue item shows the output type badge, the scope entity, the generated time, and a review button.
+The notification bell in the top bar shows a badge count of unacknowledged advisory outputs. Clicking the bell opens the advisory queue directly.
+7. Branch and Compile Workflow
+The branch and compile workflow surfaces are available to Architect and Reviewer roles. They provide visibility into the branch lifecycle — from creation through compile, review, and merge — without requiring architects to leave the Workbench for GitHub.
+7.1 Branch Switcher
+The branch selector in the top bar shows the active branch. Clicking opens a dropdown with:
+Main branch entry with last compile time and status
+All active branches grouped by intent (project, proposal, experiment, migration)
+Per-branch: branch name, intent badge, compile status dot, review status badge (draft / submitted / approved / rejected), last activity time
+Create new branch button (Architect only)
+7.2 Create Branch
+The Create Branch form is accessible from the branch switcher dropdown. It creates the branch in GitHub via the GitHub API and records the branch intent in the EAMS branch registry.
+7.3 Compile Status Panel
+The compile status panel is accessible from the status bar compile indicator and from the branch detail view. It shows the current compile run state, or the last compile outcome if no compile is in progress.
+7.4 Branch Diff View
+The branch diff view is accessible from the Branches section in the left panel. It shows the structural diff between the active branch and main: entities added, modified, and removed, with field-level change detail for modified entities.
+7.5 Review Submission
+The review submission flow is accessible from the branch detail view. It packages the compile report and diff into a review record and notifies the designated reviewers.
+Architect clicks Submit for Review in the branch detail view.
+Pre-submission checklist is evaluated: (a) last compile must be success or partial success — failed compile blocks submission; (b) no unresolved conflicts — unresolved conflicts produce a warning, not a block; (c) all advisory outputs of type compliance assessment and risk identification must be acknowledged — unacknowledged outputs block submission.
+If checklist passes, the review submission form opens: reviewer selection (multi-select from architects list), review notes (optional), and a link to the branch diff view.
+Architect submits. A review record is created in DynamoDB. Reviewers receive an email notification with a direct link to the branch diff view in the Workbench.
+Reviewers access the branch diff via the Workbench. They can leave comments (stored in the review record), approve, or request changes.
+Architect merges the branch via GitHub once the review is approved. Post-merge main compile runs automatically via GitHub Actions.
+8. Search
+Global search is accessible via the search input in the top bar (Cmd/Ctrl+K) and the Search section in the left panel. It queries the Architecture API's /search endpoint, which runs against the OpenSearch eams-search index.
+8.1 Search Behaviour
+9. Technical Architecture
+9.1 Frontend Stack
+9.2 Key API Interactions
+9.3 Infrastructure
+10. Non-Functional Requirements
+10.1 Performance
+10.2 Accessibility
+Keyboard navigation: All interactive elements (navigation tree, diagram nodes in SVG, form inputs, advisory queue items) are keyboard-navigable. Focus ring visible on all focusable elements. Diagram supports keyboard zoom and pan.
+Screen reader support: Entity detail panels, form fields, and advisory outputs have appropriate ARIA labels. Diagram SVG nodes have aria-label attributes with entity name and kind. Dynamic content updates (stale indicators, compile status changes) announce via aria-live regions.
+Colour contrast: All text meets WCAG AA contrast ratios against their backgrounds. Status badges and compliance indicators use both colour and text labels — not colour alone.
+Responsive layout: The split-panel layout supports viewport widths from 1024px upward. Below 1024px the left panel collapses to an icon rail. The Workbench is not designed for mobile viewports.
+Appendix A — Workbench URL Structure
+Appendix B — Role Capability Matrix
+Feature | Reader | Reviewer | Architect
+Entity browsing and search | ✓ | ✓ | ✓
+Viewpoint diagram viewing | ✓ | ✓ | ✓
+Diagram node click-through navigation | ✓ | ✓ | ✓
+Entity detail panel (all non-sensitive fields) | ✓ | ✓ | ✓
+Compliance findings on entity detail | ✗ | ✓ | ✓
+Branch listing (branch names and intent only) | ✗ | ✓ | ✓
+Branch diff view | ✗ | ✓ | ✓
+Entity edit forms (guided) | ✗ | ✗ | ✓
+Advisory panel (request, review, acknowledge) | ✗ | ✗ | ✓
+Branch creation and compile status | ✗ | ✗ | ✓
+Review submission and withdrawal | ✗ | ✗ | ✓
+Compile report detail | ✗ | ✓ | ✓
+Publish advisory output to Confluence | ✗ | ✗ | ✓
+Shell Region | Contents | Notes
+Top bar — left | EAMS logotype, active branch selector (dropdown), branch compile status indicator (coloured dot + last compile time) | Branch selector is always visible. Compile status dot: green (success), amber (partial/in progress), red (failed).
+Top bar — centre | Global search input (entities, viewpoints, standards by name or ID) | Keyboard shortcut: Cmd/Ctrl+K. Results appear inline with type-ahead.
+Top bar — right | Active user avatar, role badge, notification bell (compile completions, advisory outputs ready), settings link | Notifications badge shows unacknowledged advisory outputs count for Architects.
+Left panel | Navigation tree + active entity/domain context. Resizable (200–480px wide). Collapsible to icon rail. | Persistent scroll position per navigation section.
+Right panel | Active content: diagram, entity detail, advisory panel, branch review, compile report. Full remaining width. | Context-switched by navigation actions and diagram clicks.
+Status bar | Current view breadcrumb, active branch, last compile SHA (abbreviated), quick compile trigger button (Architect only). | Bottom of viewport. Always visible.
+Section | Icon | Contents | Primary User
+Domains | Grid | Domain list → expand to show entity kinds → expand to show entities. Hierarchical tree navigator. | All roles
+Search | Magnifier | Live search results as the architect types. Results grouped by kind. Clicking a result opens entity detail in right panel. | All roles
+Viewpoints | Diagram | Viewpoint catalogue filtered by domain and stakeholder. Clicking opens diagram in right panel. | All roles
+Branches | Branch | Active branches list (Architect/Reviewer). Shows branch intent, compile status, and review status per branch. | Architect / Reviewer
+Advisory | Spark | Advisory queue: pending outputs awaiting acknowledgement, recent outputs, quality metrics summary. | Architect only
+Domain navigation tree — structure
+▼ Claims                          # Domain
+▼ Systems  (3)
+● Claims Processing System    # active, tier-1
+● Claims Portal                # active
+◐ Legacy Claims API            # deprecated — compliance warning badge
+▼ Containers  (18)
+● Adjudication API             # active ⚠ violation
+● Rules Engine                 # active
+● Claims Database              # active
+···                                  # collapsed — click to expand remaining 15
+▷ Capabilities  (6)
+▷ Data Products  (4)
+▷ Decisions  (12)
+▷ Policy
+▷ Billing
+▷ Operations
+▷ Shared
+
+Lazy loading and performance
+The tree does not load all entities on initial render. Expanding a domain node fetches entity kind counts (fast — one OpenSearch aggregation). Expanding a kind node fetches the first 50 entities in that kind for that domain. Scrolling to the bottom of an expanded kind node loads the next 50.
+The global entity count is shown in the top bar: '847 entities across 5 domains'. This is updated on every compile completion event.
+Section | Contents | Visible To
+Header | Entity name, eams_id badge, kind badge, status badge (coloured), domain badge, criticality badge (if tier-1 or tier-2), compliance status indicator (green / amber / red). | All roles
+Overview | Description (full text), ownership (business_owner, architect email), review_due date, metadata fields (tpm_id, tags, lifecycle). | All roles
+Technology | technology.primary, technology.language, technology.framework, technology.runtime. Only shown for entity kinds where technology applies. | All roles
+NFR Profile | All NFR profile fields in a structured table: availability_target, throughput_rps, latency_p99_ms, data_classification, encryption_at_rest, retention_policy, etc. | All roles — data_classification shown only to Reviewer and Architect
+Relationships | Outbound and inbound relationships in two tabs. Each relationship shows: rel_type badge, target entity name (clickable), direction, criticality, protocol, SLA dependency, description. | All roles
+Compliance | Applicable standards list. Per-standard compliance status. Finding details (finding text, severity, deterministic vs advisory, remediation hint). Only shown if entity has applicable standards. | Reviewer and Architect
+Decisions | Linked ADR decisions: title, status (proposed / accepted / superseded), summary, link to full ADR entity. | All roles
+Signals | Last 5 operational signals linked to this entity: type, timestamp, description, severity. Link to full signal history. | Architect only
+Advisory | Advisory outputs for this entity: output type, generated date, status (pending acknowledgement / acknowledged). Request new advisory button. | Architect only
+Edit | Edit button (opens guided form). Link to open file in VS Code. Link to view raw YAML. Git history link. | Architect only
+Relationship entry — rendered fields
+┌─────────────────────────────────────────────────────────┐
+│ → consumes  Policy Coverage API         (container)
+│   Criticality: synchronous-critical  Protocol: REST/HTTPS
+│   SLA dependency: 200ms   Circuit breaker: resilience4j
+│   Description: Retrieves coverage details for adjudication
+│
+│   ▶ Click 'Policy Coverage API' to navigate to that entity
+└─────────────────────────────────────────────────────────┘
+
+Control | Location | Behaviour
+Viewpoint selector | Top of diagram panel | Dropdown of all viewpoints applicable to the current domain or entity. Selecting a viewpoint re-renders with the current scope.
+Scope selector | Top of diagram panel (parameterised viewpoints only) | Entity ID input or dropdown for the scope parameter (e.g. which system to render the C4 container view for).
+Branch selector | Top of diagram panel | Render the diagram for a specific branch. Defaults to active branch. Shows stale indicator if branch is behind main.
+Stale indicator | Top of diagram panel | Amber badge: 'Stale — updated N commits ago'. One-click refresh button. Auto-refresh toggle.
+Zoom and pan | Diagram canvas | Mouse wheel zoom, drag to pan. Fit-to-window button. Reset zoom button.
+Export | Top-right of diagram panel | Download as: SVG, PNG, Structurizr DSL, Mermaid, D2. Export always uses the currently rendered state.
+Publish to Confluence | Top-right (Architect only) | Opens publish dialog: select Confluence page, choose format (Mermaid for embedding, PNG for static). Requires advisory acknowledgement if diagram includes flagged entities.
+Full screen | Top-right | Expands diagram to full viewport. ESC to exit.
+Interaction | Behaviour
+Single click on node | Opens entity detail for the clicked entity in the right panel. If diagram is in left panel split view, detail opens in right panel. If diagram is full-screen, opens as a side drawer.
+Hover on node | Tooltip: entity name, kind, status, criticality, domain. Compliance badge if violations active. Does not navigate.
+Hover on edge | Tooltip: relationship type, criticality, protocol, SLA dependency ms, description (truncated to 80 chars).
+Right-click on node | Context menu: Open entity detail, Open in new tab, Request compliance assessment (Architect), Request impact analysis (Architect), Copy eams_id.
+Click on group boundary | Expands/collapses the group (e.g. system boundary containing containers). Collapsed view shows the group label and count only.
+Double-click on node | Opens entity edit form (Architect only). Same as clicking Edit in the entity detail panel.
+Rendering Technology | Role | Notes
+D3.js (force / hierarchy layouts) | In-Workbench interactive rendering | Renders from canonical render graph JSON. Handles all layout algorithms specified in the viewpoint definition. Node and edge styling from render graph display properties.
+Structurizr DSL | Export only | Projected by the Viewpoint Engine's Structurizr projector. Downloaded as a .dsl file or copied to clipboard.
+Mermaid | Export + Confluence embed | Projected by the Mermaid projector. Used for Confluence page embedding via the Mermaid macro.
+D2 | Export only | Projected by the D2 projector. Downloaded as a .d2 file.
+SVG / PNG | Export only | SVG captured from the rendered D3 diagram. PNG is SVG rasterised at 2x resolution.
+Why not embed Structurizr or Mermaid for rendering?
+Embedding a Structurizr or Mermaid renderer as an iframe would make every diagram interaction (node click, hover, tooltip) require cross-frame communication, which is fragile and slow.
+The canonical render graph JSON contains everything needed to render the diagram client-side: node positions (via layout hints), display properties (colours, shapes, badges), and relationship styling. D3.js rendering over this JSON gives the Workbench full interactivity without renderer coupling.
+The export formats (Structurizr DSL, Mermaid, D2) are generated by the Viewpoint Engine on demand and are always consistent with the rendered view.
+Edit Type | Supported in Form | Directed to VS Code
+Update a field value (description, status, lifecycle, etc.) | Yes — all scalar fields on any entity kind | —
+Update NFR profile fields | Yes — all NFR profile fields with type-appropriate inputs | —
+Update technology fields | Yes — free-text inputs for technology.primary, language, framework, runtime | —
+Add or update ownership fields | Yes — email inputs for business_owner and architect fields | —
+Change compliance standards (governed_by) | Yes — multi-select from standards catalogue | —
+Add a tag | Yes — tag chip input | —
+Add a relationship to an existing entity | Yes — entity ID autocomplete, rel_type dropdown, criticality, protocol, description | —
+Modify an existing relationship | Yes — all relationship attribute fields | —
+Remove a relationship | Yes — with confirmation step | —
+Create a new entity | No — directed to VS Code | New entity requires file creation in the correct domain directory
+Add interfaces block | No — directed to VS Code | Interfaces have complex nested structure; form complexity not justified
+Rename entity (change eams_id) | No — directed to VS Code | ID stability is critical; rename requires compiler-level handling
+Form commits directly to the active branch
+The edit form commits to whatever branch is currently active in the Workbench. If the architect is on main, the commit goes to main. If on a project branch, the commit goes to the project branch.
+The form shows a prominent branch indicator ('Committing to: main') to prevent accidental commits to the wrong branch. Committing to main from the Workbench requires an additional confirmation step with a warning.
+The form does not support committing to a new branch (branch creation is a separate action). Architects who want to create a branch from their edit should use the branch workflow before editing.
+Field | Input Type | Validation | Notes
+Relationship type (rel_type) | Dropdown — all valid rel_types | Required | Filtered to relationship types valid for the entity's kind pair (source kind → target kind)
+Target entity (to:) | Autocomplete — searches all entities by name or eams_id | Required — must resolve to a valid entity ID | Shows entity kind and domain in results to distinguish entities with similar names
+Direction | Display only — always outbound for new relationships | — | Inbound relationships are declared on the other entity
+Criticality | Dropdown: synchronous-critical, async, non-critical, informational | Optional | Pre-fills based on rel_type convention if unset
+Protocol | Text input with suggestions (REST, gRPC, GraphQL, AMQP, Kafka, SQL, etc.) | Optional | Free text — suggestions are not exhaustive
+SLA dependency (ms) | Number input | Optional — must be positive integer if set | Shown only when criticality = synchronous-critical
+Circuit breaker | Text input | Optional | Shown only when criticality = synchronous-critical
+Description | Text area — max 200 chars | Optional — recommended | Character count shown
+VS Code deep-link format
+vscode://file/{repo_local_path}/{entity_file_path}:{suggested_line_number}
+
+# Example:
+vscode://file//Users/jsmith/architecture/domains/claims/containers/adjudication-api.yaml:1
+
+# The EAMS VS Code extension registers the vscode:// protocol handler
+# and opens the file with EAMS-specific validation and autocompletion active.
+
+VS Code extension scope
+The VS Code EAMS extension provides: YAML schema validation against the EAMS DSL schema, eams_id autocompletion (searches the compiled entity registry), rel_type autocompletion with valid values per kind pair, inline compliance hints, and the eams validate on-save trigger.
+The VS Code extension is specified separately and is outside the scope of this document. Its presence is assumed for architects doing complex edits.
+Entry Point | Available Output Types | Scope Pre-filled
+Advisory section — left panel | All six types. Scope selector shown for entity-scoped types. | No — architect selects scope
+Entity detail panel — Advisory section | All six types scoped to the current entity. | Yes — current entity
+Diagram node right-click | Compliance assessment, Risk identification, Impact analysis, Explanation | Yes — clicked entity
+Diagram node right-click — impact analysis | Impact analysis with proposed change field | Yes — clicked entity. Architect types proposed change description.
+Advisory request form — field reference
+Output type: dropdown: compliance_assessment | risk_identification | design_alternatives | impact_analysis | explanation | standards_guidance
+Scope entity: autocomplete entity ID — pre-filled from context if available
+Scope mode: dropdown: entity | domain | standard (where applicable to output type)
+Branch: defaults to active branch. Override available.
+
+# Conditional fields:
+Audience (explanation only): dropdown: business | executive | developer | new-team-member | regulator
+Standard (standards_guidance only): autocomplete standard ID from standards catalogue
+Problem statement (design_alternatives only): text area — architect describes the design problem to explore
+Proposed change (impact_analysis only): text area — architect describes the proposed change to analyse
+
+Advisory output — review gate banner (Compliance Assessment)
+Compliance Assessment  •  system.claims-processing  •  Generated 10 Mar 2026 09:15  •  claude-sonnet-4-5
+ 
+Review required before this output can influence any downstream artifact.
+This assessment is advisory. It may be incomplete or incorrect. Reviewing this output means you take responsibility for any actions taken based on it.
+ 
+Disposition:  [  Accepted  ]   Accepted with modifications   Rejected   Noted
+Disposition note (required for all except Accepted): ____________________________________
+ 
+Acknowledge  (Cmd+Enter)
+Output Type | Rendered Format
+Compliance Assessment | Overall status badge (compliant / at-risk / non-compliant / unknown) with confidence indicator. Standards accordion: each standard expands to show findings. Pattern findings section. Remediation priority list (numbered, actionable). Data gaps list.
+Risk Identification | Overall risk rating badge. Risk cards: one card per finding, showing dimension badge (resilience / security / debt / ops / strategic), severity badge, title, description, affected entities (clickable), evidence quote, suggested action. Risk summary counts.
+Design Alternatives | Disclaimer banner (always visible, non-dismissible). Alternative cards: one card per alternative, showing title, description, benefits list, risks list, architectural changes required (each change is a DSL diff hint), confidence badge. No ranking indicator.
+Impact Analysis | Summary bar: affected entity count, team coordination count, scope badge, compliance impact badge. Affected entity list: expandable rows showing impact type, description, required action, owner (clickable email), urgency badge. Data gaps list. Recommended sequencing (numbered list).
+Natural Language Explanation | Audience badge. Headline (large text). Body prose. Key facts list. What it does not do list. Publish to Confluence button (no acknowledgement required).
+Standards Guidance | Standard summary card. Applicability statement. Requirements table: one row per requirement, showing requirement text, DSL field, current value, compliance badge, remediation hint for non-compliant fields. Exception path section.
+Advisory outputs do not expire
+Advisory outputs remain in the queue indefinitely until acknowledged. They do not expire or auto-acknowledge.
+If the entity an advisory output was generated for is subsequently modified (a new compile changes its records), the advisory output is marked stale with a 'Generated before last compile — entity may have changed' indicator. The architect can re-generate or acknowledge the stale output with a noted disposition.
+Field | Input | Validation
+Branch name | Text input — auto-prefixed with intent slug (e.g. project/) | Pattern: {intent}/{kebab-slug}. No spaces. Max 80 chars.
+Branch intent | Dropdown: project | proposal | experiment | migration | Required
+Description | Text area — describes the purpose of the branch | Required. Max 500 chars.
+Review required | Toggle — defaults to on for project intent, off for experiment | Controls whether the branch appears in the review queue before merge
+Base branch | Defaults to main. Override available. | Must be main or an active parent branch
+State | Display | Architect Actions Available
+Idle — success | Green dot. 'Last compiled 10 min ago — success. 144/147 entities. 3 blocked.' | Trigger compile, View compile report, View blocked entity details
+Idle — partial success | Amber dot. 'Last compiled 2 hr ago — partial success. 2 hard errors.' | Trigger compile, View compile report, View error details
+Idle — failed | Red dot. 'Last compile failed 1 hr ago.' | Trigger compile, View compile report, View failure details
+In progress | Pulsing blue dot. 'Compiling — stage 6/8 (OpenSearch indexing)'. Progress bar. | Cancel (clears the compile run; does not roll back writes already made)
+Queued | Yellow dot. 'Waiting in queue — position 2 of 3.' | —
+Diff Section | Contents
+Summary bar | Added N, Modified M, Removed R entity counts. Compliance findings introduced on branch (delta from main). Conflicts count.
+Added entities | List of new entities on the branch. Clicking opens entity detail (branch version).
+Modified entities | Accordion list. Expanding a modified entity shows a field-level diff: changed fields highlighted, previous value in red, new value in green. Relationship additions and removals shown as +/- rows.
+Removed entities | List of entities present on main but absent on branch. Clicking opens entity detail (main version, with 'removed on this branch' banner).
+Compliance delta | Findings introduced on this branch that do not exist on main. Findings resolved on this branch that existed on main.
+Conflicts | Entities modified on both this branch and main since branch creation. Per-conflict: entity name, branch version summary, main version summary, last main modification date.
+Search Feature | Behaviour
+Type-ahead | Results appear as the architect types, after a 200ms debounce. Minimum 2 characters.
+Full-text | Matches entity name, description, and key metadata fields. Ranked by relevance score from OpenSearch BM25.
+Faceted filtering | Left panel Search section shows facet counts: domain, kind, status, criticality. Clicking a facet adds it as a filter. Multiple facets are ANDed.
+Scope limitation | Search results are scoped to the active branch. Main branch search always available; branch-specific search shows branch entities merged with main.
+Result types | Entities (primary), Viewpoints, Standards. Results are grouped by type. Maximum 50 results per group.
+Keyboard navigation | Arrow keys navigate results. Enter opens the selected result in the entity detail panel. ESC closes search.
+Empty state | If no results: 'No entities found for {query}'. Suggests broadening the search or checking the domain filter. Does not suggest creating entities.
+Concern | Technology | Rationale
+Framework | React 19 | Component model well-suited to the panel layout and entity detail sections. Large ecosystem for diagram and data grid components.
+State management | Zustand | Lightweight global state for active branch, user session, advisory queue counts. Avoids Redux boilerplate for a relatively simple state shape.
+Data fetching | React Query (TanStack Query) | Handles caching, background refresh, and staleness for Architecture API calls. Pairs well with the entityUpdated subscription pattern.
+Diagram rendering | D3.js v7 | Force layout for integration maps. Hierarchical layout for C4 diagrams. Custom SVG rendering over canonical render graph JSON.
+Real-time updates | GraphQL subscription via AppSync WebSocket | entityUpdated subscription drives stale indicators and compile status updates.
+Styling | Tailwind CSS + custom design tokens | Consistent spacing, colour, and typography without a heavy component library. EAMS design tokens map to the document palette.
+Authentication | AWS Amplify (Cognito) | SAML/OIDC federation. Role-based access via Cognito groups. Token refresh handled by Amplify.
+GitHub API integration | Octokit (REST) | Used for edit form commits and branch creation. Authenticated via OAuth app with per-user token.
+Workbench Action | API Call | Notes
+Open entity detail | GET /v1/entities/{eams_id} | Cached by React Query. Invalidated on entityUpdated event for this entity.
+Load relationships tab | GET /v1/entities/{eams_id}/relationships | Separate call — not loaded until tab opened.
+Render diagram | GET /v1/viewpoints/{id}/resolve?scope={entity}&branch={branch}&format=full_json | Full JSON format for client-side D3 rendering.
+Search | GET /v1/search?q={query}&domain={domain}&kind={kind}&... | Called on debounced input change.
+Navigate graph | GET /v1/graph/traverse?from={id}&depth=2 | Used for relationship graph view (not entity detail).
+Request advisory | POST /v1/advisory/request | Async. Workbench polls GET /v1/advisory/{id} until complete.
+Acknowledge advisory | POST /v1/advisory/{id}/acknowledge | Disposition + note. Unlocks publish button.
+Compile status | GET /v1/branches (includes last compile record per branch) | Polled every 30s when compile is in progress; on-demand otherwise.
+Edit form commit | GitHub API: POST /repos/{owner}/{repo}/git/commits | Workbench calls GitHub directly. Reads current file blob, applies form changes, creates new tree + commit.
+Component | Technology | Configuration | Notes
+Frontend hosting | AWS CloudFront + S3 | Static site. CDN-distributed globally. Cache-control: immutable for hashed assets. | Deployed via GitHub Actions on merge to main.
+Auth | AWS Cognito User Pool | SAML federation to corporate IdP. Groups: eams-architect, eams-reviewer, eams-reader. | Group membership drives role in Workbench.
+GitHub OAuth App | GitHub OAuth | Read/write scope on architecture repository. Per-user token stored in Cognito user attributes. | Required for edit form commits and branch creation.
+API | Architecture API (existing) | All data via /v1/ endpoints. No Workbench-specific backend. | Workbench is a pure frontend — no additional server-side component.
+Interaction | Target | Mechanism
+Initial page load (first visit) | < 3s | CloudFront CDN, code splitting, deferred diagram bundle loading
+Navigation tree expand (domain node) | < 200ms | OpenSearch aggregation query, cached by React Query (30s TTL)
+Entity detail open | < 400ms | API GET /entities/{id} — OpenSearch p50 < 30ms + network
+Diagram render (first load) | < 1.5s | API viewpoint resolve p50 < 200ms + D3 render < 500ms
+Diagram re-render after refresh | < 800ms | Cached canonical render graph, only D3 re-render
+Search type-ahead result | < 300ms | 200ms debounce + OpenSearch search p50 < 100ms
+Edit form open | Instant | Form state from already-loaded entity detail
+Edit form inline validation | < 100ms | Client-side schema validation — no API call
+URL Pattern | View | Notes
+/ | Home — last active view restored from localStorage | Redirects to /domains or last visited entity
+/domains | Domain navigation tree, no right panel content | Default landing view
+/domains/{domain} | Domain overview in right panel | Shows entity count summary and recent compile findings for domain
+/entities/{eams_id} | Entity detail in right panel | Direct link to any entity. Branch defaults to main; ?branch= override.
+/entities/{eams_id}/edit | Entity edit form open | Opens entity detail with edit form overlay active
+/viewpoints | Viewpoint catalogue | All viewpoints with filter controls
+/viewpoints/{id}?scope={entity_id} | Diagram panel for viewpoint | Scope parameter required for parameterised viewpoints
+/branches | Branch list | All active branches
+/branches/{branch-slug} | Branch detail — diff view | Diff against main, compile status, review status
+/advisory | Advisory queue | All pending advisory outputs
+/advisory/{advisory_id} | Advisory output detail | Full advisory output with acknowledge controls
+/search?q={query} | Search results | Direct search link — shareable
+Capability | Reader | Reviewer | Architect | Notes
+Browse domain navigation tree | ✓ | ✓ | ✓ | —
+Search all entities | ✓ | ✓ | ✓ | data_classification field redacted for Reader
+View entity detail (all fields) | ✓ | ✓ | ✓ | Compliance and signals sections hidden for Reader
+View compliance findings | ✗ | ✓ | ✓ | —
+Navigate diagram (click-through) | ✓ | ✓ | ✓ | —
+View viewpoint diagrams | ✓ | ✓ | ✓ | —
+Export diagram (SVG, PNG, DSL) | ✓ | ✓ | ✓ | —
+Publish diagram to Confluence | ✗ | ✗ | ✓ | —
+View branch list (names + intent) | ✗ | ✓ | ✓ | —
+View branch diff | ✗ | ✓ | ✓ | —
+Create / switch branches | ✗ | ✗ | ✓ | —
+Trigger compile | ✗ | ✗ | ✓ | —
+View compile report detail | ✗ | ✓ | ✓ | —
+Open entity edit form | ✗ | ✗ | ✓ | —
+Request advisory output | ✗ | ✗ | ✓ | —
+View advisory outputs | ✗ | ✗ | ✓ | —
+Acknowledge advisory output | ✗ | ✗ | ✓ | —
+Submit branch for review | ✗ | ✗ | ✓ | —
+Review and approve branch | ✗ | ✓ | ✓ | —
