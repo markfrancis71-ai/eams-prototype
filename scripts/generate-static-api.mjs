@@ -44,15 +44,15 @@ async function postJSON(urlPath, body) {
   return res.json();
 }
 
-async function waitForServer(maxAttempts = 30) {
+async function waitForServer(maxAttempts = 60) {
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const res = await fetch(`${BASE}/api/domains`);
       if (res.ok) return true;
     } catch {}
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 1000));
   }
-  throw new Error("Server failed to start within 15 seconds");
+  throw new Error("Server failed to start within 60 seconds");
 }
 
 async function main() {
@@ -73,22 +73,21 @@ async function main() {
     }
   }
 
-  // Push schema (initialize DB with WAL mode first to avoid SQLITE_IOERR)
+  // Push schema
   console.log("Pushing database schema...");
-  execSync("sqlite3 data.db 'PRAGMA journal_mode=WAL;'", { stdio: "inherit", cwd: process.cwd() });
   execSync("npx drizzle-kit push", { stdio: "inherit", cwd: process.cwd() });
 
-  // Start server using tsx (avoids native module bundling issues with esbuild)
+  // Start server using the pre-built dist/index.cjs (faster and avoids tsx/native module issues)
   console.log(`\nStarting server on port ${PORT}...`);
-  const server = spawn("npx", ["tsx", "server/index.ts"], {
+  const server = spawn("node", ["dist/index.cjs"], {
     env: { ...process.env, NODE_ENV: "production", PORT: String(PORT) },
     cwd: process.cwd(),
     stdio: ["ignore", "pipe", "pipe"],
   });
 
   let serverOutput = "";
-  server.stdout.on("data", (d) => { serverOutput += d.toString(); });
-  server.stderr.on("data", (d) => { serverOutput += d.toString(); });
+  server.stdout.on("data", (d) => { const s = d.toString(); serverOutput += s; process.stdout.write(s); });
+  server.stderr.on("data", (d) => { const s = d.toString(); serverOutput += s; process.stderr.write(s); });
 
   try {
     await waitForServer();
