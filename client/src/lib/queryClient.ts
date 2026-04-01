@@ -1,6 +1,36 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
+const API_BASE = "";
+
+// Always rewrite to static .json paths.
+// Works on Netlify (static files) and locally if build:netlify was run.
+function isStaticMode(): boolean {
+  return true;
+}
+
+// Rewrite URL for static file structure:
+//   /api/search?q=&kind=system → /api/search.json
+//   /api/graph/lineage/x?direction=up → /api/graph/lineage/x/up.json
+//   /api/viewpoints/x/resolve?system=y → /api/viewpoints/x/resolve/y.json
+//   /api/anything → /api/anything.json
+function rewriteForStatic(url: string): string {
+  const [path, qs] = url.split("?");
+  const params = new URLSearchParams(qs || "");
+
+  if (path.includes("/graph/lineage/") && params.has("direction")) {
+    return `${path}/${params.get("direction")}.json`;
+  }
+  if (path.endsWith("/resolve") && params.has("system")) {
+    return `${path}/${params.get("system")}.json`;
+  }
+  if (path === "/api/search") {
+    return "/api/search.json";
+  }
+  if (path === "/api/graph/traverse" && params.has("from")) {
+    return `/api/graph/traverse/${params.get("from")}.json`;
+  }
+  return `${path}.json`;
+}
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -14,6 +44,15 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const isStatic = isStaticMode();
+
+  if (isStatic && method === "GET") {
+    const staticUrl = rewriteForStatic(url);
+    const res = await fetch(`${API_BASE}${staticUrl}`);
+    await throwIfResNotOk(res);
+    return res;
+  }
+
   const res = await fetch(`${API_BASE}${url}`, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -31,7 +70,9 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const path = queryKey.join("/").replace(/\/\/+/g, "/");
-    const res = await fetch(`${API_BASE}${path}`);
+    const isStatic = isStaticMode();
+    const finalUrl = isStatic ? rewriteForStatic(path) : path;
+    const res = await fetch(`${API_BASE}${finalUrl}`);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;
