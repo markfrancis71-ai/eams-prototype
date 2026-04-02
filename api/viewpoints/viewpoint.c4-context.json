@@ -1,0 +1,16 @@
+{
+  "id": 1,
+  "viewpoint_id": "viewpoint.c4-context",
+  "name": "C4 System Context",
+  "description": "Shows a system in its environment — actors, neighboring systems, and their interactions. The classic C4 Level 1 view.",
+  "scope_strategy": "parameter-seed",
+  "stakeholders": "[\"solution-architect\",\"engineering-manager\",\"cto\"]",
+  "parameters": "{\"entity_id\":{\"type\":\"string\",\"description\":\"The system to center the view on\"}}",
+  "scope_config": "{\"seed\":\"entity_id\",\"expand\":\"neighbors\"}",
+  "include_rules": "[]",
+  "filters": "{\"kinds\":[\"system\",\"actor\",\"container\"]}",
+  "styling": "{\"nodeColors\":{\"system\":\"#1B3A5C\",\"actor\":\"#4A5568\"}}",
+  "layout": "{\"type\":\"force-directed\",\"gravity\":0.3}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

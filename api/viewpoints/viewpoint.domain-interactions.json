@@ -1,0 +1,16 @@
+{
+  "id": 5,
+  "viewpoint_id": "viewpoint.domain-interactions",
+  "name": "Domain Interaction Map",
+  "description": "Shows how domains interact through their systems. Cross-domain dependencies and integration points.",
+  "scope_strategy": "entity-query",
+  "stakeholders": "[\"enterprise-architect\",\"domain-architect\"]",
+  "parameters": "{}",
+  "scope_config": "{\"query\":{\"kinds\":[\"system\"]}}",
+  "include_rules": "[]",
+  "filters": "{\"kinds\":[\"system\"]}",
+  "styling": "{}",
+  "layout": "{\"type\":\"force-directed\",\"groupBy\":\"domain\"}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

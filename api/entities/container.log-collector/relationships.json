@@ -1,0 +1,34 @@
+[
+  {
+    "id": 147,
+    "eams_rel_id": "rel-168",
+    "rel_type": "uses",
+    "from_entity_id": "container.log-collector",
+    "to_entity_id": "system.log-analytics",
+    "criticality": "async",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Forwards logs to analytics",
+    "branch": "main",
+    "from_entity_name": "Log Collector",
+    "from_entity_kind": "container",
+    "to_entity_name": "Log Analytics Platform",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 140,
+    "eams_rel_id": "rel-161",
+    "rel_type": "container_of",
+    "from_entity_id": "system.log-analytics",
+    "to_entity_id": "container.log-collector",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Log Analytics Platform",
+    "from_entity_kind": "system",
+    "to_entity_name": "Log Collector",
+    "to_entity_kind": "container"
+  }
+]

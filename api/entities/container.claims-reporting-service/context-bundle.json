@@ -1,0 +1,87 @@
+{
+  "entity": {
+    "id": 10,
+    "eams_id": "container.claims-reporting-service",
+    "kind": "container",
+    "name": "Claims Reporting Service",
+    "domain": "claims",
+    "status": "active",
+    "description": "Generates operational and regulatory reports. Includes daily loss runs, monthly reserve reports, and ad-hoc analytics.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": "tier-2",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": "Python",
+    "technology_language": "Python 3.11",
+    "technology_framework": "Pandas/dbt",
+    "technology_runtime": null,
+    "technology_hosting": "AWS Batch",
+    "container_type": "batch",
+    "parent_system_id": "system.claims-processing",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"reporting\",\"batch\",\"analytics\"]",
+    "metadata_created": "2023-05-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "cnt006",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 14,
+      "eams_rel_id": "rel-014",
+      "rel_type": "reads_from",
+      "from_entity_id": "container.claims-reporting-service",
+      "to_entity_id": "container.claims-database",
+      "criticality": "non-critical",
+      "protocol": "PostgreSQL read replica",
+      "sla_dependency_ms": null,
+      "description": "Reads claims data for reports",
+      "branch": "main"
+    },
+    {
+      "id": 6,
+      "eams_rel_id": "rel-006",
+      "rel_type": "container_of",
+      "from_entity_id": "system.claims-processing",
+      "to_entity_id": "container.claims-reporting-service",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 20,
+      "signal_id": "signal-020",
+      "signal_type": "incident",
+      "source": "Harness",
+      "source_id": "HARNESS-CANARY-FAIL-441",
+      "title": "Deployment Pipeline — Failed Canary Detected",
+      "description": "Canary deployment of Claims Reporting Service v3.8.0 failed health check. Error rate 12% (threshold: 2%). Automatic rollback triggered. Root cause: incompatible dbt model change. No production impact.",
+      "affected_entities": "[\"container.deployment-pipeline\",\"container.claims-reporting-service\",\"system.deployment-platform\"]",
+      "severity": "high",
+      "timestamp": "2026-03-30T15:20:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:15.319Z",
+    "relationship_count": 2,
+    "finding_count": 0
+  }
+}

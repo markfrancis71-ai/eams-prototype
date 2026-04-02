@@ -1,0 +1,50 @@
+[
+  {
+    "id": 16,
+    "eams_rel_id": "rel-016",
+    "rel_type": "uses",
+    "from_entity_id": "container.claims-web-ui",
+    "to_entity_id": "container.adjudication-api",
+    "criticality": "synchronous-critical",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Submit and query claims",
+    "branch": "main",
+    "from_entity_name": "Claims Web UI",
+    "from_entity_kind": "container",
+    "to_entity_name": "Adjudication API",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 18,
+    "eams_rel_id": "rel-018",
+    "rel_type": "uses",
+    "from_entity_id": "container.claims-web-ui",
+    "to_entity_id": "container.document-storage-service",
+    "criticality": "async",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Upload/download documents",
+    "branch": "main",
+    "from_entity_name": "Claims Web UI",
+    "from_entity_kind": "container",
+    "to_entity_name": "Document Storage Service",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 8,
+    "eams_rel_id": "rel-008",
+    "rel_type": "container_of",
+    "from_entity_id": "system.claims-portal",
+    "to_entity_id": "container.claims-web-ui",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Claims Portal",
+    "from_entity_kind": "system",
+    "to_entity_name": "Claims Web UI",
+    "to_entity_kind": "container"
+  }
+]

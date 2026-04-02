@@ -1,0 +1,616 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-container",
+    "name": "C4 Container View",
+    "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships."
+  },
+  "scope": {
+    "entity_id": "system.claims-processing"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.adjudication-api",
+        "kind": "container",
+        "name": "Adjudication API",
+        "role": "container",
+        "labels": {
+          "primary": "Adjudication API",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.adjudication-api",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API service handling claim adjudication decisions. Orchestrates rules engine evaluation, fraud checks, and settlement calculations.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.rules-engine",
+        "kind": "container",
+        "name": "Rules Engine",
+        "role": "container",
+        "labels": {
+          "primary": "Rules Engine",
+          "secondary": "Drools",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.rules-engine",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Business rules engine for claims adjudication. Contains 2,400+ rules across auto, property, and liability lines.",
+          "technology": "Drools"
+        }
+      },
+      {
+        "id": "container.claims-database",
+        "kind": "container",
+        "name": "Claims Database",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Database",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-database",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Primary claims data store. Aurora PostgreSQL with read replicas for reporting queries.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "container.event-router",
+        "kind": "container",
+        "name": "Event Router",
+        "role": "container",
+        "labels": {
+          "primary": "Event Router",
+          "secondary": "Apache Kafka",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.event-router",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Kafka-based event routing for claims domain events. Handles FNOL, status change, payment, and notification events.",
+          "technology": "Apache Kafka"
+        }
+      },
+      {
+        "id": "container.claims-notification-service",
+        "kind": "container",
+        "name": "Claims Notification Service",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Notification Service",
+          "secondary": "Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-notification-service",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Handles email, SMS, and push notifications for claims status updates, document requests, and settlement communications.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.claims-reporting-service",
+        "kind": "container",
+        "name": "Claims Reporting Service",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Reporting Service",
+          "secondary": "Python",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-reporting-service",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Generates operational and regulatory reports. Includes daily loss runs, monthly reserve reports, and ad-hoc analytics.",
+          "technology": "Python"
+        }
+      },
+      {
+        "id": "container.document-storage-service",
+        "kind": "container",
+        "name": "Document Storage Service",
+        "role": "container",
+        "labels": {
+          "primary": "Document Storage Service",
+          "secondary": "Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.document-storage-service",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Manages claim-related documents including photos, PDFs, police reports, and medical records. Integrates with OCR for auto-extraction.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.payment-gateway",
+        "kind": "system",
+        "name": "Payment Gateway",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Gateway",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-gateway",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment processing gateway supporting credit card, ACH, and wire transfers. PCI DSS Level 1 compliant.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "system.legacy-claims-api",
+        "kind": "system",
+        "name": "Legacy Claims API",
+        "role": "system",
+        "labels": {
+          "primary": "Legacy Claims API",
+          "secondary": "Java EE",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "deprecated",
+            "tier-2",
+            "violation"
+          ],
+          "dashed": true
+        },
+        "data": {
+          "eams_id": "system.legacy-claims-api",
+          "domain": "claims",
+          "status": "deprecated",
+          "criticality": "tier-2",
+          "description": "Legacy SOAP-based claims API. Scheduled for decommission by Q3 2026. Still serves 15% of integration traffic from partner systems.",
+          "technology": "Java EE"
+        }
+      },
+      {
+        "id": "system.log-analytics",
+        "kind": "system",
+        "name": "Log Analytics Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Log Analytics Platform",
+          "secondary": "ELK Stack",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.log-analytics",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Centralized log aggregation and analysis platform. ELK Stack (Elasticsearch, Logstash, Kibana) providing full-text search, log correlation, and anomaly detection across all systems.",
+          "technology": "ELK Stack"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.claims-processing",
+        "to": "container.adjudication-api",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "container.rules-engine",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "container.claims-database",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "container.event-router",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "container.claims-notification-service",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "container.claims-reporting-service",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "container.document-storage-service",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Retrieves policy details for claim verification",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Triggers claim payments",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Processes claim settlements",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors claims system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.legacy-claims-api",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Legacy integration bridge",
+          "protocol": "SOAP/XML"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects claims processing logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.claims-processing",
+        "label": "Claims Processing System",
+        "members": [
+          "container.adjudication-api",
+          "container.rules-engine",
+          "container.claims-database",
+          "container.event-router",
+          "container.claims-notification-service",
+          "container.claims-reporting-service",
+          "container.document-storage-service"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "hierarchical",
+      "direction": "TB"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.232Z",
+      "node_count": 14,
+      "edge_count": 13
+    }
+  }
+}

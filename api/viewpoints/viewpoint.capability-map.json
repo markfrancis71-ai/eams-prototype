@@ -1,0 +1,16 @@
+{
+  "id": 3,
+  "viewpoint_id": "viewpoint.capability-map",
+  "name": "Capability Heat Map",
+  "description": "Maps business capabilities to the systems and processes that realize them. Heat-colored by maturity or risk.",
+  "scope_strategy": "domain-query",
+  "stakeholders": "[\"enterprise-architect\",\"business-analyst\",\"cto\"]",
+  "parameters": "{\"domain\":{\"type\":\"string\"}}",
+  "scope_config": "{\"query\":{\"kinds\":[\"capability\",\"system\",\"process\"]}}",
+  "include_rules": "[{\"rel_types\":[\"realized_by\",\"supported_by\"]}]",
+  "filters": "{\"kinds\":[\"capability\",\"system\",\"process\",\"goal\"]}",
+  "styling": "{}",
+  "layout": "{\"type\":\"grid\",\"columns\":3}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

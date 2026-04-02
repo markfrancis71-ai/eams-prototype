@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 63,
+      "eams_id": "system.payment-gateway",
+      "kind": "system",
+      "name": "Payment Gateway",
+      "domain": "billing",
+      "status": "active",
+      "description": "Payment processing gateway supporting credit card, ACH, and wire transfers. PCI DSS Level 1 compliant.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": "tier-1",
+      "lifecycle": "production",
+      "tpm_id": null,
+      "technology_primary": "Node.js",
+      "technology_language": "TypeScript",
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": "AWS ECS Fargate",
+      "container_type": null,
+      "parent_system_id": null,
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": null,
+      "nfr_data_classification": "pci",
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"payments\",\"pci\"]",
+      "metadata_created": "2023-01-01",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": "compliant",
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "bil002",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

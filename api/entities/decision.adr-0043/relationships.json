@@ -1,0 +1,18 @@
+[
+  {
+    "id": 30,
+    "eams_rel_id": "rel-030",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.adr-0043",
+    "to_entity_id": "container.event-router",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "ADR-0043 requires event-driven architecture",
+    "branch": "main",
+    "from_entity_name": "ADR-0043: Event-driven Claims",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Event Router",
+    "to_entity_kind": "container"
+  }
+]

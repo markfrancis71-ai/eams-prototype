@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 17,
+      "eams_id": "capability.subrogation",
+      "kind": "capability",
+      "name": "Subrogation",
+      "domain": "claims",
+      "status": "active",
+      "description": "The ability to identify, pursue, and recover subrogation claims from third parties.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": "tier-2",
+      "lifecycle": null,
+      "tpm_id": null,
+      "technology_primary": null,
+      "technology_language": null,
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": null,
+      "container_type": null,
+      "parent_system_id": null,
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": null,
+      "nfr_data_classification": null,
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"capability\"]",
+      "metadata_created": "2023-01-01",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": null,
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "cap004",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "billing",
+    "type": "directory",
+    "children": [
+      {
+        "path": "billing/systems.yaml",
+        "type": "file",
+        "size": 257,
+        "modified": "2026-04-02T05:12:17.830Z"
+      }
+    ]
+  },
+  {
+    "path": "claims",
+    "type": "directory",
+    "children": [
+      {
+        "path": "claims/containers.yaml",
+        "type": "file",
+        "size": 719,
+        "modified": "2026-04-02T05:12:17.830Z"
+      },
+      {
+        "path": "claims/relationships.yaml",
+        "type": "file",
+        "size": 622,
+        "modified": "2026-04-02T05:12:17.830Z"
+      },
+      {
+        "path": "claims/systems.yaml",
+        "type": "file",
+        "size": 903,
+        "modified": "2026-04-02T05:12:17.830Z"
+      }
+    ]
+  },
+  {
+    "path": "policy",
+    "type": "directory",
+    "children": [
+      {
+        "path": "policy/systems.yaml",
+        "type": "file",
+        "size": 357,
+        "modified": "2026-04-02T05:12:17.830Z"
+      }
+    ]
+  }
+]

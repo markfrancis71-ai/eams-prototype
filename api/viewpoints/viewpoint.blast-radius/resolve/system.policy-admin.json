@@ -1,0 +1,469 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.blast-radius",
+    "name": "Blast Radius",
+    "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes."
+  },
+  "scope": {
+    "entity_id": "system.policy-admin"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "capability.policy-issuance",
+        "kind": "capability",
+        "name": "Policy Issuance",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Issuance",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-issuance",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to issue new insurance policies across all lines of business.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.policy-renewal",
+        "kind": "capability",
+        "name": "Policy Renewal",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Renewal",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-renewal",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "The ability to process policy renewals including re-rating and document generation.",
+          "technology": null
+        }
+      },
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "capability.underwriting",
+        "kind": "capability",
+        "name": "Underwriting",
+        "role": "capability",
+        "labels": {
+          "primary": "Underwriting",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.underwriting",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to assess risk, determine insurability, and price policies based on risk factors, loss history, and underwriting guidelines.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.policy-lifecycle",
+        "kind": "capability",
+        "name": "Policy Lifecycle Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Lifecycle Management",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-lifecycle",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to manage the full policy lifecycle from quote through renewal, including endorsements, cancellations, and reinstatements.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.underwriter",
+        "kind": "actor",
+        "name": "Underwriter",
+        "role": "actor",
+        "labels": {
+          "primary": "Underwriter",
+          "secondary": "actor",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.underwriter",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "P&C underwriter. Uses Policy Admin System for risk assessment, exception handling, and manual review of complex applications.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.member",
+        "kind": "actor",
+        "name": "Member",
+        "role": "actor",
+        "labels": {
+          "primary": "Member",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.member",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "USAA member (policyholder/claimant). Interacts with Claims Portal, Policy Admin, and Billing System via web and mobile applications.",
+          "technology": null
+        }
+      },
+      {
+        "id": "system.log-analytics",
+        "kind": "system",
+        "name": "Log Analytics Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Log Analytics Platform",
+          "secondary": "ELK Stack",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.log-analytics",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Centralized log aggregation and analysis platform. ELK Stack (Elasticsearch, Logstash, Kibana) providing full-text search, log correlation, and anomaly detection across all systems.",
+          "technology": "ELK Stack"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.claims-processing",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Retrieves policy details for claim verification",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors policy system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.policy-issuance",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by policy admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.policy-renewal",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by policy admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Retrieves policy billing schedules",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.underwriting",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Underwriting realized by Policy Admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.policy-lifecycle",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Policy lifecycle realized by Policy Admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.underwriter",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Underwriter uses Policy Admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.member",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Member manages policies",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects policy admin logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "radial",
+      "center": "seed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.397Z",
+      "node_count": 11,
+      "edge_count": 10
+    }
+  }
+}

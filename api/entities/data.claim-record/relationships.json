@@ -1,0 +1,34 @@
+[
+  {
+    "id": 36,
+    "eams_rel_id": "rel-036",
+    "rel_type": "stores_in",
+    "from_entity_id": "data.claim-record",
+    "to_entity_id": "container.claims-database",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Stored in claims database",
+    "branch": "main",
+    "from_entity_name": "Claim Record",
+    "from_entity_kind": "data_entity",
+    "to_entity_name": "Claims Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 37,
+    "eams_rel_id": "rel-037",
+    "rel_type": "uses",
+    "from_entity_id": "container.adjudication-api",
+    "to_entity_id": "data.claim-record",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Uses claim records",
+    "branch": "main",
+    "from_entity_name": "Adjudication API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Claim Record",
+    "to_entity_kind": "data_entity"
+  }
+]

@@ -1,0 +1,4 @@
+{
+  "path": "billing/systems.yaml",
+  "content": "# Billing Domain — Systems\ndomain: billing\n\nsystems:\n  - eams_id: system.billing\n    name: Billing System\n    status: active\n    criticality: tier-1\n\n  - eams_id: system.payment-gateway\n    name: Payment Gateway\n    status: active\n    criticality: tier-1\n"
+}

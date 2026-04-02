@@ -1,0 +1,97 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-context",
+    "name": "C4 System Context",
+    "description": "Shows a system in its environment — actors, neighboring systems, and their interactions. The classic C4 Level 1 view."
+  },
+  "scope": {
+    "entity_id": "system.legacy-claims-api"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.legacy-claims-api",
+        "kind": "system",
+        "name": "Legacy Claims API",
+        "role": "system",
+        "labels": {
+          "primary": "Legacy Claims API",
+          "secondary": "Java EE",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "deprecated",
+            "tier-2",
+            "violation"
+          ],
+          "dashed": true
+        },
+        "data": {
+          "eams_id": "system.legacy-claims-api",
+          "domain": "claims",
+          "status": "deprecated",
+          "criticality": "tier-2",
+          "description": "Legacy SOAP-based claims API. Scheduled for decommission by Q3 2026. Still serves 15% of integration traffic from partner systems.",
+          "technology": "Java EE"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.legacy-claims-api",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Legacy integration bridge",
+          "protocol": "SOAP/XML"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "force-directed",
+      "gravity": 0.3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.176Z",
+      "node_count": 2,
+      "edge_count": 1
+    }
+  }
+}

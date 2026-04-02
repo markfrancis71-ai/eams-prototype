@@ -1,0 +1,111 @@
+{
+  "entity": {
+    "id": 72,
+    "eams_id": "process.premium-billing",
+    "kind": "process",
+    "name": "Premium Billing Process",
+    "domain": "billing",
+    "status": "active",
+    "description": "Monthly billing cycle: installment generation → payment collection → reconciliation → grace period management → cancellation for non-payment. Processes ~200K installments monthly.",
+    "ownership_architect": "Priya Patel",
+    "ownership_business_owner": null,
+    "criticality": "tier-1",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": null,
+    "technology_language": null,
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": null,
+    "container_type": null,
+    "parent_system_id": null,
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"process\",\"billing\",\"monthly-cycle\"]",
+    "metadata_created": "2022-01-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": null,
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "bproc001",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 127,
+      "eams_rel_id": "rel-148",
+      "rel_type": "realized_by",
+      "from_entity_id": "process.premium-billing",
+      "to_entity_id": "capability.premium-collection",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Premium billing realizes collection capability",
+      "branch": "main"
+    },
+    {
+      "id": 128,
+      "eams_rel_id": "rel-149",
+      "rel_type": "automated_by",
+      "from_entity_id": "process.premium-billing",
+      "to_entity_id": "system.billing",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Premium billing automated by Billing System",
+      "branch": "main"
+    },
+    {
+      "id": 129,
+      "eams_rel_id": "rel-150",
+      "rel_type": "uses",
+      "from_entity_id": "process.premium-billing",
+      "to_entity_id": "container.billing-scheduler",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Premium billing uses scheduler",
+      "branch": "main"
+    },
+    {
+      "id": 185,
+      "eams_rel_id": "rel-206",
+      "rel_type": "uses",
+      "from_entity_id": "process.endorsement-processing",
+      "to_entity_id": "process.premium-billing",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Endorsement triggers billing adjustment",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 18,
+      "signal_id": "signal-018",
+      "signal_type": "incident",
+      "source": "PagerDuty",
+      "source_id": "PD-48901",
+      "title": "Auto-Pay Processing Delayed — Bank Holiday",
+      "description": "Billing scheduler auto-pay batch failed to process 12,400 ACH transactions due to Federal Reserve holiday (Cesar Chavez Day). Transactions queued and will process next business day. No customer impact — grace period covers delay.",
+      "affected_entities": "[\"container.billing-scheduler\",\"system.billing\",\"process.premium-billing\"]",
+      "severity": "medium",
+      "timestamp": "2026-03-31T06:00:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:16.553Z",
+    "relationship_count": 4,
+    "finding_count": 0
+  }
+}

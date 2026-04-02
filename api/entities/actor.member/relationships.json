@@ -1,0 +1,50 @@
+[
+  {
+    "id": 110,
+    "eams_rel_id": "rel-131",
+    "rel_type": "uses",
+    "from_entity_id": "actor.member",
+    "to_entity_id": "system.claims-portal",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Member files claims via portal",
+    "branch": "main",
+    "from_entity_name": "Member",
+    "from_entity_kind": "actor",
+    "to_entity_name": "Claims Portal",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 111,
+    "eams_rel_id": "rel-132",
+    "rel_type": "uses",
+    "from_entity_id": "actor.member",
+    "to_entity_id": "system.policy-admin",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Member manages policies",
+    "branch": "main",
+    "from_entity_name": "Member",
+    "from_entity_kind": "actor",
+    "to_entity_name": "Policy Admin System",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 112,
+    "eams_rel_id": "rel-133",
+    "rel_type": "uses",
+    "from_entity_id": "actor.member",
+    "to_entity_id": "system.billing",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Member makes payments",
+    "branch": "main",
+    "from_entity_name": "Member",
+    "from_entity_kind": "actor",
+    "to_entity_name": "Billing System",
+    "to_entity_kind": "system"
+  }
+]

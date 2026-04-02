@@ -1,0 +1,136 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.integration-surface",
+    "name": "System Integration Surface",
+    "description": "Shows all integration points for a system — incoming and outgoing APIs, events, and data flows."
+  },
+  "scope": {
+    "entity_id": "system.payment-gateway"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.payment-gateway",
+        "kind": "system",
+        "name": "Payment Gateway",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Gateway",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-gateway",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment processing gateway supporting credit card, ACH, and wire transfers. PCI DSS Level 1 compliant.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.claims-processing",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Processes claim settlements",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors payment gateway health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "force-directed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.827Z",
+      "node_count": 3,
+      "edge_count": 2
+    }
+  }
+}

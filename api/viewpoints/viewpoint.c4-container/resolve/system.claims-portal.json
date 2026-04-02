@@ -1,0 +1,307 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-container",
+    "name": "C4 Container View",
+    "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships."
+  },
+  "scope": {
+    "entity_id": "system.claims-portal"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.claims-portal",
+        "kind": "system",
+        "name": "Claims Portal",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Portal",
+          "secondary": "React/Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-portal",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Customer and adjuster-facing web portal for claims submission, tracking, and management. Supports both desktop and mobile access.",
+          "technology": "React/Node.js"
+        }
+      },
+      {
+        "id": "container.claims-web-ui",
+        "kind": "container",
+        "name": "Claims Web UI",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Web UI",
+          "secondary": "React",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-web-ui",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "React-based single-page application for claims management. Supports both customer self-service and adjuster workflows.",
+          "technology": "React"
+        }
+      },
+      {
+        "id": "container.claims-mobile-bff",
+        "kind": "container",
+        "name": "Claims Mobile BFF",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Mobile BFF",
+          "secondary": "Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-mobile-bff",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Backend-for-Frontend service optimized for mobile clients. Aggregates data from multiple backend services.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "actor.claims-adjuster",
+        "kind": "actor",
+        "name": "Claims Adjuster",
+        "role": "actor",
+        "labels": {
+          "primary": "Claims Adjuster",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.claims-adjuster",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Insurance professional responsible for evaluating and processing claims.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.policyholder",
+        "kind": "actor",
+        "name": "Policyholder",
+        "role": "actor",
+        "labels": {
+          "primary": "Policyholder",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.policyholder",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Customer who holds an insurance policy and may file claims.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.member",
+        "kind": "actor",
+        "name": "Member",
+        "role": "actor",
+        "labels": {
+          "primary": "Member",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.member",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "USAA member (policyholder/claimant). Interacts with Claims Portal, Policy Admin, and Billing System via web and mobile applications.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.external-vendor",
+        "kind": "actor",
+        "name": "External Vendor",
+        "role": "actor",
+        "labels": {
+          "primary": "External Vendor",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.external-vendor",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Third-party service providers: body shops, medical providers, contractors. Interact via Claims Portal API for assignment acceptance and status updates.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.claims-portal",
+        "to": "container.claims-web-ui",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-portal",
+        "to": "container.claims-mobile-bff",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.claims-adjuster",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Manages claims through portal",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.policyholder",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Files and tracks claims",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.member",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Member files claims via portal",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.external-vendor",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Vendors interact via Claims Portal API",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.claims-portal",
+        "label": "Claims Portal",
+        "members": [
+          "container.claims-web-ui",
+          "container.claims-mobile-bff"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "hierarchical",
+      "direction": "TB"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.237Z",
+      "node_count": 7,
+      "edge_count": 6
+    }
+  }
+}

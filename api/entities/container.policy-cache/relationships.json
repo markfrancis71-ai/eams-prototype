@@ -1,0 +1,34 @@
+[
+  {
+    "id": 83,
+    "eams_rel_id": "rel-104",
+    "rel_type": "container_of",
+    "from_entity_id": "system.policy-admin",
+    "to_entity_id": "container.policy-cache",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Policy Admin System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Policy Cache",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 85,
+    "eams_rel_id": "rel-106",
+    "rel_type": "uses",
+    "from_entity_id": "container.policy-api",
+    "to_entity_id": "container.policy-cache",
+    "criticality": "synchronous-critical",
+    "protocol": "Redis",
+    "sla_dependency_ms": null,
+    "description": "Reads cached policy data",
+    "branch": "main",
+    "from_entity_name": "Policy API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Policy Cache",
+    "to_entity_kind": "container"
+  }
+]

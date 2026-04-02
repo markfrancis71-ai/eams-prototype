@@ -1,0 +1,111 @@
+{
+  "entity": {
+    "id": 66,
+    "eams_id": "container.payment-processor",
+    "kind": "container",
+    "name": "Payment Processor",
+    "domain": "billing",
+    "status": "active",
+    "description": "Core payment processing service integrating with Stripe and bank APIs.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": null,
+    "lifecycle": null,
+    "tpm_id": null,
+    "technology_primary": "Node.js",
+    "technology_language": null,
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": null,
+    "container_type": "api",
+    "parent_system_id": "system.payment-gateway",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": "pci",
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": null,
+    "metadata_created": "2023-02-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "bcnt003",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 59,
+      "eams_rel_id": "rel-059",
+      "rel_type": "container_of",
+      "from_entity_id": "system.payment-gateway",
+      "to_entity_id": "container.payment-processor",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    },
+    {
+      "id": 60,
+      "eams_rel_id": "rel-060",
+      "rel_type": "uses",
+      "from_entity_id": "container.billing-api",
+      "to_entity_id": "container.payment-processor",
+      "criticality": "synchronous-critical",
+      "protocol": "REST/HTTPS",
+      "sla_dependency_ms": null,
+      "description": "Processes payments",
+      "branch": "main"
+    },
+    {
+      "id": 122,
+      "eams_rel_id": "rel-143",
+      "rel_type": "uses",
+      "from_entity_id": "container.payment-processor-api",
+      "to_entity_id": "container.payment-processor",
+      "criticality": "synchronous-critical",
+      "protocol": "REST/HTTPS",
+      "sla_dependency_ms": null,
+      "description": "Delegates to core payment processor",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 7,
+      "signal_id": "signal-007",
+      "signal_type": "incident",
+      "source": "ServiceNow",
+      "source_id": "SN-INC-78432",
+      "title": "Payment Gateway — Intermittent Timeout Errors",
+      "description": "Payment Gateway experiencing intermittent 504 timeouts during peak hours (2-4 PM EST). Affecting approximately 3% of payment transactions. Root cause investigation points to Stripe API rate limiting.",
+      "affected_entities": "[\"system.payment-gateway\",\"container.payment-processor\",\"system.billing\"]",
+      "severity": "critical",
+      "timestamp": "2026-03-29T14:45:00Z"
+    },
+    {
+      "id": 17,
+      "signal_id": "signal-017",
+      "signal_type": "compliance",
+      "source": "QualysGuard",
+      "source_id": "QG-PCI-2026-Q1",
+      "title": "Payment Gateway — PCI Scan Passed",
+      "description": "Quarterly PCI DSS external vulnerability scan completed successfully. All 14 critical controls passed. Next scan scheduled for Q2 2026.",
+      "affected_entities": "[\"system.payment-gateway\",\"container.payment-processor\",\"system.payment-processor\"]",
+      "severity": "low",
+      "timestamp": "2026-03-25T12:00:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:16.429Z",
+    "relationship_count": 3,
+    "finding_count": 0
+  }
+}

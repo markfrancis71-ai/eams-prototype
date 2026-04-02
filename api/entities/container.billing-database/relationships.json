@@ -1,0 +1,50 @@
+[
+  {
+    "id": 58,
+    "eams_rel_id": "rel-058",
+    "rel_type": "container_of",
+    "from_entity_id": "system.billing",
+    "to_entity_id": "container.billing-database",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Billing System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Billing Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 61,
+    "eams_rel_id": "rel-061",
+    "rel_type": "stores_in",
+    "from_entity_id": "container.billing-api",
+    "to_entity_id": "container.billing-database",
+    "criticality": "synchronous-critical",
+    "protocol": "PostgreSQL",
+    "sla_dependency_ms": null,
+    "description": "Stores billing data",
+    "branch": "main",
+    "from_entity_name": "Billing API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Billing Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 177,
+    "eams_rel_id": "rel-198",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.database-per-service",
+    "to_entity_id": "container.billing-database",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Database per service — billing",
+    "branch": "main",
+    "from_entity_name": "ADR: Database Per Service",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Billing Database",
+    "to_entity_kind": "container"
+  }
+]

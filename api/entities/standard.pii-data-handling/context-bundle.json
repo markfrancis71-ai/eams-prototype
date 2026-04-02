@@ -1,0 +1,62 @@
+{
+  "entity": {
+    "id": 35,
+    "eams_id": "standard.pii-data-handling",
+    "kind": "standard",
+    "name": "PII Data Handling Standard",
+    "domain": "claims",
+    "status": "active",
+    "description": "Requirements for handling personally identifiable information including encryption, access controls, audit logging, and retention policies.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": null,
+    "lifecycle": null,
+    "tpm_id": null,
+    "technology_primary": null,
+    "technology_language": null,
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": null,
+    "container_type": null,
+    "parent_system_id": null,
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"standard\",\"pii\",\"security\"]",
+    "metadata_created": "2024-01-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": null,
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "std002",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 32,
+      "eams_rel_id": "rel-032",
+      "rel_type": "governed_by",
+      "from_entity_id": "container.claims-database",
+      "to_entity_id": "standard.pii-data-handling",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Must comply with PII handling",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:15.820Z",
+    "relationship_count": 1,
+    "finding_count": 0
+  }
+}

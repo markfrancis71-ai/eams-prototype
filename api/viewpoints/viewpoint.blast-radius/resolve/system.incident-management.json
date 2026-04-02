@@ -1,0 +1,137 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.blast-radius",
+    "name": "Blast Radius",
+    "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes."
+  },
+  "scope": {
+    "entity_id": "system.incident-management"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.incident-management",
+        "kind": "system",
+        "name": "Incident Management System",
+        "role": "system",
+        "labels": {
+          "primary": "Incident Management System",
+          "secondary": "PagerDuty + ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident detection, routing, and resolution management. Integrates with PagerDuty and Slack.",
+          "technology": "PagerDuty + ServiceNow"
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "capability.incident-response",
+        "kind": "capability",
+        "name": "Incident Response",
+        "role": "capability",
+        "labels": {
+          "primary": "Incident Response",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.incident-response",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to detect, respond to, and resolve production incidents within SLA targets with structured post-mortem processes.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Receives alerts from monitoring",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.incident-response",
+        "to": "system.incident-management",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Incident response realized by Incident Management",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "radial",
+      "center": "seed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.418Z",
+      "node_count": 3,
+      "edge_count": 2
+    }
+  }
+}

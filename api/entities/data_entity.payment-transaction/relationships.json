@@ -1,0 +1,34 @@
+[
+  {
+    "id": 132,
+    "eams_rel_id": "rel-153",
+    "rel_type": "stores_in",
+    "from_entity_id": "data_entity.payment-transaction",
+    "to_entity_id": "container.payment-ledger",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Payment transactions stored in ledger",
+    "branch": "main",
+    "from_entity_name": "Payment Transaction",
+    "from_entity_kind": "data_entity",
+    "to_entity_name": "Payment Ledger",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 133,
+    "eams_rel_id": "rel-154",
+    "rel_type": "produces",
+    "from_entity_id": "container.payment-processor-api",
+    "to_entity_id": "data_entity.payment-transaction",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Payment API produces transaction records",
+    "branch": "main",
+    "from_entity_name": "Payment Processor API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Payment Transaction",
+    "to_entity_kind": "data_entity"
+  }
+]

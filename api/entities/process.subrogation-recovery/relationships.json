@@ -1,0 +1,34 @@
+[
+  {
+    "id": 67,
+    "eams_rel_id": "rel-080",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.subrogation-recovery",
+    "to_entity_id": "capability.subrogation",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Subrogation process realizes subrogation capability",
+    "branch": "main",
+    "from_entity_name": "Subrogation Recovery Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Subrogation",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 68,
+    "eams_rel_id": "rel-081",
+    "rel_type": "automated_by",
+    "from_entity_id": "process.subrogation-recovery",
+    "to_entity_id": "system.claims-processing",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Subrogation process automated by Claims Processing System",
+    "branch": "main",
+    "from_entity_name": "Subrogation Recovery Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Claims Processing System",
+    "to_entity_kind": "system"
+  }
+]

@@ -1,0 +1,338 @@
+{
+  "scenario_id": "scenario-1775108419069",
+  "results": [
+    {
+      "action": {
+        "type": "remove",
+        "target_entity_id": "system.claims-processing"
+      },
+      "entity": {
+        "id": 1,
+        "eams_id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "domain": "claims",
+        "status": "active",
+        "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+        "ownership_architect": "Sarah Chen",
+        "ownership_business_owner": "Mike Rodriguez",
+        "criticality": "tier-1",
+        "lifecycle": "production",
+        "tpm_id": "TPM-CL-001",
+        "technology_primary": "Java/Spring Boot",
+        "technology_language": "Java 17",
+        "technology_framework": "Spring Boot 3.2",
+        "technology_runtime": "JVM 17",
+        "technology_hosting": "AWS ECS Fargate",
+        "container_type": null,
+        "parent_system_id": null,
+        "nfr_availability": "99.95%",
+        "nfr_throughput": "500 claims/min",
+        "nfr_latency": "p99 < 200ms",
+        "nfr_data_classification": "pii",
+        "nfr_encryption": "AES-256 at rest, TLS 1.3 in transit",
+        "nfr_retention": "7 years",
+        "tags": "[\"core\",\"claims\",\"tier-1\"]",
+        "metadata_created": "2023-01-15",
+        "metadata_last_reviewed": "2025-11-01",
+        "metadata_review_due": "2026-05-01",
+        "compliance_status": "warning",
+        "git_sha": null,
+        "compiled_at": null,
+        "branch": "main",
+        "content_hash": "abc123",
+        "raw_yaml": null
+      },
+      "direct_impact": 20,
+      "total_impact": 8,
+      "affected_entities": [
+        {
+          "eams_id": "system.claims-processing",
+          "name": "Claims Processing System",
+          "kind": "system"
+        },
+        {
+          "eams_id": "container.adjudication-api",
+          "name": "Adjudication API",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.rules-engine",
+          "name": "Rules Engine",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.claims-database",
+          "name": "Claims Database",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.event-router",
+          "name": "Event Router",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.claims-notification-service",
+          "name": "Claims Notification Service",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.claims-reporting-service",
+          "name": "Claims Reporting Service",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.document-storage-service",
+          "name": "Document Storage Service",
+          "kind": "container"
+        }
+      ],
+      "affected_relationships": [
+        {
+          "id": 1,
+          "eams_rel_id": "rel-001",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.adjudication-api",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 2,
+          "eams_rel_id": "rel-002",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.rules-engine",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 3,
+          "eams_rel_id": "rel-003",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.claims-database",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 4,
+          "eams_rel_id": "rel-004",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.event-router",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 5,
+          "eams_rel_id": "rel-005",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.claims-notification-service",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 6,
+          "eams_rel_id": "rel-006",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.claims-reporting-service",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 7,
+          "eams_rel_id": "rel-007",
+          "rel_type": "container_of",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "container.document-storage-service",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Contains",
+          "branch": "main"
+        },
+        {
+          "id": 33,
+          "eams_rel_id": "rel-033",
+          "rel_type": "governed_by",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "standard.aws-deployment",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Must follow AWS deployment standard",
+          "branch": "main"
+        },
+        {
+          "id": 39,
+          "eams_rel_id": "rel-039",
+          "rel_type": "uses",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "system.policy-admin",
+          "criticality": "synchronous-critical",
+          "protocol": "REST/HTTPS",
+          "sla_dependency_ms": null,
+          "description": "Retrieves policy details for claim verification",
+          "branch": "main"
+        },
+        {
+          "id": 41,
+          "eams_rel_id": "rel-041",
+          "rel_type": "uses",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "system.billing",
+          "criticality": "synchronous-critical",
+          "protocol": "REST/HTTPS",
+          "sla_dependency_ms": null,
+          "description": "Triggers claim payments",
+          "branch": "main"
+        },
+        {
+          "id": 42,
+          "eams_rel_id": "rel-042",
+          "rel_type": "uses",
+          "from_entity_id": "system.claims-processing",
+          "to_entity_id": "system.payment-gateway",
+          "criticality": "synchronous-critical",
+          "protocol": "REST/HTTPS",
+          "sla_dependency_ms": null,
+          "description": "Processes claim settlements",
+          "branch": "main"
+        },
+        {
+          "id": 21,
+          "eams_rel_id": "rel-021",
+          "rel_type": "realized_by",
+          "from_entity_id": "capability.claim-adjudication",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Realized by claims processing system",
+          "branch": "main"
+        },
+        {
+          "id": 22,
+          "eams_rel_id": "rel-022",
+          "rel_type": "realized_by",
+          "from_entity_id": "capability.fnol",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "FNOL capability realized",
+          "branch": "main"
+        },
+        {
+          "id": 24,
+          "eams_rel_id": "rel-024",
+          "rel_type": "realized_by",
+          "from_entity_id": "capability.claim-settlement",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Settlement processing",
+          "branch": "main"
+        },
+        {
+          "id": 43,
+          "eams_rel_id": "rel-043",
+          "rel_type": "uses",
+          "from_entity_id": "system.monitoring-platform",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "non-critical",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Monitors claims system health",
+          "branch": "main"
+        },
+        {
+          "id": 62,
+          "eams_rel_id": "rel-062",
+          "rel_type": "uses",
+          "from_entity_id": "system.legacy-claims-api",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "async",
+          "protocol": "SOAP/XML",
+          "sla_dependency_ms": null,
+          "description": "Legacy integration bridge",
+          "branch": "main"
+        },
+        {
+          "id": 68,
+          "eams_rel_id": "rel-081",
+          "rel_type": "automated_by",
+          "from_entity_id": "process.subrogation-recovery",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Subrogation process automated by Claims Processing System",
+          "branch": "main"
+        },
+        {
+          "id": 70,
+          "eams_rel_id": "rel-083",
+          "rel_type": "automated_by",
+          "from_entity_id": "process.fraud-investigation",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Fraud investigation automated by Claims Processing System",
+          "branch": "main"
+        },
+        {
+          "id": 74,
+          "eams_rel_id": "rel-087",
+          "rel_type": "automated_by",
+          "from_entity_id": "process.cat-claims",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "CAT process automated by Claims Processing System",
+          "branch": "main"
+        },
+        {
+          "id": 167,
+          "eams_rel_id": "rel-188",
+          "rel_type": "uses",
+          "from_entity_id": "system.log-analytics",
+          "to_entity_id": "system.claims-processing",
+          "criticality": "non-critical",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Collects claims processing logs",
+          "branch": "main"
+        }
+      ],
+      "risk_level": "critical",
+      "warnings": [
+        "WARNING: Tier-1 critical system"
+      ]
+    }
+  ]
+}

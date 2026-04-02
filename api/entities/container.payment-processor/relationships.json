@@ -1,0 +1,50 @@
+[
+  {
+    "id": 59,
+    "eams_rel_id": "rel-059",
+    "rel_type": "container_of",
+    "from_entity_id": "system.payment-gateway",
+    "to_entity_id": "container.payment-processor",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Payment Gateway",
+    "from_entity_kind": "system",
+    "to_entity_name": "Payment Processor",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 60,
+    "eams_rel_id": "rel-060",
+    "rel_type": "uses",
+    "from_entity_id": "container.billing-api",
+    "to_entity_id": "container.payment-processor",
+    "criticality": "synchronous-critical",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Processes payments",
+    "branch": "main",
+    "from_entity_name": "Billing API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Payment Processor",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 122,
+    "eams_rel_id": "rel-143",
+    "rel_type": "uses",
+    "from_entity_id": "container.payment-processor-api",
+    "to_entity_id": "container.payment-processor",
+    "criticality": "synchronous-critical",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Delegates to core payment processor",
+    "branch": "main",
+    "from_entity_name": "Payment Processor API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Payment Processor",
+    "to_entity_kind": "container"
+  }
+]

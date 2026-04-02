@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 11,
+      "eams_id": "container.document-storage-service",
+      "kind": "container",
+      "name": "Document Storage Service",
+      "domain": "claims",
+      "status": "active",
+      "description": "Manages claim-related documents including photos, PDFs, police reports, and medical records. Integrates with OCR for auto-extraction.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": "tier-2",
+      "lifecycle": "production",
+      "tpm_id": null,
+      "technology_primary": "Node.js",
+      "technology_language": "TypeScript",
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": "AWS S3 + Lambda",
+      "container_type": "api",
+      "parent_system_id": "system.claims-processing",
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": null,
+      "nfr_data_classification": "phi",
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"documents\",\"storage\",\"ocr\"]",
+      "metadata_created": "2023-04-15",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": "warning",
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "cnt007",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

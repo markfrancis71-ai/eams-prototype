@@ -1,0 +1,99 @@
+{
+  "entity": {
+    "id": 12,
+    "eams_id": "container.claims-web-ui",
+    "kind": "container",
+    "name": "Claims Web UI",
+    "domain": "claims",
+    "status": "active",
+    "description": "React-based single-page application for claims management. Supports both customer self-service and adjuster workflows.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": "tier-1",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": "React",
+    "technology_language": "TypeScript",
+    "technology_framework": "Next.js 14",
+    "technology_runtime": "Browser",
+    "technology_hosting": "AWS CloudFront",
+    "container_type": "ui",
+    "parent_system_id": "system.claims-portal",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"ui\",\"react\",\"web\"]",
+    "metadata_created": "2023-06-15",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "cnt008",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 16,
+      "eams_rel_id": "rel-016",
+      "rel_type": "uses",
+      "from_entity_id": "container.claims-web-ui",
+      "to_entity_id": "container.adjudication-api",
+      "criticality": "synchronous-critical",
+      "protocol": "REST/HTTPS",
+      "sla_dependency_ms": null,
+      "description": "Submit and query claims",
+      "branch": "main"
+    },
+    {
+      "id": 18,
+      "eams_rel_id": "rel-018",
+      "rel_type": "uses",
+      "from_entity_id": "container.claims-web-ui",
+      "to_entity_id": "container.document-storage-service",
+      "criticality": "async",
+      "protocol": "REST/HTTPS",
+      "sla_dependency_ms": null,
+      "description": "Upload/download documents",
+      "branch": "main"
+    },
+    {
+      "id": 8,
+      "eams_rel_id": "rel-008",
+      "rel_type": "container_of",
+      "from_entity_id": "system.claims-portal",
+      "to_entity_id": "container.claims-web-ui",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 8,
+      "signal_id": "signal-008",
+      "signal_type": "performance",
+      "source": "New Relic",
+      "source_id": "NR-ALERT-22190",
+      "title": "Claims Portal — Frontend Bundle Size Regression",
+      "description": "Claims Web UI bundle size increased 34% (from 1.2MB to 1.6MB) after recent dependency update. Page load time p95 increased from 2.1s to 3.4s. Recommend tree-shaking audit.",
+      "affected_entities": "[\"system.claims-portal\",\"container.claims-web-ui\"]",
+      "severity": "medium",
+      "timestamp": "2026-03-27T11:30:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:15.386Z",
+    "relationship_count": 3,
+    "finding_count": 0
+  }
+}

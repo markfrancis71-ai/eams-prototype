@@ -1,0 +1,50 @@
+[
+  {
+    "id": 183,
+    "eams_rel_id": "rel-204",
+    "rel_type": "governed_by",
+    "from_entity_id": "container.k8s-cluster",
+    "to_entity_id": "standard.cloud-native",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "K8s cluster follows cloud-native standard",
+    "branch": "main",
+    "from_entity_name": "Kubernetes Cluster",
+    "from_entity_kind": "container",
+    "to_entity_name": "Cloud-Native Architecture Standard",
+    "to_entity_kind": "standard"
+  },
+  {
+    "id": 143,
+    "eams_rel_id": "rel-164",
+    "rel_type": "container_of",
+    "from_entity_id": "system.deployment-platform",
+    "to_entity_id": "container.k8s-cluster",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Deployment Platform",
+    "from_entity_kind": "system",
+    "to_entity_name": "Kubernetes Cluster",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 146,
+    "eams_rel_id": "rel-167",
+    "rel_type": "uses",
+    "from_entity_id": "container.deployment-pipeline",
+    "to_entity_id": "container.k8s-cluster",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Deploys to Kubernetes",
+    "branch": "main",
+    "from_entity_name": "Deployment Pipeline",
+    "from_entity_kind": "container",
+    "to_entity_name": "Kubernetes Cluster",
+    "to_entity_kind": "container"
+  }
+]

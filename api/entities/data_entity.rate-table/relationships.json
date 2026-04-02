@@ -1,0 +1,34 @@
+[
+  {
+    "id": 105,
+    "eams_rel_id": "rel-126",
+    "rel_type": "stores_in",
+    "from_entity_id": "data_entity.rate-table",
+    "to_entity_id": "container.rating-tables",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Rate tables stored in Redis cache",
+    "branch": "main",
+    "from_entity_name": "Rate Table",
+    "from_entity_kind": "data_entity",
+    "to_entity_name": "Rating Tables Store",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 106,
+    "eams_rel_id": "rel-127",
+    "rel_type": "uses",
+    "from_entity_id": "container.policy-rating-api",
+    "to_entity_id": "data_entity.rate-table",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Rating API uses rate tables",
+    "branch": "main",
+    "from_entity_name": "Policy Rating API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Rate Table",
+    "to_entity_kind": "data_entity"
+  }
+]

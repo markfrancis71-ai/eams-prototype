@@ -1,0 +1,18 @@
+[
+  {
+    "id": 29,
+    "eams_rel_id": "rel-029",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.adr-0042",
+    "to_entity_id": "container.adjudication-api",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "ADR-0042 constrains adjudication design",
+    "branch": "main",
+    "from_entity_name": "ADR-0042: Real-time Adjudication",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Adjudication API",
+    "to_entity_kind": "container"
+  }
+]

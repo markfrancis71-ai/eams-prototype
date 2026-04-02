@@ -1,0 +1,16 @@
+{
+  "id": 2,
+  "viewpoint_id": "viewpoint.c4-container",
+  "name": "C4 Container View",
+  "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships.",
+  "scope_strategy": "parameter-seed",
+  "stakeholders": "[\"solution-architect\",\"tech-lead\",\"developer\"]",
+  "parameters": "{\"entity_id\":{\"type\":\"string\",\"description\":\"The system to show containers for\"}}",
+  "scope_config": "{\"seed\":\"entity_id\",\"expand\":\"containers\"}",
+  "include_rules": "[{\"rel_types\":[\"container_of\",\"uses\",\"stores_in\",\"reads_from\",\"publishes_to\",\"subscribes_to\"],\"kinds\":[\"container\",\"system\",\"actor\"]}]",
+  "filters": "{}",
+  "styling": "{\"nodeColors\":{\"container\":\"#0F7173\",\"system\":\"#1B3A5C\"}}",
+  "layout": "{\"type\":\"hierarchical\",\"direction\":\"TB\"}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

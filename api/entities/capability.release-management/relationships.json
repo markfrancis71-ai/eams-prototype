@@ -1,0 +1,50 @@
+[
+  {
+    "id": 150,
+    "eams_rel_id": "rel-171",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.release-management",
+    "to_entity_id": "system.deployment-platform",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Release management realized by Deployment Platform",
+    "branch": "main",
+    "from_entity_name": "Release Management",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Deployment Platform",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 156,
+    "eams_rel_id": "rel-177",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.change-management",
+    "to_entity_id": "capability.release-management",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Change management enables release management",
+    "branch": "main",
+    "from_entity_name": "Change Management Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Release Management",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 162,
+    "eams_rel_id": "rel-183",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.operational-resilience",
+    "to_entity_id": "capability.release-management",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Release management supports resilience",
+    "branch": "main",
+    "from_entity_name": "Operational Resilience",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Release Management",
+    "to_entity_kind": "capability"
+  }
+]

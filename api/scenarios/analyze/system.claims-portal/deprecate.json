@@ -1,0 +1,131 @@
+{
+  "scenario_id": "scenario-1775108419073",
+  "results": [
+    {
+      "action": {
+        "type": "deprecate",
+        "target_entity_id": "system.claims-portal"
+      },
+      "entity": {
+        "id": 2,
+        "eams_id": "system.claims-portal",
+        "kind": "system",
+        "name": "Claims Portal",
+        "domain": "claims",
+        "status": "active",
+        "description": "Customer and adjuster-facing web portal for claims submission, tracking, and management. Supports both desktop and mobile access.",
+        "ownership_architect": "Sarah Chen",
+        "ownership_business_owner": "Lisa Park",
+        "criticality": "tier-1",
+        "lifecycle": "production",
+        "tpm_id": "TPM-CL-002",
+        "technology_primary": "React/Node.js",
+        "technology_language": "TypeScript",
+        "technology_framework": "Next.js 14",
+        "technology_runtime": "Node.js 20",
+        "technology_hosting": "AWS CloudFront + ECS",
+        "container_type": null,
+        "parent_system_id": null,
+        "nfr_availability": "99.9%",
+        "nfr_throughput": "10,000 concurrent users",
+        "nfr_latency": "p99 < 500ms",
+        "nfr_data_classification": "pii",
+        "nfr_encryption": null,
+        "nfr_retention": null,
+        "tags": "[\"portal\",\"claims\",\"customer-facing\"]",
+        "metadata_created": "2023-06-01",
+        "metadata_last_reviewed": "2025-12-01",
+        "metadata_review_due": null,
+        "compliance_status": "compliant",
+        "git_sha": null,
+        "compiled_at": null,
+        "branch": "main",
+        "content_hash": "def456",
+        "raw_yaml": null
+      },
+      "direct_impact": 5,
+      "total_impact": 3,
+      "affected_entities": [
+        {
+          "eams_id": "system.claims-portal",
+          "name": "Claims Portal",
+          "kind": "system"
+        },
+        {
+          "eams_id": "container.claims-web-ui",
+          "name": "Claims Web UI",
+          "kind": "container"
+        },
+        {
+          "eams_id": "container.claims-mobile-bff",
+          "name": "Claims Mobile BFF",
+          "kind": "container"
+        }
+      ],
+      "affected_relationships": [
+        {
+          "id": 19,
+          "eams_rel_id": "rel-019",
+          "rel_type": "uses",
+          "from_entity_id": "actor.claims-adjuster",
+          "to_entity_id": "system.claims-portal",
+          "criticality": "synchronous-critical",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Manages claims through portal",
+          "branch": "main"
+        },
+        {
+          "id": 20,
+          "eams_rel_id": "rel-020",
+          "rel_type": "uses",
+          "from_entity_id": "actor.policyholder",
+          "to_entity_id": "system.claims-portal",
+          "criticality": "synchronous-critical",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Files and tracks claims",
+          "branch": "main"
+        },
+        {
+          "id": 23,
+          "eams_rel_id": "rel-023",
+          "rel_type": "realized_by",
+          "from_entity_id": "capability.fnol",
+          "to_entity_id": "system.claims-portal",
+          "criticality": "informational",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "FNOL via portal",
+          "branch": "main"
+        },
+        {
+          "id": 110,
+          "eams_rel_id": "rel-131",
+          "rel_type": "uses",
+          "from_entity_id": "actor.member",
+          "to_entity_id": "system.claims-portal",
+          "criticality": "synchronous-critical",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Member files claims via portal",
+          "branch": "main"
+        },
+        {
+          "id": 113,
+          "eams_rel_id": "rel-134",
+          "rel_type": "uses",
+          "from_entity_id": "actor.external-vendor",
+          "to_entity_id": "system.claims-portal",
+          "criticality": "async",
+          "protocol": null,
+          "sla_dependency_ms": null,
+          "description": "Vendors interact via Claims Portal API",
+          "branch": "main"
+        }
+      ],
+      "risk_level": "medium",
+      "warnings": []
+    }
+  ]
+}

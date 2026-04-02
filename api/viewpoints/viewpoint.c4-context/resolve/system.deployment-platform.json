@@ -1,0 +1,147 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-context",
+    "name": "C4 System Context",
+    "description": "Shows a system in its environment — actors, neighboring systems, and their interactions. The classic C4 Level 1 view."
+  },
+  "scope": {
+    "entity_id": "system.deployment-platform"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.deployment-platform",
+        "kind": "system",
+        "name": "Deployment Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Deployment Platform",
+          "secondary": "Kubernetes + Harness",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.deployment-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "CI/CD and container orchestration platform. Kubernetes (EKS) + Harness for automated deployments with blue-green and canary release strategies.",
+          "technology": "Kubernetes + Harness"
+        }
+      },
+      {
+        "id": "container.deployment-pipeline",
+        "kind": "container",
+        "name": "Deployment Pipeline",
+        "role": "container",
+        "labels": {
+          "primary": "Deployment Pipeline",
+          "secondary": "Harness",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.deployment-pipeline",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Harness deployment pipelines for blue-green and canary releases. Supports automated rollback on health check failure.",
+          "technology": "Harness"
+        }
+      },
+      {
+        "id": "container.k8s-cluster",
+        "kind": "container",
+        "name": "Kubernetes Cluster",
+        "role": "container",
+        "labels": {
+          "primary": "Kubernetes Cluster",
+          "secondary": "AWS EKS",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.k8s-cluster",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "EKS Kubernetes cluster hosting containerized workloads. 12 node groups across 3 AZs with cluster autoscaler and Karpenter for node provisioning.",
+          "technology": "AWS EKS"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.deployment-platform",
+        "to": "container.deployment-pipeline",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.deployment-platform",
+        "to": "container.k8s-cluster",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.deployment-platform",
+        "label": "Deployment Platform",
+        "members": [
+          "container.deployment-pipeline",
+          "container.k8s-cluster"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "force-directed",
+      "gravity": 0.3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.224Z",
+      "node_count": 3,
+      "edge_count": 2
+    }
+  }
+}

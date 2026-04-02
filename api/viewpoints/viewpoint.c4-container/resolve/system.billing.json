@@ -1,0 +1,482 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-container",
+    "name": "C4 Container View",
+    "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships."
+  },
+  "scope": {
+    "entity_id": "system.billing"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.billing-api",
+        "kind": "container",
+        "name": "Billing API",
+        "role": "container",
+        "labels": {
+          "primary": "Billing API",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-api",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API for billing operations.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.billing-database",
+        "kind": "container",
+        "name": "Billing Database",
+        "role": "container",
+        "labels": {
+          "primary": "Billing Database",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-database",
+          "domain": "billing",
+          "status": "active",
+          "criticality": null,
+          "description": "Billing data store with financial transaction history.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.payment-ledger",
+        "kind": "container",
+        "name": "Payment Ledger",
+        "role": "container",
+        "labels": {
+          "primary": "Payment Ledger",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.payment-ledger",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Double-entry accounting ledger for premium receivables, payments, refunds, and write-offs. PostgreSQL with strict ACID compliance.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "container.billing-notification-service",
+        "kind": "container",
+        "name": "Billing Notification Service",
+        "role": "container",
+        "labels": {
+          "primary": "Billing Notification Service",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-notification-service",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Sends billing reminders, payment confirmations, and past-due notices via email, SMS, and push notifications.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.billing-scheduler",
+        "kind": "container",
+        "name": "Billing Scheduler",
+        "role": "container",
+        "labels": {
+          "primary": "Billing Scheduler",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-scheduler",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Scheduled job runner for installment generation, auto-pay processing, and grace period enforcement. Runs nightly and on-demand.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "actor.member",
+        "kind": "actor",
+        "name": "Member",
+        "role": "actor",
+        "labels": {
+          "primary": "Member",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.member",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "USAA member (policyholder/claimant). Interacts with Claims Portal, Policy Admin, and Billing System via web and mobile applications.",
+          "technology": null
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "system.log-analytics",
+        "kind": "system",
+        "name": "Log Analytics Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Log Analytics Platform",
+          "secondary": "ELK Stack",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.log-analytics",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Centralized log aggregation and analysis platform. ELK Stack (Elasticsearch, Logstash, Kibana) providing full-text search, log correlation, and anomaly detection across all systems.",
+          "technology": "ELK Stack"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.billing",
+        "to": "container.billing-api",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "container.billing-database",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Retrieves policy billing schedules",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "container.payment-ledger",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "container.billing-notification-service",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "container.billing-scheduler",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Triggers claim payments",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.member",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Member makes payments",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors billing system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects billing system logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.billing",
+        "label": "Billing System",
+        "members": [
+          "container.billing-api",
+          "container.billing-database",
+          "container.payment-ledger",
+          "container.billing-notification-service",
+          "container.billing-scheduler"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "hierarchical",
+      "direction": "TB"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.271Z",
+      "node_count": 11,
+      "edge_count": 10
+    }
+  }
+}

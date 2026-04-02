@@ -1,0 +1,18 @@
+[
+  {
+    "id": 32,
+    "eams_rel_id": "rel-032",
+    "rel_type": "governed_by",
+    "from_entity_id": "container.claims-database",
+    "to_entity_id": "standard.pii-data-handling",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Must comply with PII handling",
+    "branch": "main",
+    "from_entity_name": "Claims Database",
+    "from_entity_kind": "container",
+    "to_entity_name": "PII Data Handling Standard",
+    "to_entity_kind": "standard"
+  }
+]

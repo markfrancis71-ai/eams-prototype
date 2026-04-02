@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 72,
+      "eams_id": "process.premium-billing",
+      "kind": "process",
+      "name": "Premium Billing Process",
+      "domain": "billing",
+      "status": "active",
+      "description": "Monthly billing cycle: installment generation → payment collection → reconciliation → grace period management → cancellation for non-payment. Processes ~200K installments monthly.",
+      "ownership_architect": "Priya Patel",
+      "ownership_business_owner": null,
+      "criticality": "tier-1",
+      "lifecycle": "production",
+      "tpm_id": null,
+      "technology_primary": null,
+      "technology_language": null,
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": null,
+      "container_type": null,
+      "parent_system_id": null,
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": null,
+      "nfr_data_classification": null,
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"process\",\"billing\",\"monthly-cycle\"]",
+      "metadata_created": "2022-01-01",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": null,
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "bproc001",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

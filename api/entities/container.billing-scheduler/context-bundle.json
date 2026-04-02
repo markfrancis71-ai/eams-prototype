@@ -1,0 +1,111 @@
+{
+  "entity": {
+    "id": 71,
+    "eams_id": "container.billing-scheduler",
+    "kind": "container",
+    "name": "Billing Scheduler",
+    "domain": "billing",
+    "status": "active",
+    "description": "Scheduled job runner for installment generation, auto-pay processing, and grace period enforcement. Runs nightly and on-demand.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": "tier-1",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": "Java/Spring Boot",
+    "technology_language": "Java 17",
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": "AWS Batch",
+    "container_type": "batch",
+    "parent_system_id": "system.billing",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"scheduler\",\"batch\",\"billing\"]",
+    "metadata_created": "2022-04-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "bcnt007",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 120,
+      "eams_rel_id": "rel-141",
+      "rel_type": "uses",
+      "from_entity_id": "container.billing-scheduler",
+      "to_entity_id": "container.billing-api",
+      "criticality": "synchronous-critical",
+      "protocol": "REST/HTTPS",
+      "sla_dependency_ms": null,
+      "description": "Triggers scheduled billing operations",
+      "branch": "main"
+    },
+    {
+      "id": 121,
+      "eams_rel_id": "rel-142",
+      "rel_type": "uses",
+      "from_entity_id": "container.billing-scheduler",
+      "to_entity_id": "container.billing-notification-service",
+      "criticality": "async",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Triggers billing notifications",
+      "branch": "main"
+    },
+    {
+      "id": 117,
+      "eams_rel_id": "rel-138",
+      "rel_type": "container_of",
+      "from_entity_id": "system.billing",
+      "to_entity_id": "container.billing-scheduler",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    },
+    {
+      "id": 129,
+      "eams_rel_id": "rel-150",
+      "rel_type": "uses",
+      "from_entity_id": "process.premium-billing",
+      "to_entity_id": "container.billing-scheduler",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Premium billing uses scheduler",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 18,
+      "signal_id": "signal-018",
+      "signal_type": "incident",
+      "source": "PagerDuty",
+      "source_id": "PD-48901",
+      "title": "Auto-Pay Processing Delayed — Bank Holiday",
+      "description": "Billing scheduler auto-pay batch failed to process 12,400 ACH transactions due to Federal Reserve holiday (Cesar Chavez Day). Transactions queued and will process next business day. No customer impact — grace period covers delay.",
+      "affected_entities": "[\"container.billing-scheduler\",\"system.billing\",\"process.premium-billing\"]",
+      "severity": "medium",
+      "timestamp": "2026-03-31T06:00:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:16.526Z",
+    "relationship_count": 4,
+    "finding_count": 0
+  }
+}

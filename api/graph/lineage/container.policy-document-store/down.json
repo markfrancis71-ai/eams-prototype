@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 52,
+      "eams_id": "container.policy-document-store",
+      "kind": "container",
+      "name": "Policy Document Store",
+      "domain": "policy",
+      "status": "active",
+      "description": "Document storage for policy PDFs, endorsements, and declarations pages. S3-backed with metadata indexing and versioning.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": "tier-2",
+      "lifecycle": "production",
+      "tpm_id": null,
+      "technology_primary": "AWS S3",
+      "technology_language": "TypeScript",
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": "AWS S3 + Lambda",
+      "container_type": "storage",
+      "parent_system_id": "system.policy-document-gen",
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": null,
+      "nfr_data_classification": "pii",
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"storage\",\"documents\",\"s3\"]",
+      "metadata_created": "2023-09-15",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": "compliant",
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "pcnt008",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

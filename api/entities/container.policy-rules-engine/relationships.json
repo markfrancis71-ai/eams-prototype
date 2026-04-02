@@ -1,0 +1,50 @@
+[
+  {
+    "id": 80,
+    "eams_rel_id": "rel-101",
+    "rel_type": "container_of",
+    "from_entity_id": "system.policy-admin",
+    "to_entity_id": "container.policy-rules-engine",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Policy Admin System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Policy Rules Engine",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 84,
+    "eams_rel_id": "rel-105",
+    "rel_type": "uses",
+    "from_entity_id": "container.policy-api",
+    "to_entity_id": "container.policy-rules-engine",
+    "criticality": "synchronous-critical",
+    "protocol": "gRPC",
+    "sla_dependency_ms": null,
+    "description": "Evaluates underwriting rules",
+    "branch": "main",
+    "from_entity_name": "Policy API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Policy Rules Engine",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 91,
+    "eams_rel_id": "rel-112",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.underwriting",
+    "to_entity_id": "container.policy-rules-engine",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Rules engine evaluates underwriting decisions",
+    "branch": "main",
+    "from_entity_name": "Underwriting",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Policy Rules Engine",
+    "to_entity_kind": "container"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 38,
+    "eams_rel_id": "rel-038",
+    "rel_type": "uses",
+    "from_entity_id": "container.adjudication-api",
+    "to_entity_id": "data.policy-reference",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "References policy data",
+    "branch": "main",
+    "from_entity_name": "Adjudication API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Policy Reference",
+    "to_entity_kind": "data_entity"
+  }
+]

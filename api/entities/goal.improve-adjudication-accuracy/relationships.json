@@ -1,0 +1,18 @@
+[
+  {
+    "id": 28,
+    "eams_rel_id": "rel-028",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.improve-adjudication-accuracy",
+    "to_entity_id": "capability.fraud-detection",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Better fraud detection improves accuracy",
+    "branch": "main",
+    "from_entity_name": "Improve Adjudication Accuracy",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Fraud Detection",
+    "to_entity_kind": "capability"
+  }
+]

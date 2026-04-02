@@ -1,0 +1,50 @@
+[
+  {
+    "id": 15,
+    "eams_rel_id": "rel-015",
+    "rel_type": "stores_in",
+    "from_entity_id": "container.document-storage-service",
+    "to_entity_id": "container.claims-database",
+    "criticality": "async",
+    "protocol": "PostgreSQL",
+    "sla_dependency_ms": null,
+    "description": "Stores document metadata",
+    "branch": "main",
+    "from_entity_name": "Document Storage Service",
+    "from_entity_kind": "container",
+    "to_entity_name": "Claims Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 7,
+    "eams_rel_id": "rel-007",
+    "rel_type": "container_of",
+    "from_entity_id": "system.claims-processing",
+    "to_entity_id": "container.document-storage-service",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Claims Processing System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Document Storage Service",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 18,
+    "eams_rel_id": "rel-018",
+    "rel_type": "uses",
+    "from_entity_id": "container.claims-web-ui",
+    "to_entity_id": "container.document-storage-service",
+    "criticality": "async",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Upload/download documents",
+    "branch": "main",
+    "from_entity_name": "Claims Web UI",
+    "from_entity_kind": "container",
+    "to_entity_name": "Document Storage Service",
+    "to_entity_kind": "container"
+  }
+]

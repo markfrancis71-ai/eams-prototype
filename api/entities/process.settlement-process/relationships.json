@@ -1,0 +1,18 @@
+[
+  {
+    "id": 65,
+    "eams_rel_id": "rel-065",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.settlement-process",
+    "to_entity_id": "capability.claim-settlement",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Settlement process",
+    "branch": "main",
+    "from_entity_name": "Settlement Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Claim Settlement",
+    "to_entity_kind": "capability"
+  }
+]

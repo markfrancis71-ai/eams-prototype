@@ -1,0 +1,24 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.capability-map",
+    "name": "Capability Heat Map",
+    "description": "Maps business capabilities to the systems and processes that realize them. Heat-colored by maturity or risk."
+  },
+  "scope": {
+    "entity_id": "system.payment-processor"
+  },
+  "render_graph": {
+    "nodes": [],
+    "edges": [],
+    "groups": [],
+    "layout": {
+      "type": "grid",
+      "columns": 3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.329Z",
+      "node_count": 0,
+      "edge_count": 0
+    }
+  }
+}

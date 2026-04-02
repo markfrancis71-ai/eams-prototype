@@ -1,0 +1,431 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.blast-radius",
+    "name": "Blast Radius",
+    "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes."
+  },
+  "scope": {
+    "entity_id": "system.monitoring-platform"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.payment-gateway",
+        "kind": "system",
+        "name": "Payment Gateway",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Gateway",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-gateway",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment processing gateway supporting credit card, ACH, and wire transfers. PCI DSS Level 1 compliant.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "system.incident-management",
+        "kind": "system",
+        "name": "Incident Management System",
+        "role": "system",
+        "labels": {
+          "primary": "Incident Management System",
+          "secondary": "PagerDuty + ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident detection, routing, and resolution management. Integrates with PagerDuty and Slack.",
+          "technology": "PagerDuty + ServiceNow"
+        }
+      },
+      {
+        "id": "capability.observability",
+        "kind": "capability",
+        "name": "Observability",
+        "role": "capability",
+        "labels": {
+          "primary": "Observability",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.observability",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to monitor, trace, and debug distributed systems through metrics, logs, and traces with real-time alerting.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.incident-response",
+        "kind": "capability",
+        "name": "Incident Response",
+        "role": "capability",
+        "labels": {
+          "primary": "Incident Response",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.incident-response",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to detect, respond to, and resolve production incidents within SLA targets with structured post-mortem processes.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.incident-management",
+        "kind": "process",
+        "name": "Incident Management Process",
+        "role": "process",
+        "labels": {
+          "primary": "Incident Management Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident lifecycle: detection → triage → assignment → investigation → resolution → post-mortem → RCA documentation. SLA: P1 = 15 min response, 4 hour resolution.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.capacity-planning",
+        "kind": "process",
+        "name": "Capacity Planning Process",
+        "role": "process",
+        "labels": {
+          "primary": "Capacity Planning Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.capacity-planning",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Quarterly capacity review: utilization trend analysis → growth projection → infrastructure sizing → procurement request → provisioning. Covers compute, storage, and network.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors claims system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors policy system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors billing system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors payment gateway health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Receives alerts from monitoring",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.observability",
+        "to": "system.monitoring-platform",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Observability realized by Monitoring Platform",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.incident-response",
+        "to": "system.monitoring-platform",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Incident response uses monitoring for detection",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Incident management uses monitoring for detection",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.capacity-planning",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Capacity planning uses monitoring metrics",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "radial",
+      "center": "seed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.415Z",
+      "node_count": 10,
+      "edge_count": 9
+    }
+  }
+}

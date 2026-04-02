@@ -1,0 +1,34 @@
+[
+  {
+    "id": 107,
+    "eams_rel_id": "rel-128",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.ensure-regulatory-compliance",
+    "to_entity_id": "capability.underwriting",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Underwriting supports compliance",
+    "branch": "main",
+    "from_entity_name": "Ensure Regulatory Compliance",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Underwriting",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 108,
+    "eams_rel_id": "rel-129",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.ensure-regulatory-compliance",
+    "to_entity_id": "capability.policy-lifecycle",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Lifecycle management supports compliance",
+    "branch": "main",
+    "from_entity_name": "Ensure Regulatory Compliance",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Policy Lifecycle Management",
+    "to_entity_kind": "capability"
+  }
+]

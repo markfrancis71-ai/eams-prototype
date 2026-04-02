@@ -1,0 +1,50 @@
+[
+  {
+    "id": 53,
+    "eams_rel_id": "rel-053",
+    "rel_type": "reads_from",
+    "from_entity_id": "container.rating-api",
+    "to_entity_id": "container.rating-tables",
+    "criticality": "synchronous-critical",
+    "protocol": "Redis",
+    "sla_dependency_ms": null,
+    "description": "Reads rating tables",
+    "branch": "main",
+    "from_entity_name": "Rating API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Rating Tables Store",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 49,
+    "eams_rel_id": "rel-049",
+    "rel_type": "container_of",
+    "from_entity_id": "system.policy-rating-engine",
+    "to_entity_id": "container.rating-api",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Policy Rating Engine",
+    "from_entity_kind": "system",
+    "to_entity_name": "Rating API",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 51,
+    "eams_rel_id": "rel-051",
+    "rel_type": "uses",
+    "from_entity_id": "container.policy-api",
+    "to_entity_id": "container.rating-api",
+    "criticality": "synchronous-critical",
+    "protocol": "gRPC",
+    "sla_dependency_ms": null,
+    "description": "Calculates premiums",
+    "branch": "main",
+    "from_entity_name": "Policy API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Rating API",
+    "to_entity_kind": "container"
+  }
+]

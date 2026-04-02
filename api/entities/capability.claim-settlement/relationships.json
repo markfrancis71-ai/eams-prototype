@@ -1,0 +1,34 @@
+[
+  {
+    "id": 24,
+    "eams_rel_id": "rel-024",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.claim-settlement",
+    "to_entity_id": "system.claims-processing",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Settlement processing",
+    "branch": "main",
+    "from_entity_name": "Claim Settlement",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Claims Processing System",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 65,
+    "eams_rel_id": "rel-065",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.settlement-process",
+    "to_entity_id": "capability.claim-settlement",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Settlement process",
+    "branch": "main",
+    "from_entity_name": "Settlement Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Claim Settlement",
+    "to_entity_kind": "capability"
+  }
+]

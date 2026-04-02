@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 8,
+      "eams_id": "container.event-router",
+      "kind": "container",
+      "name": "Event Router",
+      "domain": "claims",
+      "status": "active",
+      "description": "Kafka-based event routing for claims domain events. Handles FNOL, status change, payment, and notification events.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": "tier-1",
+      "lifecycle": "production",
+      "tpm_id": null,
+      "technology_primary": "Apache Kafka",
+      "technology_language": null,
+      "technology_framework": "Kafka Streams",
+      "technology_runtime": null,
+      "technology_hosting": "AWS MSK",
+      "container_type": "stream",
+      "parent_system_id": "system.claims-processing",
+      "nfr_availability": "99.99%",
+      "nfr_throughput": "50,000 events/min",
+      "nfr_latency": null,
+      "nfr_data_classification": null,
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"kafka\",\"events\",\"streaming\"]",
+      "metadata_created": "2023-03-01",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": "compliant",
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "cnt004",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 63,
+    "eams_rel_id": "rel-063",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.fnol-process",
+    "to_entity_id": "capability.fnol",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "FNOL process realizes FNOL capability",
+    "branch": "main",
+    "from_entity_name": "FNOL Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "First Notice of Loss",
+    "to_entity_kind": "capability"
+  }
+]

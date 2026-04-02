@@ -1,0 +1,34 @@
+[
+  {
+    "id": 130,
+    "eams_rel_id": "rel-151",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.payment-processing",
+    "to_entity_id": "capability.premium-collection",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Payment processing realizes collection capability",
+    "branch": "main",
+    "from_entity_name": "Payment Processing",
+    "from_entity_kind": "process",
+    "to_entity_name": "Premium Collection",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 131,
+    "eams_rel_id": "rel-152",
+    "rel_type": "automated_by",
+    "from_entity_id": "process.payment-processing",
+    "to_entity_id": "system.payment-processor",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Payment processing automated by Payment Processor",
+    "branch": "main",
+    "from_entity_name": "Payment Processing",
+    "from_entity_kind": "process",
+    "to_entity_name": "Payment Processor",
+    "to_entity_kind": "system"
+  }
+]

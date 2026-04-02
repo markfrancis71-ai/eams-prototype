@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 32,
+      "eams_id": "decision.adr-0042",
+      "kind": "decision",
+      "name": "ADR-0042: Real-time Adjudication",
+      "domain": "claims",
+      "status": "active",
+      "description": "Decision to implement real-time adjudication for auto claims under $5,000 using a dedicated fast-path rules engine, bypassing the batch queue.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": null,
+      "lifecycle": null,
+      "tpm_id": null,
+      "technology_primary": null,
+      "technology_language": null,
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": null,
+      "container_type": null,
+      "parent_system_id": null,
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": null,
+      "nfr_data_classification": null,
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"adr\",\"architecture-decision\"]",
+      "metadata_created": "2025-06-15",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": null,
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "dec001",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

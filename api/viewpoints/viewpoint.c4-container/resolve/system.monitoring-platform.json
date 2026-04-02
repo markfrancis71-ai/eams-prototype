@@ -1,0 +1,357 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-container",
+    "name": "C4 Container View",
+    "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships."
+  },
+  "scope": {
+    "entity_id": "system.monitoring-platform"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.monitoring-dashboard",
+        "kind": "container",
+        "name": "Monitoring Dashboard",
+        "role": "container",
+        "labels": {
+          "primary": "Monitoring Dashboard",
+          "secondary": "Grafana",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.monitoring-dashboard",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Grafana dashboards for real-time system health, SLA tracking, and capacity metrics. 45+ dashboards covering all tier-1 and tier-2 systems.",
+          "technology": "Grafana"
+        }
+      },
+      {
+        "id": "container.alert-manager",
+        "kind": "container",
+        "name": "Alert Manager",
+        "role": "container",
+        "labels": {
+          "primary": "Alert Manager",
+          "secondary": "PagerDuty",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.alert-manager",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "PagerDuty/OpsGenie integration for incident routing, escalation policies, and on-call scheduling. Routes alerts from Datadog to appropriate on-call teams.",
+          "technology": "PagerDuty"
+        }
+      },
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.payment-gateway",
+        "kind": "system",
+        "name": "Payment Gateway",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Gateway",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-gateway",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment processing gateway supporting credit card, ACH, and wire transfers. PCI DSS Level 1 compliant.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "system.incident-management",
+        "kind": "system",
+        "name": "Incident Management System",
+        "role": "system",
+        "labels": {
+          "primary": "Incident Management System",
+          "secondary": "PagerDuty + ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident detection, routing, and resolution management. Integrates with PagerDuty and Slack.",
+          "technology": "PagerDuty + ServiceNow"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors claims system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors policy system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "container.monitoring-dashboard",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "container.alert-manager",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors billing system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors payment gateway health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Receives alerts from monitoring",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.monitoring-platform",
+        "label": "Monitoring Platform",
+        "members": [
+          "container.monitoring-dashboard",
+          "container.alert-manager"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "hierarchical",
+      "direction": "TB"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.293Z",
+      "node_count": 8,
+      "edge_count": 7
+    }
+  }
+}

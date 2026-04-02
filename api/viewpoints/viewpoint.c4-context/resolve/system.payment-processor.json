@@ -1,0 +1,104 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-context",
+    "name": "C4 System Context",
+    "description": "Shows a system in its environment — actors, neighboring systems, and their interactions. The classic C4 Level 1 view."
+  },
+  "scope": {
+    "entity_id": "system.payment-processor"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.payment-processor",
+        "kind": "system",
+        "name": "Payment Processor",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Processor",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-processor",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "External payment processing integration hub. Handles credit card, ACH, and EFT transactions via Stripe and internal banking APIs.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.payment-processor-api",
+        "kind": "container",
+        "name": "Payment Processor API",
+        "role": "container",
+        "labels": {
+          "primary": "Payment Processor API",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.payment-processor-api",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment gateway integration layer. Handles tokenization, authorization, capture, and refund workflows across Stripe and internal banking APIs.",
+          "technology": "Node.js"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.payment-processor",
+        "to": "container.payment-processor-api",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.payment-processor",
+        "label": "Payment Processor",
+        "members": [
+          "container.payment-processor-api"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "force-directed",
+      "gravity": 0.3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.207Z",
+      "node_count": 2,
+      "edge_count": 1
+    }
+  }
+}

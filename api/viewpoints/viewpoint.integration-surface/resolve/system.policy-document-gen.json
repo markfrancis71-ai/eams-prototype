@@ -1,0 +1,51 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.integration-surface",
+    "name": "System Integration Surface",
+    "description": "Shows all integration points for a system — incoming and outgoing APIs, events, and data flows."
+  },
+  "scope": {
+    "entity_id": "system.policy-document-gen"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.policy-document-gen",
+        "kind": "system",
+        "name": "Policy Document Generator",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Document Generator",
+          "secondary": "Node.js",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-document-gen",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Generates policy documents, endorsements, declarations pages, and certificates of insurance.",
+          "technology": "Node.js"
+        }
+      }
+    ],
+    "edges": [],
+    "groups": [],
+    "layout": {
+      "type": "force-directed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.820Z",
+      "node_count": 1,
+      "edge_count": 0
+    }
+  }
+}

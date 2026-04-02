@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "id": 54,
+      "eams_id": "container.policy-cache",
+      "kind": "container",
+      "name": "Policy Cache",
+      "domain": "policy",
+      "status": "active",
+      "description": "Redis cache layer for frequently accessed policy data, rate tables, and territory factors. Reduces database load by 70%.",
+      "ownership_architect": null,
+      "ownership_business_owner": null,
+      "criticality": "tier-2",
+      "lifecycle": "production",
+      "tpm_id": null,
+      "technology_primary": "Redis",
+      "technology_language": null,
+      "technology_framework": null,
+      "technology_runtime": null,
+      "technology_hosting": "AWS ElastiCache",
+      "container_type": "cache",
+      "parent_system_id": "system.policy-admin",
+      "nfr_availability": null,
+      "nfr_throughput": null,
+      "nfr_latency": "p99 < 5ms",
+      "nfr_data_classification": null,
+      "nfr_encryption": null,
+      "nfr_retention": null,
+      "tags": "[\"cache\",\"redis\",\"performance\"]",
+      "metadata_created": "2023-07-01",
+      "metadata_last_reviewed": null,
+      "metadata_review_due": null,
+      "compliance_status": "compliant",
+      "git_sha": null,
+      "compiled_at": null,
+      "branch": "main",
+      "content_hash": "pcnt010",
+      "raw_yaml": null
+    }
+  ],
+  "edges": []
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "id": 163,
+    "eams_rel_id": "rel-184",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.improve-member-experience",
+    "to_entity_id": "capability.observability",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Observability helps maintain experience SLAs",
+    "branch": "main",
+    "from_entity_name": "Improve Member Experience",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Observability",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 164,
+    "eams_rel_id": "rel-185",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.improve-member-experience",
+    "to_entity_id": "capability.fnol",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Fast FNOL improves member experience",
+    "branch": "main",
+    "from_entity_name": "Improve Member Experience",
+    "from_entity_kind": "goal",
+    "to_entity_name": "First Notice of Loss",
+    "to_entity_kind": "capability"
+  }
+]

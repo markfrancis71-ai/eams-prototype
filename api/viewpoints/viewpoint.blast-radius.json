@@ -1,0 +1,16 @@
+{
+  "id": 4,
+  "viewpoint_id": "viewpoint.blast-radius",
+  "name": "Blast Radius",
+  "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes.",
+  "scope_strategy": "parameter-seed",
+  "stakeholders": "[\"solution-architect\",\"sre\",\"risk-officer\"]",
+  "parameters": "{\"entity_id\":{\"type\":\"string\"}}",
+  "scope_config": "{\"seed\":\"entity_id\",\"expand\":\"dependents\",\"depth\":3}",
+  "include_rules": "[{\"rel_types\":[\"uses\",\"consumes\",\"subscribes_to\",\"reads_from\",\"realized_by\"]}]",
+  "filters": "{}",
+  "styling": "{\"emphasize_criticality\":true}",
+  "layout": "{\"type\":\"radial\",\"center\":\"seed\"}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

@@ -1,0 +1,4 @@
+{
+  "path": "claims/relationships.yaml",
+  "content": "# Claims Domain — Relationships\ndomain: claims\n\nrelationships:\n  - from: container.adjudication-api\n    to: container.rules-engine\n    type: uses\n    criticality: synchronous-critical\n    protocol: gRPC\n    description: Evaluates claim rules\n\n  - from: container.adjudication-api\n    to: container.claims-database\n    type: stores_in\n    criticality: synchronous-critical\n    protocol: PostgreSQL\n    description: Reads/writes claim data\n\n  - from: container.adjudication-api\n    to: container.event-router\n    type: publishes_to\n    criticality: async\n    protocol: Kafka\n    description: Publishes adjudication events\n"
+}

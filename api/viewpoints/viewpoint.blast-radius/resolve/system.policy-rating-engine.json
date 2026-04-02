@@ -1,0 +1,179 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.blast-radius",
+    "name": "Blast Radius",
+    "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes."
+  },
+  "scope": {
+    "entity_id": "system.policy-rating-engine"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.policy-rating-engine",
+        "kind": "system",
+        "name": "Policy Rating Engine",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Rating Engine",
+          "secondary": "Go",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-rating-engine",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Calculates premiums based on risk factors, coverage selections, and actuarial tables. Supports real-time and batch rating.",
+          "technology": "Go"
+        }
+      },
+      {
+        "id": "capability.premium-calculation",
+        "kind": "capability",
+        "name": "Premium Calculation",
+        "role": "capability",
+        "labels": {
+          "primary": "Premium Calculation",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.premium-calculation",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to calculate premiums based on risk factors and coverage selections.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.new-business-underwriting",
+        "kind": "process",
+        "name": "New Business Underwriting Process",
+        "role": "process",
+        "labels": {
+          "primary": "New Business Underwriting Process",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.new-business-underwriting",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "End-to-end new business workflow: application intake → risk assessment → underwriting decision → quote generation → binding → policy issuance. SLA: 48 hours for standard auto, 5 days for specialty.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.policy-renewal",
+        "kind": "process",
+        "name": "Policy Renewal Process",
+        "role": "process",
+        "labels": {
+          "primary": "Policy Renewal Process",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.policy-renewal",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Automated renewal process: renewal eligibility check → re-rating → renewal offer generation → member notification → acceptance/decline → policy reissue. 90-day advance processing window.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "capability.premium-calculation",
+        "to": "system.policy-rating-engine",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by rating engine",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.new-business-underwriting",
+        "to": "system.policy-rating-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "New business uses rating engine for quote",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.policy-renewal",
+        "to": "system.policy-rating-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Renewal uses rating engine for re-rating",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "radial",
+      "center": "seed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.400Z",
+      "node_count": 4,
+      "edge_count": 3
+    }
+  }
+}

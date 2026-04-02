@@ -1,0 +1,104 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-container",
+    "name": "C4 Container View",
+    "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships."
+  },
+  "scope": {
+    "entity_id": "system.policy-document-gen"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.policy-document-gen",
+        "kind": "system",
+        "name": "Policy Document Generator",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Document Generator",
+          "secondary": "Node.js",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-document-gen",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Generates policy documents, endorsements, declarations pages, and certificates of insurance.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.policy-document-store",
+        "kind": "container",
+        "name": "Policy Document Store",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Document Store",
+          "secondary": "AWS S3",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-document-store",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Document storage for policy PDFs, endorsements, and declarations pages. S3-backed with metadata indexing and versioning.",
+          "technology": "AWS S3"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.policy-document-gen",
+        "to": "container.policy-document-store",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.policy-document-gen",
+        "label": "Policy Document Generator",
+        "members": [
+          "container.policy-document-store"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "hierarchical",
+      "direction": "TB"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.261Z",
+      "node_count": 2,
+      "edge_count": 1
+    }
+  }
+}

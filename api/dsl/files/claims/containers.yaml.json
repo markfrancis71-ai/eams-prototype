@@ -1,0 +1,4 @@
+{
+  "path": "claims/containers.yaml",
+  "content": "# Claims Domain — Containers\ndomain: claims\n\ncontainers:\n  - eams_id: container.adjudication-api\n    name: Adjudication API\n    parent_system: system.claims-processing\n    container_type: api\n    technology:\n      primary: Java/Spring Boot\n      language: Java 17\n    nfr:\n      latency: \"p99 < 150ms\"\n      throughput: \"200 req/s\"\n\n  - eams_id: container.rules-engine\n    name: Rules Engine\n    parent_system: system.claims-processing\n    container_type: worker\n    technology:\n      primary: Drools\n      framework: Drools 8.x\n\n  - eams_id: container.claims-database\n    name: Claims Database\n    parent_system: system.claims-processing\n    container_type: database\n    technology:\n      primary: Aurora PostgreSQL\n"
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "id": 31,
+    "eams_rel_id": "rel-031",
+    "rel_type": "governed_by",
+    "from_entity_id": "container.adjudication-api",
+    "to_entity_id": "standard.rest-api-first",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Must follow REST API standard",
+    "branch": "main",
+    "from_entity_name": "Adjudication API",
+    "from_entity_kind": "container",
+    "to_entity_name": "REST API First",
+    "to_entity_kind": "standard"
+  },
+  {
+    "id": 34,
+    "eams_rel_id": "rel-034",
+    "rel_type": "governed_by",
+    "from_entity_id": "system.legacy-claims-api",
+    "to_entity_id": "standard.rest-api-first",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Violates REST-first standard",
+    "branch": "main",
+    "from_entity_name": "Legacy Claims API",
+    "from_entity_kind": "system",
+    "to_entity_name": "REST API First",
+    "to_entity_kind": "standard"
+  }
+]

@@ -1,0 +1,146 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-context",
+    "name": "C4 System Context",
+    "description": "Shows a system in its environment — actors, neighboring systems, and their interactions. The classic C4 Level 1 view."
+  },
+  "scope": {
+    "entity_id": "system.incident-management"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.incident-management",
+        "kind": "system",
+        "name": "Incident Management System",
+        "role": "system",
+        "labels": {
+          "primary": "Incident Management System",
+          "secondary": "PagerDuty + ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident detection, routing, and resolution management. Integrates with PagerDuty and Slack.",
+          "technology": "PagerDuty + ServiceNow"
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "container.incident-tracker",
+        "kind": "container",
+        "name": "Incident Tracker",
+        "role": "container",
+        "labels": {
+          "primary": "Incident Tracker",
+          "secondary": "ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.incident-tracker",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "ServiceNow integration for incident lifecycle management, RCA tracking, and SLA compliance reporting.",
+          "technology": "ServiceNow"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Receives alerts from monitoring",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.incident-management",
+        "to": "container.incident-tracker",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.incident-management",
+        "label": "Incident Management System",
+        "members": [
+          "container.incident-tracker"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "force-directed",
+      "gravity": 0.3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.217Z",
+      "node_count": 3,
+      "edge_count": 2
+    }
+  }
+}

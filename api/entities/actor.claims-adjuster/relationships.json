@@ -1,0 +1,18 @@
+[
+  {
+    "id": 19,
+    "eams_rel_id": "rel-019",
+    "rel_type": "uses",
+    "from_entity_id": "actor.claims-adjuster",
+    "to_entity_id": "system.claims-portal",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Manages claims through portal",
+    "branch": "main",
+    "from_entity_name": "Claims Adjuster",
+    "from_entity_kind": "actor",
+    "to_entity_name": "Claims Portal",
+    "to_entity_kind": "system"
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "id": 6,
+  "viewpoint_id": "viewpoint.integration-surface",
+  "name": "System Integration Surface",
+  "description": "Shows all integration points for a system — incoming and outgoing APIs, events, and data flows.",
+  "scope_strategy": "parameter-seed",
+  "stakeholders": "[\"integration-architect\",\"tech-lead\"]",
+  "parameters": "{\"entity_id\":{\"type\":\"string\"}}",
+  "scope_config": "{\"seed\":\"entity_id\",\"expand\":\"all-connections\"}",
+  "include_rules": "[{\"rel_types\":[\"uses\",\"consumes\",\"publishes_to\",\"subscribes_to\",\"invokes\"]}]",
+  "filters": "{}",
+  "styling": "{\"highlight_protocols\":true}",
+  "layout": "{\"type\":\"force-directed\"}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 26,
+    "eams_rel_id": "rel-026",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.reduce-claims-cycle",
+    "to_entity_id": "capability.claim-adjudication",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Faster adjudication reduces cycle time",
+    "branch": "main",
+    "from_entity_name": "Reduce Claims Cycle Time",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Claim Adjudication",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 27,
+    "eams_rel_id": "rel-027",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.reduce-claims-cycle",
+    "to_entity_id": "capability.fnol",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Faster FNOL reduces cycle time",
+    "branch": "main",
+    "from_entity_name": "Reduce Claims Cycle Time",
+    "from_entity_kind": "goal",
+    "to_entity_name": "First Notice of Loss",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 77,
+    "eams_rel_id": "rel-090",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.reduce-claims-cycle",
+    "to_entity_id": "capability.catastrophe-management",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "CAT management supports claims cycle reduction",
+    "branch": "main",
+    "from_entity_name": "Reduce Claims Cycle Time",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Catastrophe Management",
+    "to_entity_kind": "capability"
+  }
+]

@@ -1,0 +1,123 @@
+{
+  "entity": {
+    "id": 46,
+    "eams_id": "container.rating-tables",
+    "kind": "container",
+    "name": "Rating Tables Store",
+    "domain": "policy",
+    "status": "active",
+    "description": "Redis-cached actuarial rating tables and factors.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": null,
+    "lifecycle": null,
+    "tpm_id": null,
+    "technology_primary": "Redis",
+    "technology_language": null,
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": null,
+    "container_type": "cache",
+    "parent_system_id": "system.policy-rating-engine",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": null,
+    "metadata_created": "2023-03-15",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "pcnt005",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 50,
+      "eams_rel_id": "rel-050",
+      "rel_type": "container_of",
+      "from_entity_id": "system.policy-rating-engine",
+      "to_entity_id": "container.rating-tables",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    },
+    {
+      "id": 53,
+      "eams_rel_id": "rel-053",
+      "rel_type": "reads_from",
+      "from_entity_id": "container.rating-api",
+      "to_entity_id": "container.rating-tables",
+      "criticality": "synchronous-critical",
+      "protocol": "Redis",
+      "sla_dependency_ms": null,
+      "description": "Reads rating tables",
+      "branch": "main"
+    },
+    {
+      "id": 87,
+      "eams_rel_id": "rel-108",
+      "rel_type": "uses",
+      "from_entity_id": "container.policy-rating-api",
+      "to_entity_id": "container.rating-tables",
+      "criticality": "synchronous-critical",
+      "protocol": "Redis",
+      "sla_dependency_ms": null,
+      "description": "Reads rate tables",
+      "branch": "main"
+    },
+    {
+      "id": 105,
+      "eams_rel_id": "rel-126",
+      "rel_type": "stores_in",
+      "from_entity_id": "data_entity.rate-table",
+      "to_entity_id": "container.rating-tables",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Rate tables stored in Redis cache",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 6,
+      "signal_id": "signal-006",
+      "signal_type": "change",
+      "source": "GitHub Actions",
+      "source_id": "GHA-deploy-4417",
+      "title": "Policy Rating Engine — Production Deployment v2.14.0",
+      "description": "Automated deployment of Policy Rating Engine v2.14.0 to production. Changes include updated actuarial tables for Q2 2026 and improved caching strategy for rating factor lookups.",
+      "affected_entities": "[\"system.policy-rating-engine\",\"container.rating-api\",\"container.rating-tables\"]",
+      "severity": "low",
+      "timestamp": "2026-03-28T06:15:00Z"
+    },
+    {
+      "id": 15,
+      "signal_id": "signal-015",
+      "signal_type": "performance",
+      "source": "Datadog",
+      "source_id": "DD-METRIC-9103",
+      "title": "Policy Rating Engine — Cache Miss Rate Elevated",
+      "description": "Redis cache miss rate for rate table lookups increased from 5% to 28% following Q2 actuarial table refresh. Rating API latency p99 increased from 80ms to 340ms. Recommend cache warm-up procedure after table updates.",
+      "affected_entities": "[\"system.policy-rating-engine\",\"container.policy-rating-api\",\"container.rating-tables\",\"container.policy-cache\"]",
+      "severity": "medium",
+      "timestamp": "2026-03-30T08:45:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:16.047Z",
+    "relationship_count": 4,
+    "finding_count": 0
+  }
+}

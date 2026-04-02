@@ -1,0 +1,18 @@
+[
+  {
+    "id": 20,
+    "eams_rel_id": "rel-020",
+    "rel_type": "uses",
+    "from_entity_id": "actor.policyholder",
+    "to_entity_id": "system.claims-portal",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Files and tracks claims",
+    "branch": "main",
+    "from_entity_name": "Policyholder",
+    "from_entity_kind": "actor",
+    "to_entity_name": "Claims Portal",
+    "to_entity_kind": "system"
+  }
+]

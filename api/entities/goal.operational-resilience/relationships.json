@@ -1,0 +1,50 @@
+[
+  {
+    "id": 160,
+    "eams_rel_id": "rel-181",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.operational-resilience",
+    "to_entity_id": "capability.observability",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Observability supports resilience",
+    "branch": "main",
+    "from_entity_name": "Operational Resilience",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Observability",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 161,
+    "eams_rel_id": "rel-182",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.operational-resilience",
+    "to_entity_id": "capability.incident-response",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Incident response supports resilience",
+    "branch": "main",
+    "from_entity_name": "Operational Resilience",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Incident Response",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 162,
+    "eams_rel_id": "rel-183",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.operational-resilience",
+    "to_entity_id": "capability.release-management",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Release management supports resilience",
+    "branch": "main",
+    "from_entity_name": "Operational Resilience",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Release Management",
+    "to_entity_kind": "capability"
+  }
+]

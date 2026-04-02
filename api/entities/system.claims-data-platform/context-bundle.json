@@ -1,0 +1,62 @@
+{
+  "entity": {
+    "id": 3,
+    "eams_id": "system.claims-data-platform",
+    "kind": "system",
+    "name": "Claims Data Platform",
+    "domain": "claims",
+    "status": "active",
+    "description": "Analytics and reporting platform for claims data, providing real-time dashboards and batch reporting capabilities.",
+    "ownership_architect": "David Kim",
+    "ownership_business_owner": "Mike Rodriguez",
+    "criticality": "tier-2",
+    "lifecycle": "production",
+    "tpm_id": "TPM-CL-003",
+    "technology_primary": "Snowflake/dbt",
+    "technology_language": "SQL/Python",
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": "AWS + Snowflake",
+    "container_type": null,
+    "parent_system_id": null,
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": "confidential",
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"data\",\"analytics\",\"claims\"]",
+    "metadata_created": "2024-01-10",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "ghi789",
+    "raw_yaml": null
+  },
+  "relationships": [],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 5,
+      "signal_id": "signal-005",
+      "signal_type": "feedback",
+      "source": "Architecture Review Board",
+      "source_id": "ARB-2026-Q1-03",
+      "title": "ARB Feedback — Claims Data Platform Architecture",
+      "description": "Architecture Review Board recommends implementing data lineage tracking in the Claims Data Platform to improve audit trail for regulatory reporting.",
+      "affected_entities": "[\"system.claims-data-platform\"]",
+      "severity": "low",
+      "timestamp": "2026-03-22T16:30:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:15.126Z",
+    "relationship_count": 0,
+    "finding_count": 0
+  }
+}

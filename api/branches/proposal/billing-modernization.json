@@ -1,0 +1,10 @@
+{
+  "id": 2,
+  "branch_name": "proposal/billing-modernization",
+  "intent": "proposal",
+  "description": "Proposal to modernize the billing system from monolithic to microservices architecture with event-driven payment processing.",
+  "review_status": "draft",
+  "author": "priya.patel@company.com",
+  "base_branch": "main",
+  "created_at": "2026-03-10T14:00:00Z"
+}

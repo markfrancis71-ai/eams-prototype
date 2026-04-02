@@ -1,0 +1,34 @@
+[
+  {
+    "id": 170,
+    "eams_rel_id": "rel-191",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.event-driven-architecture",
+    "to_entity_id": "container.event-router",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "EDA decision drives event router design",
+    "branch": "main",
+    "from_entity_name": "ADR: Event-Driven Architecture",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Event Router",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 171,
+    "eams_rel_id": "rel-192",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.event-driven-architecture",
+    "to_entity_id": "container.policy-event-bus",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "EDA decision drives policy event bus",
+    "branch": "main",
+    "from_entity_name": "ADR: Event-Driven Architecture",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Policy Event Bus",
+    "to_entity_kind": "container"
+  }
+]

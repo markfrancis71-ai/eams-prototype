@@ -1,0 +1,3857 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.tier1-dependency",
+    "name": "Tier-1 Dependency Graph",
+    "description": "Shows all tier-1 critical systems and their dependencies. Highlights single points of failure."
+  },
+  "scope": {
+    "entity_id": "system.log-analytics"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.claims-portal",
+        "kind": "system",
+        "name": "Claims Portal",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Portal",
+          "secondary": "React/Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-portal",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Customer and adjuster-facing web portal for claims submission, tracking, and management. Supports both desktop and mobile access.",
+          "technology": "React/Node.js"
+        }
+      },
+      {
+        "id": "system.claims-data-platform",
+        "kind": "system",
+        "name": "Claims Data Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Data Platform",
+          "secondary": "Snowflake/dbt",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-data-platform",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Analytics and reporting platform for claims data, providing real-time dashboards and batch reporting capabilities.",
+          "technology": "Snowflake/dbt"
+        }
+      },
+      {
+        "id": "system.legacy-claims-api",
+        "kind": "system",
+        "name": "Legacy Claims API",
+        "role": "system",
+        "labels": {
+          "primary": "Legacy Claims API",
+          "secondary": "Java EE",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "deprecated",
+            "tier-2",
+            "violation"
+          ],
+          "dashed": true
+        },
+        "data": {
+          "eams_id": "system.legacy-claims-api",
+          "domain": "claims",
+          "status": "deprecated",
+          "criticality": "tier-2",
+          "description": "Legacy SOAP-based claims API. Scheduled for decommission by Q3 2026. Still serves 15% of integration traffic from partner systems.",
+          "technology": "Java EE"
+        }
+      },
+      {
+        "id": "container.adjudication-api",
+        "kind": "container",
+        "name": "Adjudication API",
+        "role": "container",
+        "labels": {
+          "primary": "Adjudication API",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.adjudication-api",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API service handling claim adjudication decisions. Orchestrates rules engine evaluation, fraud checks, and settlement calculations.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.rules-engine",
+        "kind": "container",
+        "name": "Rules Engine",
+        "role": "container",
+        "labels": {
+          "primary": "Rules Engine",
+          "secondary": "Drools",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.rules-engine",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Business rules engine for claims adjudication. Contains 2,400+ rules across auto, property, and liability lines.",
+          "technology": "Drools"
+        }
+      },
+      {
+        "id": "container.claims-database",
+        "kind": "container",
+        "name": "Claims Database",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Database",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-database",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Primary claims data store. Aurora PostgreSQL with read replicas for reporting queries.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "container.event-router",
+        "kind": "container",
+        "name": "Event Router",
+        "role": "container",
+        "labels": {
+          "primary": "Event Router",
+          "secondary": "Apache Kafka",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.event-router",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Kafka-based event routing for claims domain events. Handles FNOL, status change, payment, and notification events.",
+          "technology": "Apache Kafka"
+        }
+      },
+      {
+        "id": "container.claims-notification-service",
+        "kind": "container",
+        "name": "Claims Notification Service",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Notification Service",
+          "secondary": "Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-notification-service",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Handles email, SMS, and push notifications for claims status updates, document requests, and settlement communications.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.claims-reporting-service",
+        "kind": "container",
+        "name": "Claims Reporting Service",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Reporting Service",
+          "secondary": "Python",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-reporting-service",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Generates operational and regulatory reports. Includes daily loss runs, monthly reserve reports, and ad-hoc analytics.",
+          "technology": "Python"
+        }
+      },
+      {
+        "id": "container.document-storage-service",
+        "kind": "container",
+        "name": "Document Storage Service",
+        "role": "container",
+        "labels": {
+          "primary": "Document Storage Service",
+          "secondary": "Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.document-storage-service",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Manages claim-related documents including photos, PDFs, police reports, and medical records. Integrates with OCR for auto-extraction.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.claims-web-ui",
+        "kind": "container",
+        "name": "Claims Web UI",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Web UI",
+          "secondary": "React",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-web-ui",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "React-based single-page application for claims management. Supports both customer self-service and adjuster workflows.",
+          "technology": "React"
+        }
+      },
+      {
+        "id": "container.claims-mobile-bff",
+        "kind": "container",
+        "name": "Claims Mobile BFF",
+        "role": "container",
+        "labels": {
+          "primary": "Claims Mobile BFF",
+          "secondary": "Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.claims-mobile-bff",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Backend-for-Frontend service optimized for mobile clients. Aggregates data from multiple backend services.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "capability.claim-adjudication",
+        "kind": "capability",
+        "name": "Claim Adjudication",
+        "role": "capability",
+        "labels": {
+          "primary": "Claim Adjudication",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.claim-adjudication",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to evaluate a claim against policy terms, coverage rules, and fraud indicators to produce an adjudication decision.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.fnol",
+        "kind": "capability",
+        "name": "First Notice of Loss",
+        "role": "capability",
+        "labels": {
+          "primary": "First Notice of Loss",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.fnol",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to receive and register initial loss notifications across all channels (web, mobile, phone, email).",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.claim-settlement",
+        "kind": "capability",
+        "name": "Claim Settlement",
+        "role": "capability",
+        "labels": {
+          "primary": "Claim Settlement",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.claim-settlement",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to calculate, authorize, and execute claim payments including partial payments, reserves, and recoveries.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.subrogation",
+        "kind": "capability",
+        "name": "Subrogation",
+        "role": "capability",
+        "labels": {
+          "primary": "Subrogation",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.subrogation",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "The ability to identify, pursue, and recover subrogation claims from third parties.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.fraud-detection",
+        "kind": "capability",
+        "name": "Fraud Detection",
+        "role": "capability",
+        "labels": {
+          "primary": "Fraud Detection",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.fraud-detection",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to detect, flag, and investigate potentially fraudulent claims using rules-based and ML-based indicators.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.fnol-process",
+        "kind": "process",
+        "name": "FNOL Process",
+        "role": "process",
+        "labels": {
+          "primary": "FNOL Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.fnol-process",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "End-to-end First Notice of Loss process from initial notification through claim creation and assignment.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.adjudication-process",
+        "kind": "process",
+        "name": "Adjudication Process",
+        "role": "process",
+        "labels": {
+          "primary": "Adjudication Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.adjudication-process",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Claim evaluation process including coverage verification, damage assessment, liability determination, and settlement calculation.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.settlement-process",
+        "kind": "process",
+        "name": "Settlement Process",
+        "role": "process",
+        "labels": {
+          "primary": "Settlement Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.settlement-process",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Payment authorization and execution process for approved claims including partial payments, supplements, and final settlements.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.subrogation-recovery",
+        "kind": "process",
+        "name": "Subrogation Recovery Process",
+        "role": "process",
+        "labels": {
+          "primary": "Subrogation Recovery Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.subrogation-recovery",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "End-to-end subrogation workflow: identify recovery opportunity → send demand letter → negotiate with third-party insurer → collect payment → close recovery. Average cycle time: 45 days. Recovery rate: 62% of identified opportunities.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.fraud-investigation",
+        "kind": "process",
+        "name": "Fraud Investigation Process",
+        "role": "process",
+        "labels": {
+          "primary": "Fraud Investigation Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.fraud-investigation",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "SIU investigation workflow triggered by fraud scoring above threshold (>0.7). Steps: case assignment → evidence collection → interview scheduling → determination → referral/closure. SLA: initial review within 48 hours, determination within 30 days.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.cat-claims",
+        "kind": "process",
+        "name": "Catastrophe Claims Process",
+        "role": "process",
+        "labels": {
+          "primary": "Catastrophe Claims Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.cat-claims",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Specialized high-volume claims process activated during declared catastrophe events (hurricanes, hail, wildfire). Includes: CAT declaration trigger → surge staffing → field adjuster deployment → expedited FNOL intake → batch adjudication → accelerated settlement. Handles 10x normal volume with modified SLAs.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.catastrophe-management",
+        "kind": "capability",
+        "name": "Catastrophe Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Catastrophe Management",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.catastrophe-management",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to declare catastrophe events, activate surge protocols, deploy field resources, and manage high-volume claims processing with modified SLAs and approval authorities.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data.claim-record",
+        "kind": "data_entity",
+        "name": "Claim Record",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Claim Record",
+          "secondary": "data_entity",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data.claim-record",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Master claim record containing claim metadata, status, amounts, parties, and lifecycle events.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data.claimant",
+        "kind": "data_entity",
+        "name": "Claimant",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Claimant",
+          "secondary": "data_entity",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data.claimant",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Person or entity making the claim. Includes contact information, identification, and claim history.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data.policy-reference",
+        "kind": "data_entity",
+        "name": "Policy Reference",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Policy Reference",
+          "secondary": "data_entity",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data.policy-reference",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Reference to the insurance policy associated with a claim. Includes coverage terms, limits, and deductibles.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data.adjudication-decision",
+        "kind": "data_entity",
+        "name": "Adjudication Decision",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Adjudication Decision",
+          "secondary": "data_entity",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data.adjudication-decision",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Record of the adjudication decision including coverage determination, payment amount, and rationale.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.reduce-claims-cycle",
+        "kind": "goal",
+        "name": "Reduce Claims Cycle Time",
+        "role": "goal",
+        "labels": {
+          "primary": "Reduce Claims Cycle Time",
+          "secondary": "goal",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.reduce-claims-cycle",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Reduce average claims cycle time from 14 days to 7 days by Q4 2026 through automation and process optimization.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.improve-adjudication-accuracy",
+        "kind": "goal",
+        "name": "Improve Adjudication Accuracy",
+        "role": "goal",
+        "labels": {
+          "primary": "Improve Adjudication Accuracy",
+          "secondary": "goal",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.improve-adjudication-accuracy",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Improve automated adjudication accuracy from 82% to 95% by enhancing rules engine and incorporating ML models.",
+          "technology": null
+        }
+      },
+      {
+        "id": "decision.adr-0042",
+        "kind": "decision",
+        "name": "ADR-0042: Real-time Adjudication",
+        "role": "decision",
+        "labels": {
+          "primary": "ADR-0042: Real-time Adjudication",
+          "secondary": "decision",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "note",
+          "color": "#D97706",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "decision.adr-0042",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Decision to implement real-time adjudication for auto claims under $5,000 using a dedicated fast-path rules engine, bypassing the batch queue.",
+          "technology": null
+        }
+      },
+      {
+        "id": "decision.adr-0043",
+        "kind": "decision",
+        "name": "ADR-0043: Event-driven Claims",
+        "role": "decision",
+        "labels": {
+          "primary": "ADR-0043: Event-driven Claims",
+          "secondary": "decision",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "note",
+          "color": "#D97706",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "decision.adr-0043",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Decision to migrate claims processing from request-response to event-driven architecture using Kafka for improved decoupling and scalability.",
+          "technology": null
+        }
+      },
+      {
+        "id": "standard.rest-api-first",
+        "kind": "standard",
+        "name": "REST API First",
+        "role": "standard",
+        "labels": {
+          "primary": "REST API First",
+          "secondary": "standard",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "shield",
+          "color": "#6D28D9",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "standard.rest-api-first",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "All new services must expose REST APIs following the enterprise API design guidelines. SOAP interfaces are prohibited for new development.",
+          "technology": null
+        }
+      },
+      {
+        "id": "standard.pii-data-handling",
+        "kind": "standard",
+        "name": "PII Data Handling Standard",
+        "role": "standard",
+        "labels": {
+          "primary": "PII Data Handling Standard",
+          "secondary": "standard",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "shield",
+          "color": "#6D28D9",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "standard.pii-data-handling",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Requirements for handling personally identifiable information including encryption, access controls, audit logging, and retention policies.",
+          "technology": null
+        }
+      },
+      {
+        "id": "standard.aws-deployment",
+        "kind": "standard",
+        "name": "AWS Deployment Standard",
+        "role": "standard",
+        "labels": {
+          "primary": "AWS Deployment Standard",
+          "secondary": "standard",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "shield",
+          "color": "#6D28D9",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "standard.aws-deployment",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "All new workloads must be deployed to AWS using approved patterns: ECS Fargate for services, Lambda for event handlers, RDS/Aurora for databases.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.claims-adjuster",
+        "kind": "actor",
+        "name": "Claims Adjuster",
+        "role": "actor",
+        "labels": {
+          "primary": "Claims Adjuster",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.claims-adjuster",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Insurance professional responsible for evaluating and processing claims.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.policyholder",
+        "kind": "actor",
+        "name": "Policyholder",
+        "role": "actor",
+        "labels": {
+          "primary": "Policyholder",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.policyholder",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Customer who holds an insurance policy and may file claims.",
+          "technology": null
+        }
+      },
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.policy-rating-engine",
+        "kind": "system",
+        "name": "Policy Rating Engine",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Rating Engine",
+          "secondary": "Go",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-rating-engine",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Calculates premiums based on risk factors, coverage selections, and actuarial tables. Supports real-time and batch rating.",
+          "technology": "Go"
+        }
+      },
+      {
+        "id": "system.policy-document-gen",
+        "kind": "system",
+        "name": "Policy Document Generator",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Document Generator",
+          "secondary": "Node.js",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-document-gen",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Generates policy documents, endorsements, declarations pages, and certificates of insurance.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.policy-api",
+        "kind": "container",
+        "name": "Policy API",
+        "role": "container",
+        "labels": {
+          "primary": "Policy API",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-api",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API for policy CRUD operations, endorsements, and renewals.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.policy-database",
+        "kind": "container",
+        "name": "Policy Database",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Database",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-database",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Primary policy data store with full history and audit trail.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "container.policy-event-bus",
+        "kind": "container",
+        "name": "Policy Event Bus",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Event Bus",
+          "secondary": "Apache Kafka",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-event-bus",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Kafka-based event bus for policy domain events (issued, renewed, cancelled, endorsed).",
+          "technology": "Apache Kafka"
+        }
+      },
+      {
+        "id": "container.rating-api",
+        "kind": "container",
+        "name": "Rating API",
+        "role": "container",
+        "labels": {
+          "primary": "Rating API",
+          "secondary": "Go",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.rating-api",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "High-performance rating calculation API.",
+          "technology": "Go"
+        }
+      },
+      {
+        "id": "container.rating-tables",
+        "kind": "container",
+        "name": "Rating Tables Store",
+        "role": "container",
+        "labels": {
+          "primary": "Rating Tables Store",
+          "secondary": "Redis",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.rating-tables",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Redis-cached actuarial rating tables and factors.",
+          "technology": "Redis"
+        }
+      },
+      {
+        "id": "capability.policy-issuance",
+        "kind": "capability",
+        "name": "Policy Issuance",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Issuance",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-issuance",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to issue new insurance policies across all lines of business.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.premium-calculation",
+        "kind": "capability",
+        "name": "Premium Calculation",
+        "role": "capability",
+        "labels": {
+          "primary": "Premium Calculation",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.premium-calculation",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to calculate premiums based on risk factors and coverage selections.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.policy-renewal",
+        "kind": "capability",
+        "name": "Policy Renewal",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Renewal",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-renewal",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "The ability to process policy renewals including re-rating and document generation.",
+          "technology": null
+        }
+      },
+      {
+        "id": "container.policy-rating-api",
+        "kind": "container",
+        "name": "Policy Rating API",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Rating API",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-rating-api",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API for real-time policy rating calculations. Handles quote rating, renewal re-rating, and endorsement re-rating across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.policy-rules-engine",
+        "kind": "container",
+        "name": "Policy Rules Engine",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Rules Engine",
+          "secondary": "Drools",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-rules-engine",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Business rules engine for underwriting decisions. Evaluates risk acceptability, coverage eligibility, and pricing exceptions using Drools-based rule sets.",
+          "technology": "Drools"
+        }
+      },
+      {
+        "id": "container.policy-document-store",
+        "kind": "container",
+        "name": "Policy Document Store",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Document Store",
+          "secondary": "AWS S3",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-document-store",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Document storage for policy PDFs, endorsements, and declarations pages. S3-backed with metadata indexing and versioning.",
+          "technology": "AWS S3"
+        }
+      },
+      {
+        "id": "container.policy-workflow-engine",
+        "kind": "container",
+        "name": "Policy Workflow Engine",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Workflow Engine",
+          "secondary": "Camunda BPM",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-workflow-engine",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Orchestrates policy lifecycle workflows including new business, renewal, endorsement, and cancellation. Camunda BPM-based with custom task handlers.",
+          "technology": "Camunda BPM"
+        }
+      },
+      {
+        "id": "container.policy-cache",
+        "kind": "container",
+        "name": "Policy Cache",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Cache",
+          "secondary": "Redis",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-cache",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Redis cache layer for frequently accessed policy data, rate tables, and territory factors. Reduces database load by 70%.",
+          "technology": "Redis"
+        }
+      },
+      {
+        "id": "process.new-business-underwriting",
+        "kind": "process",
+        "name": "New Business Underwriting Process",
+        "role": "process",
+        "labels": {
+          "primary": "New Business Underwriting Process",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.new-business-underwriting",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "End-to-end new business workflow: application intake → risk assessment → underwriting decision → quote generation → binding → policy issuance. SLA: 48 hours for standard auto, 5 days for specialty.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.policy-renewal",
+        "kind": "process",
+        "name": "Policy Renewal Process",
+        "role": "process",
+        "labels": {
+          "primary": "Policy Renewal Process",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.policy-renewal",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Automated renewal process: renewal eligibility check → re-rating → renewal offer generation → member notification → acceptance/decline → policy reissue. 90-day advance processing window.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.endorsement-processing",
+        "kind": "process",
+        "name": "Endorsement Processing",
+        "role": "process",
+        "labels": {
+          "primary": "Endorsement Processing",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.endorsement-processing",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Mid-term policy change workflow: change request → impact assessment → re-rating → approval routing → endorsement issuance → billing adjustment.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.underwriting",
+        "kind": "capability",
+        "name": "Underwriting",
+        "role": "capability",
+        "labels": {
+          "primary": "Underwriting",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.underwriting",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to assess risk, determine insurability, and price policies based on risk factors, loss history, and underwriting guidelines.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.policy-lifecycle",
+        "kind": "capability",
+        "name": "Policy Lifecycle Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Lifecycle Management",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-lifecycle",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to manage the full policy lifecycle from quote through renewal, including endorsements, cancellations, and reinstatements.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data_entity.policy-record",
+        "kind": "data_entity",
+        "name": "Policy Record",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Policy Record",
+          "secondary": "data_entity",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data_entity.policy-record",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Core policy data object: policy number, effective dates, coverage limits, deductibles, premium, named insureds, covered vehicles/properties.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data_entity.rate-table",
+        "kind": "data_entity",
+        "name": "Rate Table",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Rate Table",
+          "secondary": "data_entity",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data_entity.rate-table",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Rating factor tables: territory factors, vehicle symbols, driver classifications, multi-policy discounts, loyalty tiers. Updated quarterly by actuarial.",
+          "technology": null
+        }
+      },
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.payment-gateway",
+        "kind": "system",
+        "name": "Payment Gateway",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Gateway",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-gateway",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment processing gateway supporting credit card, ACH, and wire transfers. PCI DSS Level 1 compliant.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.billing-api",
+        "kind": "container",
+        "name": "Billing API",
+        "role": "container",
+        "labels": {
+          "primary": "Billing API",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-api",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API for billing operations.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.billing-database",
+        "kind": "container",
+        "name": "Billing Database",
+        "role": "container",
+        "labels": {
+          "primary": "Billing Database",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-database",
+          "domain": "billing",
+          "status": "active",
+          "criticality": null,
+          "description": "Billing data store with financial transaction history.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "container.payment-processor",
+        "kind": "container",
+        "name": "Payment Processor",
+        "role": "container",
+        "labels": {
+          "primary": "Payment Processor",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.payment-processor",
+          "domain": "billing",
+          "status": "active",
+          "criticality": null,
+          "description": "Core payment processing service integrating with Stripe and bank APIs.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "system.payment-processor",
+        "kind": "system",
+        "name": "Payment Processor",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Processor",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-processor",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "External payment processing integration hub. Handles credit card, ACH, and EFT transactions via Stripe and internal banking APIs.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.payment-ledger",
+        "kind": "container",
+        "name": "Payment Ledger",
+        "role": "container",
+        "labels": {
+          "primary": "Payment Ledger",
+          "secondary": "Aurora PostgreSQL",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.payment-ledger",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Double-entry accounting ledger for premium receivables, payments, refunds, and write-offs. PostgreSQL with strict ACID compliance.",
+          "technology": "Aurora PostgreSQL"
+        }
+      },
+      {
+        "id": "container.payment-processor-api",
+        "kind": "container",
+        "name": "Payment Processor API",
+        "role": "container",
+        "labels": {
+          "primary": "Payment Processor API",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.payment-processor-api",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Payment gateway integration layer. Handles tokenization, authorization, capture, and refund workflows across Stripe and internal banking APIs.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.billing-notification-service",
+        "kind": "container",
+        "name": "Billing Notification Service",
+        "role": "container",
+        "labels": {
+          "primary": "Billing Notification Service",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-notification-service",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Sends billing reminders, payment confirmations, and past-due notices via email, SMS, and push notifications.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "container.billing-scheduler",
+        "kind": "container",
+        "name": "Billing Scheduler",
+        "role": "container",
+        "labels": {
+          "primary": "Billing Scheduler",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.billing-scheduler",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Scheduled job runner for installment generation, auto-pay processing, and grace period enforcement. Runs nightly and on-demand.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "process.premium-billing",
+        "kind": "process",
+        "name": "Premium Billing Process",
+        "role": "process",
+        "labels": {
+          "primary": "Premium Billing Process",
+          "secondary": "process",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.premium-billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Monthly billing cycle: installment generation → payment collection → reconciliation → grace period management → cancellation for non-payment. Processes ~200K installments monthly.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.payment-processing",
+        "kind": "process",
+        "name": "Payment Processing",
+        "role": "process",
+        "labels": {
+          "primary": "Payment Processing",
+          "secondary": "process",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.payment-processing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Real-time payment workflow: payment receipt → validation → authorization → capture → ledger posting → confirmation. Supports credit card, ACH, and EFT.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.premium-collection",
+        "kind": "capability",
+        "name": "Premium Collection",
+        "role": "capability",
+        "labels": {
+          "primary": "Premium Collection",
+          "secondary": "capability",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.premium-collection",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to collect premiums through multiple payment methods, manage installment plans, and handle payment failures gracefully.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.financial-reconciliation",
+        "kind": "capability",
+        "name": "Financial Reconciliation",
+        "role": "capability",
+        "labels": {
+          "primary": "Financial Reconciliation",
+          "secondary": "capability",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.financial-reconciliation",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Ability to reconcile premium receivables with actual payments, identify discrepancies, and manage refunds/write-offs.",
+          "technology": null
+        }
+      },
+      {
+        "id": "data_entity.payment-transaction",
+        "kind": "data_entity",
+        "name": "Payment Transaction",
+        "role": "data_entity",
+        "labels": {
+          "primary": "Payment Transaction",
+          "secondary": "data_entity",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "cylinder",
+          "color": "#7C5E3C",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "data_entity.payment-transaction",
+          "domain": "billing",
+          "status": "active",
+          "criticality": null,
+          "description": "Payment record: transaction ID, amount, method, authorization code, status, timestamps, associated policy number.",
+          "technology": null
+        }
+      },
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "system.incident-management",
+        "kind": "system",
+        "name": "Incident Management System",
+        "role": "system",
+        "labels": {
+          "primary": "Incident Management System",
+          "secondary": "PagerDuty + ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident detection, routing, and resolution management. Integrates with PagerDuty and Slack.",
+          "technology": "PagerDuty + ServiceNow"
+        }
+      },
+      {
+        "id": "system.log-analytics",
+        "kind": "system",
+        "name": "Log Analytics Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Log Analytics Platform",
+          "secondary": "ELK Stack",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.log-analytics",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Centralized log aggregation and analysis platform. ELK Stack (Elasticsearch, Logstash, Kibana) providing full-text search, log correlation, and anomaly detection across all systems.",
+          "technology": "ELK Stack"
+        }
+      },
+      {
+        "id": "system.deployment-platform",
+        "kind": "system",
+        "name": "Deployment Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Deployment Platform",
+          "secondary": "Kubernetes + Harness",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.deployment-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "CI/CD and container orchestration platform. Kubernetes (EKS) + Harness for automated deployments with blue-green and canary release strategies.",
+          "technology": "Kubernetes + Harness"
+        }
+      },
+      {
+        "id": "container.monitoring-dashboard",
+        "kind": "container",
+        "name": "Monitoring Dashboard",
+        "role": "container",
+        "labels": {
+          "primary": "Monitoring Dashboard",
+          "secondary": "Grafana",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.monitoring-dashboard",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Grafana dashboards for real-time system health, SLA tracking, and capacity metrics. 45+ dashboards covering all tier-1 and tier-2 systems.",
+          "technology": "Grafana"
+        }
+      },
+      {
+        "id": "container.alert-manager",
+        "kind": "container",
+        "name": "Alert Manager",
+        "role": "container",
+        "labels": {
+          "primary": "Alert Manager",
+          "secondary": "PagerDuty",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.alert-manager",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "PagerDuty/OpsGenie integration for incident routing, escalation policies, and on-call scheduling. Routes alerts from Datadog to appropriate on-call teams.",
+          "technology": "PagerDuty"
+        }
+      },
+      {
+        "id": "container.log-collector",
+        "kind": "container",
+        "name": "Log Collector",
+        "role": "container",
+        "labels": {
+          "primary": "Log Collector",
+          "secondary": "Fluentd",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.log-collector",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Filebeat/Fluentd log collection agents aggregating logs from all containers. Enriches logs with service metadata before forwarding to OpenSearch.",
+          "technology": "Fluentd"
+        }
+      },
+      {
+        "id": "container.incident-tracker",
+        "kind": "container",
+        "name": "Incident Tracker",
+        "role": "container",
+        "labels": {
+          "primary": "Incident Tracker",
+          "secondary": "ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.incident-tracker",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "ServiceNow integration for incident lifecycle management, RCA tracking, and SLA compliance reporting.",
+          "technology": "ServiceNow"
+        }
+      },
+      {
+        "id": "container.deployment-pipeline",
+        "kind": "container",
+        "name": "Deployment Pipeline",
+        "role": "container",
+        "labels": {
+          "primary": "Deployment Pipeline",
+          "secondary": "Harness",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.deployment-pipeline",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Harness deployment pipelines for blue-green and canary releases. Supports automated rollback on health check failure.",
+          "technology": "Harness"
+        }
+      },
+      {
+        "id": "container.k8s-cluster",
+        "kind": "container",
+        "name": "Kubernetes Cluster",
+        "role": "container",
+        "labels": {
+          "primary": "Kubernetes Cluster",
+          "secondary": "AWS EKS",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.k8s-cluster",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "EKS Kubernetes cluster hosting containerized workloads. 12 node groups across 3 AZs with cluster autoscaler and Karpenter for node provisioning.",
+          "technology": "AWS EKS"
+        }
+      },
+      {
+        "id": "process.incident-management",
+        "kind": "process",
+        "name": "Incident Management Process",
+        "role": "process",
+        "labels": {
+          "primary": "Incident Management Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident lifecycle: detection → triage → assignment → investigation → resolution → post-mortem → RCA documentation. SLA: P1 = 15 min response, 4 hour resolution.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.change-management",
+        "kind": "process",
+        "name": "Change Management Process",
+        "role": "process",
+        "labels": {
+          "primary": "Change Management Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.change-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Change request workflow: RFC submission → impact assessment → CAB review → approval → implementation → validation → closure. All production changes require CAB approval.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.capacity-planning",
+        "kind": "process",
+        "name": "Capacity Planning Process",
+        "role": "process",
+        "labels": {
+          "primary": "Capacity Planning Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.capacity-planning",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Quarterly capacity review: utilization trend analysis → growth projection → infrastructure sizing → procurement request → provisioning. Covers compute, storage, and network.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.observability",
+        "kind": "capability",
+        "name": "Observability",
+        "role": "capability",
+        "labels": {
+          "primary": "Observability",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.observability",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to monitor, trace, and debug distributed systems through metrics, logs, and traces with real-time alerting.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.release-management",
+        "kind": "capability",
+        "name": "Release Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Release Management",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.release-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to safely deploy software changes to production with automated testing, staged rollouts, and instant rollback.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.incident-response",
+        "kind": "capability",
+        "name": "Incident Response",
+        "role": "capability",
+        "labels": {
+          "primary": "Incident Response",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.incident-response",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to detect, respond to, and resolve production incidents within SLA targets with structured post-mortem processes.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.ensure-regulatory-compliance",
+        "kind": "goal",
+        "name": "Ensure Regulatory Compliance",
+        "role": "goal",
+        "labels": {
+          "primary": "Ensure Regulatory Compliance",
+          "secondary": "goal",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.ensure-regulatory-compliance",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Ensure all P&C systems and processes comply with state insurance regulations, NAIC guidelines, and internal audit requirements. Zero critical audit findings target.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.improve-member-experience",
+        "kind": "goal",
+        "name": "Improve Member Experience",
+        "role": "goal",
+        "labels": {
+          "primary": "Improve Member Experience",
+          "secondary": "goal",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.improve-member-experience",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Deliver seamless digital experiences across quoting, servicing, and claims with <3 second page loads and >4.5 app store rating.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.operational-resilience",
+        "kind": "goal",
+        "name": "Operational Resilience",
+        "role": "goal",
+        "labels": {
+          "primary": "Operational Resilience",
+          "secondary": "goal",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.operational-resilience",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Achieve 99.95% availability across all tier-1 systems with <15 minute incident detection and <4 hour resolution SLAs.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.member",
+        "kind": "actor",
+        "name": "Member",
+        "role": "actor",
+        "labels": {
+          "primary": "Member",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.member",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "USAA member (policyholder/claimant). Interacts with Claims Portal, Policy Admin, and Billing System via web and mobile applications.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.underwriter",
+        "kind": "actor",
+        "name": "Underwriter",
+        "role": "actor",
+        "labels": {
+          "primary": "Underwriter",
+          "secondary": "actor",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.underwriter",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "P&C underwriter. Uses Policy Admin System for risk assessment, exception handling, and manual review of complex applications.",
+          "technology": null
+        }
+      },
+      {
+        "id": "actor.external-vendor",
+        "kind": "actor",
+        "name": "External Vendor",
+        "role": "actor",
+        "labels": {
+          "primary": "External Vendor",
+          "secondary": "actor",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "person",
+          "color": "#4A5568",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "actor.external-vendor",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Third-party service providers: body shops, medical providers, contractors. Interact via Claims Portal API for assignment acceptance and status updates.",
+          "technology": null
+        }
+      },
+      {
+        "id": "standard.api-design",
+        "kind": "standard",
+        "name": "API Design Standard",
+        "role": "standard",
+        "labels": {
+          "primary": "API Design Standard",
+          "secondary": "standard",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "shield",
+          "color": "#6D28D9",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "standard.api-design",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "RESTful API design standard: OpenAPI 3.0 spec required, semantic versioning, OAuth 2.0 auth, rate limiting, pagination. Applies to all API containers.",
+          "technology": null
+        }
+      },
+      {
+        "id": "standard.data-classification",
+        "kind": "standard",
+        "name": "Data Classification Standard",
+        "role": "standard",
+        "labels": {
+          "primary": "Data Classification Standard",
+          "secondary": "standard",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "shield",
+          "color": "#6D28D9",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "standard.data-classification",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Data classification standard: PII handling (encryption at rest AES-256, in transit TLS 1.3), retention policies, access controls per NIST 800-53.",
+          "technology": null
+        }
+      },
+      {
+        "id": "standard.cloud-native",
+        "kind": "standard",
+        "name": "Cloud-Native Architecture Standard",
+        "role": "standard",
+        "labels": {
+          "primary": "Cloud-Native Architecture Standard",
+          "secondary": "standard",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "shield",
+          "color": "#6D28D9",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "standard.cloud-native",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Cloud-native architecture standard: 12-factor app principles, containerized deployment, horizontal scaling, health checks, graceful shutdown.",
+          "technology": null
+        }
+      },
+      {
+        "id": "decision.event-driven-architecture",
+        "kind": "decision",
+        "name": "ADR: Event-Driven Architecture",
+        "role": "decision",
+        "labels": {
+          "primary": "ADR: Event-Driven Architecture",
+          "secondary": "decision",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "note",
+          "color": "#D97706",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "decision.event-driven-architecture",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "ADR: Adopt event-driven architecture using Apache Kafka for inter-system communication. Rationale: decoupling, scalability, audit trail. Status: accepted.",
+          "technology": null
+        }
+      },
+      {
+        "id": "decision.api-gateway-pattern",
+        "kind": "decision",
+        "name": "ADR: API Gateway Pattern",
+        "role": "decision",
+        "labels": {
+          "primary": "ADR: API Gateway Pattern",
+          "secondary": "decision",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "note",
+          "color": "#D97706",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "decision.api-gateway-pattern",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "ADR: Implement API gateway (Kong) for external-facing APIs. Rationale: centralized auth, rate limiting, observability. Status: accepted.",
+          "technology": null
+        }
+      },
+      {
+        "id": "decision.database-per-service",
+        "kind": "decision",
+        "name": "ADR: Database Per Service",
+        "role": "decision",
+        "labels": {
+          "primary": "ADR: Database Per Service",
+          "secondary": "decision",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "note",
+          "color": "#D97706",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "decision.database-per-service",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "ADR: Each system owns its database. No shared databases. Rationale: loose coupling, independent deployability, technology flexibility. Status: accepted.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.claims-processing",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Retrieves policy details for claim verification",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Triggers claim payments",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.claims-processing",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Processes claim settlements",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors claims system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.legacy-claims-api",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Legacy integration bridge",
+          "protocol": "SOAP/XML"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects claims processing logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.claims-adjuster",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Manages claims through portal",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.policyholder",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Files and tracks claims",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.member",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Member files claims via portal",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.external-vendor",
+        "to": "system.claims-portal",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Vendors interact via Claims Portal API",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "container.adjudication-api",
+        "to": "container.rules-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Evaluates claim rules",
+          "protocol": "gRPC"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.adjudication-api",
+        "to": "container.claims-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Reads/writes claim data",
+          "protocol": "PostgreSQL"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.adjudication-api",
+        "to": "data.claim-record",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Uses claim records",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.adjudication-api",
+        "to": "data.policy-reference",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "References policy data",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.claims-web-ui",
+        "to": "container.adjudication-api",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Submit and query claims",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.claims-mobile-bff",
+        "to": "container.adjudication-api",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Mobile claims operations",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.fraud-investigation",
+        "to": "container.rules-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Fraud investigation uses Rules Engine for scoring",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.claims-reporting-service",
+        "to": "container.claims-database",
+        "rel_type": "reads_from",
+        "labels": {
+          "primary": "Reads claims data for reports",
+          "protocol": "PostgreSQL read replica"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.document-storage-service",
+        "to": "container.claims-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Stores document metadata",
+          "protocol": "PostgreSQL"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "data.claim-record",
+        "to": "container.claims-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Stored in claims database",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.cat-claims",
+        "to": "container.event-router",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "CAT process uses Event Router for high-volume intake",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.claims-web-ui",
+        "to": "container.document-storage-service",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Upload/download documents",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors policy system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.billing",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Retrieves policy billing schedules",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.underwriter",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Underwriter uses Policy Admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.member",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Member manages policies",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects policy admin logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.new-business-underwriting",
+        "to": "system.policy-rating-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "New business uses rating engine for quote",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.policy-renewal",
+        "to": "system.policy-rating-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Renewal uses rating engine for re-rating",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-api",
+        "to": "container.rating-api",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Calculates premiums",
+          "protocol": "gRPC"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-api",
+        "to": "container.policy-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Stores policy data",
+          "protocol": "PostgreSQL"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-api",
+        "to": "container.policy-rules-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Evaluates underwriting rules",
+          "protocol": "gRPC"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-api",
+        "to": "container.policy-cache",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Reads cached policy data",
+          "protocol": "Redis"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-api",
+        "to": "container.policy-workflow-engine",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Triggers policy lifecycle workflows",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-api",
+        "to": "data_entity.policy-record",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Policy API manages policy records",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-document-store",
+        "to": "container.policy-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Stores document metadata",
+          "protocol": "PostgreSQL"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "data_entity.policy-record",
+        "to": "container.policy-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Policy records stored in policy database",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-workflow-engine",
+        "to": "container.policy-event-bus",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Publishes workflow state changes",
+          "protocol": "Kafka"
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "container.rating-api",
+        "to": "container.rating-tables",
+        "rel_type": "reads_from",
+        "labels": {
+          "primary": "Reads rating tables",
+          "protocol": "Redis"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-rating-api",
+        "to": "container.rating-tables",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Reads rate tables",
+          "protocol": "Redis"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "data_entity.rate-table",
+        "to": "container.rating-tables",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Rate tables stored in Redis cache",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.policy-rating-api",
+        "to": "data_entity.rate-table",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Rating API uses rate tables",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.policy-renewal",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Renewal triggers billing schedule update",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.endorsement-processing",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Endorsement triggers billing adjustment",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.endorsement-processing",
+        "to": "process.premium-billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Endorsement triggers billing adjustment",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "actor.member",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Member makes payments",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors billing system health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects billing system logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.monitoring-platform",
+        "to": "system.payment-gateway",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Monitors payment gateway health",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.billing-api",
+        "to": "container.payment-processor",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Processes payments",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.billing-api",
+        "to": "container.billing-database",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Stores billing data",
+          "protocol": "PostgreSQL"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.billing-api",
+        "to": "container.payment-ledger",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Reads/writes financial ledger",
+          "protocol": "PostgreSQL"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.billing-api",
+        "to": "container.payment-processor-api",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Processes payments via gateway",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.billing-scheduler",
+        "to": "container.billing-api",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Triggers scheduled billing operations",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.payment-processor-api",
+        "to": "container.payment-processor",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Delegates to core payment processor",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "data_entity.payment-transaction",
+        "to": "container.payment-ledger",
+        "rel_type": "stores_in",
+        "labels": {
+          "primary": "Payment transactions stored in ledger",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.billing-scheduler",
+        "to": "container.billing-notification-service",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Triggers billing notifications",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "process.premium-billing",
+        "to": "container.billing-scheduler",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Premium billing uses scheduler",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Receives alerts from monitoring",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.incident-management",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Incident management uses monitoring for detection",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.capacity-planning",
+        "to": "system.monitoring-platform",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Capacity planning uses monitoring metrics",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.log-collector",
+        "to": "system.log-analytics",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Forwards logs to analytics",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      },
+      {
+        "from": "container.monitoring-dashboard",
+        "to": "container.alert-manager",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Dashboard shows alert status",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.alert-manager",
+        "to": "container.incident-tracker",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Creates incidents from alerts",
+          "protocol": "REST/HTTPS"
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.deployment-pipeline",
+        "to": "container.k8s-cluster",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Deploys to Kubernetes",
+          "protocol": ""
+        },
+        "display": {
+          "style": "solid",
+          "weight": 3,
+          "color": "#EF4444",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.claims-processing",
+        "label": "Claims Processing System",
+        "members": [
+          "container.adjudication-api",
+          "container.rules-engine",
+          "container.claims-database",
+          "container.event-router",
+          "container.claims-notification-service",
+          "container.claims-reporting-service",
+          "container.document-storage-service"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.claims-portal",
+        "label": "Claims Portal",
+        "members": [
+          "container.claims-web-ui",
+          "container.claims-mobile-bff"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.policy-admin",
+        "label": "Policy Admin System",
+        "members": [
+          "container.policy-api",
+          "container.policy-database",
+          "container.policy-event-bus",
+          "container.policy-rules-engine",
+          "container.policy-workflow-engine",
+          "container.policy-cache"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.policy-rating-engine",
+        "label": "Policy Rating Engine",
+        "members": [
+          "container.rating-api",
+          "container.rating-tables",
+          "container.policy-rating-api"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.policy-document-gen",
+        "label": "Policy Document Generator",
+        "members": [
+          "container.policy-document-store"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.billing",
+        "label": "Billing System",
+        "members": [
+          "container.billing-api",
+          "container.billing-database",
+          "container.payment-ledger",
+          "container.billing-notification-service",
+          "container.billing-scheduler"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.payment-gateway",
+        "label": "Payment Gateway",
+        "members": [
+          "container.payment-processor"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.payment-processor",
+        "label": "Payment Processor",
+        "members": [
+          "container.payment-processor-api"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.monitoring-platform",
+        "label": "Monitoring Platform",
+        "members": [
+          "container.monitoring-dashboard",
+          "container.alert-manager"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.incident-management",
+        "label": "Incident Management System",
+        "members": [
+          "container.incident-tracker"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.log-analytics",
+        "label": "Log Analytics Platform",
+        "members": [
+          "container.log-collector"
+        ],
+        "color": "#1B3A5C33"
+      },
+      {
+        "id": "group-system.deployment-platform",
+        "label": "Deployment Platform",
+        "members": [
+          "container.deployment-pipeline",
+          "container.k8s-cluster"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "force-directed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:18.239Z",
+      "node_count": 104,
+      "edge_count": 65
+    }
+  }
+}

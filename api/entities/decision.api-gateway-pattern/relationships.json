@@ -1,0 +1,50 @@
+[
+  {
+    "id": 172,
+    "eams_rel_id": "rel-193",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.api-gateway-pattern",
+    "to_entity_id": "container.adjudication-api",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "API gateway pattern applies to adjudication API",
+    "branch": "main",
+    "from_entity_name": "ADR: API Gateway Pattern",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Adjudication API",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 173,
+    "eams_rel_id": "rel-194",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.api-gateway-pattern",
+    "to_entity_id": "container.policy-api",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "API gateway pattern applies to policy API",
+    "branch": "main",
+    "from_entity_name": "ADR: API Gateway Pattern",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Policy API",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 174,
+    "eams_rel_id": "rel-195",
+    "rel_type": "constrains",
+    "from_entity_id": "decision.api-gateway-pattern",
+    "to_entity_id": "container.billing-api",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "API gateway pattern applies to billing API",
+    "branch": "main",
+    "from_entity_name": "ADR: API Gateway Pattern",
+    "from_entity_kind": "decision",
+    "to_entity_name": "Billing API",
+    "to_entity_kind": "container"
+  }
+]

@@ -1,0 +1,229 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.integration-surface",
+    "name": "System Integration Surface",
+    "description": "Shows all integration points for a system — incoming and outgoing APIs, events, and data flows."
+  },
+  "scope": {
+    "entity_id": "system.log-analytics"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.log-analytics",
+        "kind": "system",
+        "name": "Log Analytics Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Log Analytics Platform",
+          "secondary": "ELK Stack",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.log-analytics",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Centralized log aggregation and analysis platform. ELK Stack (Elasticsearch, Logstash, Kibana) providing full-text search, log correlation, and anomaly detection across all systems.",
+          "technology": "ELK Stack"
+        }
+      },
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.billing",
+        "kind": "system",
+        "name": "Billing System",
+        "role": "system",
+        "labels": {
+          "primary": "Billing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.billing",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core billing system managing premium billing, payment processing, and accounts receivable for all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "container.log-collector",
+        "kind": "container",
+        "name": "Log Collector",
+        "role": "container",
+        "labels": {
+          "primary": "Log Collector",
+          "secondary": "Fluentd",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.log-collector",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Filebeat/Fluentd log collection agents aggregating logs from all containers. Enriches logs with service metadata before forwarding to OpenSearch.",
+          "technology": "Fluentd"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.log-analytics",
+        "to": "system.claims-processing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects claims processing logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.policy-admin",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects policy admin logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.log-analytics",
+        "to": "system.billing",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Collects billing system logs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "container.log-collector",
+        "to": "system.log-analytics",
+        "rel_type": "uses",
+        "labels": {
+          "primary": "Forwards logs to analytics",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": true
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.log-analytics",
+        "label": "Log Analytics Platform",
+        "members": [
+          "container.log-collector"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "force-directed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.839Z",
+      "node_count": 5,
+      "edge_count": 4
+    }
+  }
+}

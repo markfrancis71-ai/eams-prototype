@@ -1,0 +1,34 @@
+[
+  {
+    "id": 141,
+    "eams_rel_id": "rel-162",
+    "rel_type": "container_of",
+    "from_entity_id": "system.incident-management",
+    "to_entity_id": "container.incident-tracker",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Incident Management System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Incident Tracker",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 145,
+    "eams_rel_id": "rel-166",
+    "rel_type": "uses",
+    "from_entity_id": "container.alert-manager",
+    "to_entity_id": "container.incident-tracker",
+    "criticality": "synchronous-critical",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Creates incidents from alerts",
+    "branch": "main",
+    "from_entity_name": "Alert Manager",
+    "from_entity_kind": "container",
+    "to_entity_name": "Incident Tracker",
+    "to_entity_kind": "container"
+  }
+]

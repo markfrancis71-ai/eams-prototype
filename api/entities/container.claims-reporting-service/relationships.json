@@ -1,0 +1,34 @@
+[
+  {
+    "id": 14,
+    "eams_rel_id": "rel-014",
+    "rel_type": "reads_from",
+    "from_entity_id": "container.claims-reporting-service",
+    "to_entity_id": "container.claims-database",
+    "criticality": "non-critical",
+    "protocol": "PostgreSQL read replica",
+    "sla_dependency_ms": null,
+    "description": "Reads claims data for reports",
+    "branch": "main",
+    "from_entity_name": "Claims Reporting Service",
+    "from_entity_kind": "container",
+    "to_entity_name": "Claims Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 6,
+    "eams_rel_id": "rel-006",
+    "rel_type": "container_of",
+    "from_entity_id": "system.claims-processing",
+    "to_entity_id": "container.claims-reporting-service",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Claims Processing System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Claims Reporting Service",
+    "to_entity_kind": "container"
+  }
+]

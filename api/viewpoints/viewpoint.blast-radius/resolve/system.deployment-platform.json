@@ -1,0 +1,95 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.blast-radius",
+    "name": "Blast Radius",
+    "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes."
+  },
+  "scope": {
+    "entity_id": "system.deployment-platform"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.deployment-platform",
+        "kind": "system",
+        "name": "Deployment Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Deployment Platform",
+          "secondary": "Kubernetes + Harness",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.deployment-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "CI/CD and container orchestration platform. Kubernetes (EKS) + Harness for automated deployments with blue-green and canary release strategies.",
+          "technology": "Kubernetes + Harness"
+        }
+      },
+      {
+        "id": "capability.release-management",
+        "kind": "capability",
+        "name": "Release Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Release Management",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.release-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to safely deploy software changes to production with automated testing, staged rollouts, and instant rollback.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "capability.release-management",
+        "to": "system.deployment-platform",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Release management realized by Deployment Platform",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "radial",
+      "center": "seed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.423Z",
+      "node_count": 2,
+      "edge_count": 1
+    }
+  }
+}

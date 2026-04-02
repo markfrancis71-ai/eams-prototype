@@ -1,0 +1,17 @@
+{
+  "id": 3,
+  "advisory_id": "advisory-003",
+  "output_type": "risk_identification",
+  "scope_entity_id": "system.claims-processing",
+  "scope_mode": "entity",
+  "branch": "main",
+  "status": "pending",
+  "disposition": null,
+  "disposition_note": null,
+  "model_tier": "tier-2",
+  "content": "{\"summary\":\"Risk assessment for Claims Processing System\",\"risks\":[{\"id\":\"RISK-001\",\"title\":\"Single point of failure in Rules Engine\",\"severity\":\"high\",\"likelihood\":\"medium\",\"detail\":\"The Rules Engine (Drools) has no failover configuration. A failure would halt all adjudication processing.\",\"mitigation\":\"Implement active-passive failover with health check routing.\"},{\"id\":\"RISK-002\",\"title\":\"Database connection pool exhaustion\",\"severity\":\"medium\",\"likelihood\":\"low\",\"detail\":\"Under peak load (month-end), connection pool utilization reaches 85%. Spike events could cause timeouts.\",\"mitigation\":\"Increase pool size from 50 to 100 and implement connection pooling with PgBouncer.\"},{\"id\":\"RISK-003\",\"title\":\"Kafka consumer lag during peak\",\"severity\":\"medium\",\"likelihood\":\"medium\",\"detail\":\"Event router consumer lag exceeds 30 seconds during peak processing, causing delayed notifications.\",\"mitigation\":\"Scale consumer group and optimize message processing batch size.\"}]}",
+  "data_gaps": "[\"Load test results from last 90 days not available\",\"Disaster recovery test date unknown\"]",
+  "generated_at": "2026-03-20T16:45:00Z",
+  "acknowledged_at": null,
+  "acknowledged_by": null
+}

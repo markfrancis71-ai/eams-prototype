@@ -1,0 +1,50 @@
+[
+  {
+    "id": 25,
+    "eams_rel_id": "rel-025",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.fraud-detection",
+    "to_entity_id": "container.rules-engine",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Fraud rules in rules engine",
+    "branch": "main",
+    "from_entity_name": "Fraud Detection",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Rules Engine",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 28,
+    "eams_rel_id": "rel-028",
+    "rel_type": "supported_by",
+    "from_entity_id": "goal.improve-adjudication-accuracy",
+    "to_entity_id": "capability.fraud-detection",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Better fraud detection improves accuracy",
+    "branch": "main",
+    "from_entity_name": "Improve Adjudication Accuracy",
+    "from_entity_kind": "goal",
+    "to_entity_name": "Fraud Detection",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 69,
+    "eams_rel_id": "rel-082",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.fraud-investigation",
+    "to_entity_id": "capability.fraud-detection",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Fraud investigation process realizes fraud detection capability",
+    "branch": "main",
+    "from_entity_name": "Fraud Investigation Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Fraud Detection",
+    "to_entity_kind": "capability"
+  }
+]

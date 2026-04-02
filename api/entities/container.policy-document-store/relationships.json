@@ -1,0 +1,34 @@
+[
+  {
+    "id": 89,
+    "eams_rel_id": "rel-110",
+    "rel_type": "stores_in",
+    "from_entity_id": "container.policy-document-store",
+    "to_entity_id": "container.policy-database",
+    "criticality": "async",
+    "protocol": "PostgreSQL",
+    "sla_dependency_ms": null,
+    "description": "Stores document metadata",
+    "branch": "main",
+    "from_entity_name": "Policy Document Store",
+    "from_entity_kind": "container",
+    "to_entity_name": "Policy Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 81,
+    "eams_rel_id": "rel-102",
+    "rel_type": "container_of",
+    "from_entity_id": "system.policy-document-gen",
+    "to_entity_id": "container.policy-document-store",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Policy Document Generator",
+    "from_entity_kind": "system",
+    "to_entity_name": "Policy Document Store",
+    "to_entity_kind": "container"
+  }
+]

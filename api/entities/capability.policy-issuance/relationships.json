@@ -1,0 +1,18 @@
+[
+  {
+    "id": 54,
+    "eams_rel_id": "rel-054",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.policy-issuance",
+    "to_entity_id": "system.policy-admin",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Realized by policy admin",
+    "branch": "main",
+    "from_entity_name": "Policy Issuance",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Policy Admin System",
+    "to_entity_kind": "system"
+  }
+]

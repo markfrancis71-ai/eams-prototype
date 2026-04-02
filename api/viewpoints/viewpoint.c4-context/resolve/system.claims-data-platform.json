@@ -1,0 +1,52 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-context",
+    "name": "C4 System Context",
+    "description": "Shows a system in its environment — actors, neighboring systems, and their interactions. The classic C4 Level 1 view."
+  },
+  "scope": {
+    "entity_id": "system.claims-data-platform"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.claims-data-platform",
+        "kind": "system",
+        "name": "Claims Data Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Data Platform",
+          "secondary": "Snowflake/dbt",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-data-platform",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Analytics and reporting platform for claims data, providing real-time dashboards and batch reporting capabilities.",
+          "technology": "Snowflake/dbt"
+        }
+      }
+    ],
+    "edges": [],
+    "groups": [],
+    "layout": {
+      "type": "force-directed",
+      "gravity": 0.3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.173Z",
+      "node_count": 1,
+      "edge_count": 0
+    }
+  }
+}

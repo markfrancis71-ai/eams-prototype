@@ -1,0 +1,33 @@
+{
+  "branch": "proposal/billing-modernization",
+  "added": [
+    {
+      "eams_id": "container.billing-event-processor",
+      "name": "Billing Event Processor",
+      "kind": "container"
+    }
+  ],
+  "modified": [],
+  "removed": [
+    {
+      "eams_id": "system.claims-processing",
+      "name": "Claims Processing System",
+      "kind": "system"
+    },
+    {
+      "eams_id": "system.claims-portal",
+      "name": "Claims Portal",
+      "kind": "system"
+    },
+    {
+      "eams_id": "system.claims-data-platform",
+      "name": "Claims Data Platform",
+      "kind": "system"
+    }
+  ],
+  "summary": {
+    "added": 1,
+    "modified": 0,
+    "removed": 0
+  }
+}

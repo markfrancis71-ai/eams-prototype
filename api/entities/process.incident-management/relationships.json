@@ -1,0 +1,50 @@
+[
+  {
+    "id": 153,
+    "eams_rel_id": "rel-174",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.incident-management",
+    "to_entity_id": "capability.incident-response",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Incident management realizes incident response capability",
+    "branch": "main",
+    "from_entity_name": "Incident Management Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Incident Response",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 154,
+    "eams_rel_id": "rel-175",
+    "rel_type": "automated_by",
+    "from_entity_id": "process.incident-management",
+    "to_entity_id": "system.incident-management",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Incident management automated by Incident Management System",
+    "branch": "main",
+    "from_entity_name": "Incident Management Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Incident Management System",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 155,
+    "eams_rel_id": "rel-176",
+    "rel_type": "uses",
+    "from_entity_id": "process.incident-management",
+    "to_entity_id": "system.monitoring-platform",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Incident management uses monitoring for detection",
+    "branch": "main",
+    "from_entity_name": "Incident Management Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Monitoring Platform",
+    "to_entity_kind": "system"
+  }
+]

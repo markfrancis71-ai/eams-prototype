@@ -1,0 +1,498 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.capability-map",
+    "name": "Capability Heat Map",
+    "description": "Maps business capabilities to the systems and processes that realize them. Heat-colored by maturity or risk."
+  },
+  "scope": {
+    "domain": "policy"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.policy-admin",
+        "kind": "system",
+        "name": "Policy Admin System",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Admin System",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-admin",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core policy administration system managing policy lifecycle from quoting through renewal. Handles all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.policy-rating-engine",
+        "kind": "system",
+        "name": "Policy Rating Engine",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Rating Engine",
+          "secondary": "Go",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-rating-engine",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Calculates premiums based on risk factors, coverage selections, and actuarial tables. Supports real-time and batch rating.",
+          "technology": "Go"
+        }
+      },
+      {
+        "id": "system.policy-document-gen",
+        "kind": "system",
+        "name": "Policy Document Generator",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Document Generator",
+          "secondary": "Node.js",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-document-gen",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Generates policy documents, endorsements, declarations pages, and certificates of insurance.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "capability.policy-issuance",
+        "kind": "capability",
+        "name": "Policy Issuance",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Issuance",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-issuance",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to issue new insurance policies across all lines of business.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.premium-calculation",
+        "kind": "capability",
+        "name": "Premium Calculation",
+        "role": "capability",
+        "labels": {
+          "primary": "Premium Calculation",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.premium-calculation",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to calculate premiums based on risk factors and coverage selections.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.policy-renewal",
+        "kind": "capability",
+        "name": "Policy Renewal",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Renewal",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-renewal",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "The ability to process policy renewals including re-rating and document generation.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.new-business-underwriting",
+        "kind": "process",
+        "name": "New Business Underwriting Process",
+        "role": "process",
+        "labels": {
+          "primary": "New Business Underwriting Process",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.new-business-underwriting",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "End-to-end new business workflow: application intake → risk assessment → underwriting decision → quote generation → binding → policy issuance. SLA: 48 hours for standard auto, 5 days for specialty.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.policy-renewal",
+        "kind": "process",
+        "name": "Policy Renewal Process",
+        "role": "process",
+        "labels": {
+          "primary": "Policy Renewal Process",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.policy-renewal",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Automated renewal process: renewal eligibility check → re-rating → renewal offer generation → member notification → acceptance/decline → policy reissue. 90-day advance processing window.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.endorsement-processing",
+        "kind": "process",
+        "name": "Endorsement Processing",
+        "role": "process",
+        "labels": {
+          "primary": "Endorsement Processing",
+          "secondary": "process",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.endorsement-processing",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Mid-term policy change workflow: change request → impact assessment → re-rating → approval routing → endorsement issuance → billing adjustment.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.underwriting",
+        "kind": "capability",
+        "name": "Underwriting",
+        "role": "capability",
+        "labels": {
+          "primary": "Underwriting",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.underwriting",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to assess risk, determine insurability, and price policies based on risk factors, loss history, and underwriting guidelines.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.policy-lifecycle",
+        "kind": "capability",
+        "name": "Policy Lifecycle Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Policy Lifecycle Management",
+          "secondary": "capability",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.policy-lifecycle",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to manage the full policy lifecycle from quote through renewal, including endorsements, cancellations, and reinstatements.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.ensure-regulatory-compliance",
+        "kind": "goal",
+        "name": "Ensure Regulatory Compliance",
+        "role": "goal",
+        "labels": {
+          "primary": "Ensure Regulatory Compliance",
+          "secondary": "goal",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.ensure-regulatory-compliance",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Ensure all P&C systems and processes comply with state insurance regulations, NAIC guidelines, and internal audit requirements. Zero critical audit findings target.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "capability.policy-issuance",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by policy admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.policy-renewal",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by policy admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.underwriting",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Underwriting realized by Policy Admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.policy-lifecycle",
+        "to": "system.policy-admin",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Policy lifecycle realized by Policy Admin",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.premium-calculation",
+        "to": "system.policy-rating-engine",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by rating engine",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.new-business-underwriting",
+        "to": "capability.underwriting",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "New business process realizes underwriting capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.policy-renewal",
+        "to": "capability.policy-lifecycle",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Renewal realizes policy lifecycle capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.endorsement-processing",
+        "to": "capability.policy-lifecycle",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Endorsement process realizes lifecycle capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.ensure-regulatory-compliance",
+        "to": "capability.underwriting",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Underwriting supports compliance",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.ensure-regulatory-compliance",
+        "to": "capability.policy-lifecycle",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Lifecycle management supports compliance",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "grid",
+      "columns": 3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.352Z",
+      "node_count": 12,
+      "edge_count": 10
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "entity": {
+    "id": 51,
+    "eams_id": "container.policy-rules-engine",
+    "kind": "container",
+    "name": "Policy Rules Engine",
+    "domain": "policy",
+    "status": "active",
+    "description": "Business rules engine for underwriting decisions. Evaluates risk acceptability, coverage eligibility, and pricing exceptions using Drools-based rule sets.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": "tier-1",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": "Drools",
+    "technology_language": "Java 17",
+    "technology_framework": "Drools 8.x",
+    "technology_runtime": null,
+    "technology_hosting": "AWS ECS Fargate",
+    "container_type": "worker",
+    "parent_system_id": "system.policy-admin",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": "p99 < 60ms per rule set evaluation",
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"rules\",\"drools\",\"underwriting\"]",
+    "metadata_created": "2023-05-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "pcnt007",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 80,
+      "eams_rel_id": "rel-101",
+      "rel_type": "container_of",
+      "from_entity_id": "system.policy-admin",
+      "to_entity_id": "container.policy-rules-engine",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    },
+    {
+      "id": 84,
+      "eams_rel_id": "rel-105",
+      "rel_type": "uses",
+      "from_entity_id": "container.policy-api",
+      "to_entity_id": "container.policy-rules-engine",
+      "criticality": "synchronous-critical",
+      "protocol": "gRPC",
+      "sla_dependency_ms": null,
+      "description": "Evaluates underwriting rules",
+      "branch": "main"
+    },
+    {
+      "id": 91,
+      "eams_rel_id": "rel-112",
+      "rel_type": "realized_by",
+      "from_entity_id": "capability.underwriting",
+      "to_entity_id": "container.policy-rules-engine",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Rules engine evaluates underwriting decisions",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 16,
+      "signal_id": "signal-016",
+      "signal_type": "change",
+      "source": "Harness",
+      "source_id": "HARNESS-PIPE-7201",
+      "title": "Underwriting Rules Update Deployed",
+      "description": "Policy Rules Engine updated with 47 new underwriting rules for specialty lines. Deployment via Harness pipeline with canary release strategy. 0% error rate during canary phase.",
+      "affected_entities": "[\"container.policy-rules-engine\",\"system.policy-admin\"]",
+      "severity": "low",
+      "timestamp": "2026-03-29T07:30:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:16.131Z",
+    "relationship_count": 3,
+    "finding_count": 0
+  }
+}

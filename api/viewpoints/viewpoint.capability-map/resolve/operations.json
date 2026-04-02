@@ -1,0 +1,568 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.capability-map",
+    "name": "Capability Heat Map",
+    "description": "Maps business capabilities to the systems and processes that realize them. Heat-colored by maturity or risk."
+  },
+  "scope": {
+    "domain": "operations"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.monitoring-platform",
+        "kind": "system",
+        "name": "Monitoring Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Monitoring Platform",
+          "secondary": "Datadog",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.monitoring-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Centralized monitoring and observability platform. Collects metrics, logs, and traces from all systems.",
+          "technology": "Datadog"
+        }
+      },
+      {
+        "id": "system.incident-management",
+        "kind": "system",
+        "name": "Incident Management System",
+        "role": "system",
+        "labels": {
+          "primary": "Incident Management System",
+          "secondary": "PagerDuty + ServiceNow",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident detection, routing, and resolution management. Integrates with PagerDuty and Slack.",
+          "technology": "PagerDuty + ServiceNow"
+        }
+      },
+      {
+        "id": "system.log-analytics",
+        "kind": "system",
+        "name": "Log Analytics Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Log Analytics Platform",
+          "secondary": "ELK Stack",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.log-analytics",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Centralized log aggregation and analysis platform. ELK Stack (Elasticsearch, Logstash, Kibana) providing full-text search, log correlation, and anomaly detection across all systems.",
+          "technology": "ELK Stack"
+        }
+      },
+      {
+        "id": "system.deployment-platform",
+        "kind": "system",
+        "name": "Deployment Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Deployment Platform",
+          "secondary": "Kubernetes + Harness",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.deployment-platform",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "CI/CD and container orchestration platform. Kubernetes (EKS) + Harness for automated deployments with blue-green and canary release strategies.",
+          "technology": "Kubernetes + Harness"
+        }
+      },
+      {
+        "id": "process.incident-management",
+        "kind": "process",
+        "name": "Incident Management Process",
+        "role": "process",
+        "labels": {
+          "primary": "Incident Management Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.incident-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Incident lifecycle: detection → triage → assignment → investigation → resolution → post-mortem → RCA documentation. SLA: P1 = 15 min response, 4 hour resolution.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.change-management",
+        "kind": "process",
+        "name": "Change Management Process",
+        "role": "process",
+        "labels": {
+          "primary": "Change Management Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.change-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Change request workflow: RFC submission → impact assessment → CAB review → approval → implementation → validation → closure. All production changes require CAB approval.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.capacity-planning",
+        "kind": "process",
+        "name": "Capacity Planning Process",
+        "role": "process",
+        "labels": {
+          "primary": "Capacity Planning Process",
+          "secondary": "process",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.capacity-planning",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Quarterly capacity review: utilization trend analysis → growth projection → infrastructure sizing → procurement request → provisioning. Covers compute, storage, and network.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.observability",
+        "kind": "capability",
+        "name": "Observability",
+        "role": "capability",
+        "labels": {
+          "primary": "Observability",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.observability",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to monitor, trace, and debug distributed systems through metrics, logs, and traces with real-time alerting.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.release-management",
+        "kind": "capability",
+        "name": "Release Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Release Management",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.release-management",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to safely deploy software changes to production with automated testing, staged rollouts, and instant rollback.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.incident-response",
+        "kind": "capability",
+        "name": "Incident Response",
+        "role": "capability",
+        "labels": {
+          "primary": "Incident Response",
+          "secondary": "capability",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.incident-response",
+          "domain": "operations",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to detect, respond to, and resolve production incidents within SLA targets with structured post-mortem processes.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.improve-member-experience",
+        "kind": "goal",
+        "name": "Improve Member Experience",
+        "role": "goal",
+        "labels": {
+          "primary": "Improve Member Experience",
+          "secondary": "goal",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.improve-member-experience",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Deliver seamless digital experiences across quoting, servicing, and claims with <3 second page loads and >4.5 app store rating.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.operational-resilience",
+        "kind": "goal",
+        "name": "Operational Resilience",
+        "role": "goal",
+        "labels": {
+          "primary": "Operational Resilience",
+          "secondary": "goal",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.operational-resilience",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Achieve 99.95% availability across all tier-1 systems with <15 minute incident detection and <4 hour resolution SLAs.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.fnol",
+        "kind": "capability",
+        "name": "First Notice of Loss",
+        "role": "capability",
+        "labels": {
+          "primary": "First Notice of Loss",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.fnol",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to receive and register initial loss notifications across all channels (web, mobile, phone, email).",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "capability.observability",
+        "to": "system.monitoring-platform",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Observability realized by Monitoring Platform",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.incident-response",
+        "to": "system.monitoring-platform",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Incident response uses monitoring for detection",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.incident-response",
+        "to": "system.incident-management",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Incident response realized by Incident Management",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.observability",
+        "to": "system.log-analytics",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Observability realized by Log Analytics",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.release-management",
+        "to": "system.deployment-platform",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Release management realized by Deployment Platform",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.incident-management",
+        "to": "capability.incident-response",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Incident management realizes incident response capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.change-management",
+        "to": "capability.release-management",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Change management enables release management",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.capacity-planning",
+        "to": "capability.observability",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Capacity planning relies on observability data",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.operational-resilience",
+        "to": "capability.observability",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Observability supports resilience",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.improve-member-experience",
+        "to": "capability.observability",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Observability helps maintain experience SLAs",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.operational-resilience",
+        "to": "capability.release-management",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Release management supports resilience",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.operational-resilience",
+        "to": "capability.incident-response",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Incident response supports resilience",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.improve-member-experience",
+        "to": "capability.fnol",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Fast FNOL improves member experience",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "grid",
+      "columns": 3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.378Z",
+      "node_count": 13,
+      "edge_count": 13
+    }
+  }
+}

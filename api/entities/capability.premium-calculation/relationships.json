@@ -1,0 +1,18 @@
+[
+  {
+    "id": 55,
+    "eams_rel_id": "rel-055",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.premium-calculation",
+    "to_entity_id": "system.policy-rating-engine",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Realized by rating engine",
+    "branch": "main",
+    "from_entity_name": "Premium Calculation",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Policy Rating Engine",
+    "to_entity_kind": "system"
+  }
+]

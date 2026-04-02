@@ -1,0 +1,111 @@
+{
+  "entity": {
+    "id": 67,
+    "eams_id": "system.payment-processor",
+    "kind": "system",
+    "name": "Payment Processor",
+    "domain": "billing",
+    "status": "active",
+    "description": "External payment processing integration hub. Handles credit card, ACH, and EFT transactions via Stripe and internal banking APIs.",
+    "ownership_architect": "Priya Patel",
+    "ownership_business_owner": null,
+    "criticality": "tier-1",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": "Node.js",
+    "technology_language": "TypeScript",
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": "AWS ECS Fargate",
+    "container_type": null,
+    "parent_system_id": null,
+    "nfr_availability": "99.99%",
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": "pci",
+    "nfr_encryption": "AES-256 at rest, TLS 1.3 in transit",
+    "nfr_retention": null,
+    "tags": "[\"payments\",\"pci\",\"integration\"]",
+    "metadata_created": "2023-06-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "bil003",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 114,
+      "eams_rel_id": "rel-135",
+      "rel_type": "container_of",
+      "from_entity_id": "system.payment-processor",
+      "to_entity_id": "container.payment-processor-api",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    },
+    {
+      "id": 135,
+      "eams_rel_id": "rel-156",
+      "rel_type": "governed_by",
+      "from_entity_id": "system.payment-processor",
+      "to_entity_id": "standard.data-classification",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Payment data governed by classification standard",
+      "branch": "main"
+    },
+    {
+      "id": 124,
+      "eams_rel_id": "rel-145",
+      "rel_type": "realized_by",
+      "from_entity_id": "capability.premium-collection",
+      "to_entity_id": "system.payment-processor",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Premium collection uses Payment Processor",
+      "branch": "main"
+    },
+    {
+      "id": 131,
+      "eams_rel_id": "rel-152",
+      "rel_type": "automated_by",
+      "from_entity_id": "process.payment-processing",
+      "to_entity_id": "system.payment-processor",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Payment processing automated by Payment Processor",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 17,
+      "signal_id": "signal-017",
+      "signal_type": "compliance",
+      "source": "QualysGuard",
+      "source_id": "QG-PCI-2026-Q1",
+      "title": "Payment Gateway — PCI Scan Passed",
+      "description": "Quarterly PCI DSS external vulnerability scan completed successfully. All 14 critical controls passed. Next scan scheduled for Q2 2026.",
+      "affected_entities": "[\"system.payment-gateway\",\"container.payment-processor\",\"system.payment-processor\"]",
+      "severity": "low",
+      "timestamp": "2026-03-25T12:00:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:16.446Z",
+    "relationship_count": 4,
+    "finding_count": 0
+  }
+}

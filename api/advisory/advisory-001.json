@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "advisory_id": "advisory-001",
+  "output_type": "compliance_assessment",
+  "scope_entity_id": "system.legacy-claims-api",
+  "scope_mode": "entity",
+  "branch": "main",
+  "status": "pending",
+  "disposition": null,
+  "disposition_note": null,
+  "model_tier": "tier-2",
+  "content": "{\"summary\":\"Legacy Claims API has significant compliance gaps\",\"overall_risk\":\"high\",\"findings\":[{\"category\":\"API Standards\",\"severity\":\"violation\",\"detail\":\"System uses SOAP/XML instead of mandated REST. No migration plan documented.\"},{\"category\":\"Deployment\",\"severity\":\"violation\",\"detail\":\"On-premises deployment violates cloud-first mandate. Migration cost estimated at $450K.\"},{\"category\":\"Security\",\"severity\":\"warning\",\"detail\":\"Java 8 runtime has 23 known CVEs. Upgrade to Java 17+ required.\"},{\"category\":\"Data Handling\",\"severity\":\"warning\",\"detail\":\"PII data handling practices not verified against current standards.\"}],\"recommendations\":[\"Prioritize decommission timeline — recommend Q2 2026 instead of Q3 2026\",\"Implement API gateway facade to redirect traffic to new Claims Processing System\",\"Conduct security audit before any further integration partner onboarding\"]}",
+  "data_gaps": "[\"Missing recent penetration test results\",\"Partner integration traffic breakdown unavailable\"]",
+  "generated_at": "2026-03-15T10:30:00Z",
+  "acknowledged_at": null,
+  "acknowledged_by": null
+}

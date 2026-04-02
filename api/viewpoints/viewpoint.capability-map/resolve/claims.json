@@ -1,0 +1,784 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.capability-map",
+    "name": "Capability Heat Map",
+    "description": "Maps business capabilities to the systems and processes that realize them. Heat-colored by maturity or risk."
+  },
+  "scope": {
+    "domain": "claims"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.claims-processing",
+        "kind": "system",
+        "name": "Claims Processing System",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Processing System",
+          "secondary": "Java/Spring Boot",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-processing",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Core claims processing system handling end-to-end claim lifecycle from FNOL through settlement. Processes approximately 45,000 claims per month across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      },
+      {
+        "id": "system.claims-portal",
+        "kind": "system",
+        "name": "Claims Portal",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Portal",
+          "secondary": "React/Node.js",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-portal",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Customer and adjuster-facing web portal for claims submission, tracking, and management. Supports both desktop and mobile access.",
+          "technology": "React/Node.js"
+        }
+      },
+      {
+        "id": "system.claims-data-platform",
+        "kind": "system",
+        "name": "Claims Data Platform",
+        "role": "system",
+        "labels": {
+          "primary": "Claims Data Platform",
+          "secondary": "Snowflake/dbt",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.claims-data-platform",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "Analytics and reporting platform for claims data, providing real-time dashboards and batch reporting capabilities.",
+          "technology": "Snowflake/dbt"
+        }
+      },
+      {
+        "id": "system.legacy-claims-api",
+        "kind": "system",
+        "name": "Legacy Claims API",
+        "role": "system",
+        "labels": {
+          "primary": "Legacy Claims API",
+          "secondary": "Java EE",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "deprecated",
+            "tier-2",
+            "violation"
+          ],
+          "dashed": true
+        },
+        "data": {
+          "eams_id": "system.legacy-claims-api",
+          "domain": "claims",
+          "status": "deprecated",
+          "criticality": "tier-2",
+          "description": "Legacy SOAP-based claims API. Scheduled for decommission by Q3 2026. Still serves 15% of integration traffic from partner systems.",
+          "technology": "Java EE"
+        }
+      },
+      {
+        "id": "capability.claim-adjudication",
+        "kind": "capability",
+        "name": "Claim Adjudication",
+        "role": "capability",
+        "labels": {
+          "primary": "Claim Adjudication",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.claim-adjudication",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to evaluate a claim against policy terms, coverage rules, and fraud indicators to produce an adjudication decision.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.fnol",
+        "kind": "capability",
+        "name": "First Notice of Loss",
+        "role": "capability",
+        "labels": {
+          "primary": "First Notice of Loss",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.fnol",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to receive and register initial loss notifications across all channels (web, mobile, phone, email).",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.claim-settlement",
+        "kind": "capability",
+        "name": "Claim Settlement",
+        "role": "capability",
+        "labels": {
+          "primary": "Claim Settlement",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.claim-settlement",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to calculate, authorize, and execute claim payments including partial payments, reserves, and recoveries.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.subrogation",
+        "kind": "capability",
+        "name": "Subrogation",
+        "role": "capability",
+        "labels": {
+          "primary": "Subrogation",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.subrogation",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "The ability to identify, pursue, and recover subrogation claims from third parties.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.fraud-detection",
+        "kind": "capability",
+        "name": "Fraud Detection",
+        "role": "capability",
+        "labels": {
+          "primary": "Fraud Detection",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.fraud-detection",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to detect, flag, and investigate potentially fraudulent claims using rules-based and ML-based indicators.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.fnol-process",
+        "kind": "process",
+        "name": "FNOL Process",
+        "role": "process",
+        "labels": {
+          "primary": "FNOL Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.fnol-process",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "End-to-end First Notice of Loss process from initial notification through claim creation and assignment.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.adjudication-process",
+        "kind": "process",
+        "name": "Adjudication Process",
+        "role": "process",
+        "labels": {
+          "primary": "Adjudication Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.adjudication-process",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Claim evaluation process including coverage verification, damage assessment, liability determination, and settlement calculation.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.settlement-process",
+        "kind": "process",
+        "name": "Settlement Process",
+        "role": "process",
+        "labels": {
+          "primary": "Settlement Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.settlement-process",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Payment authorization and execution process for approved claims including partial payments, supplements, and final settlements.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.subrogation-recovery",
+        "kind": "process",
+        "name": "Subrogation Recovery Process",
+        "role": "process",
+        "labels": {
+          "primary": "Subrogation Recovery Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-2"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.subrogation-recovery",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-2",
+          "description": "End-to-end subrogation workflow: identify recovery opportunity → send demand letter → negotiate with third-party insurer → collect payment → close recovery. Average cycle time: 45 days. Recovery rate: 62% of identified opportunities.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.fraud-investigation",
+        "kind": "process",
+        "name": "Fraud Investigation Process",
+        "role": "process",
+        "labels": {
+          "primary": "Fraud Investigation Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.fraud-investigation",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "SIU investigation workflow triggered by fraud scoring above threshold (>0.7). Steps: case assignment → evidence collection → interview scheduling → determination → referral/closure. SLA: initial review within 48 hours, determination within 30 days.",
+          "technology": null
+        }
+      },
+      {
+        "id": "process.cat-claims",
+        "kind": "process",
+        "name": "Catastrophe Claims Process",
+        "role": "process",
+        "labels": {
+          "primary": "Catastrophe Claims Process",
+          "secondary": "process",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "diamond",
+          "color": "#2D6A4F",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "process.cat-claims",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Specialized high-volume claims process activated during declared catastrophe events (hurricanes, hail, wildfire). Includes: CAT declaration trigger → surge staffing → field adjuster deployment → expedited FNOL intake → batch adjudication → accelerated settlement. Handles 10x normal volume with modified SLAs.",
+          "technology": null
+        }
+      },
+      {
+        "id": "capability.catastrophe-management",
+        "kind": "capability",
+        "name": "Catastrophe Management",
+        "role": "capability",
+        "labels": {
+          "primary": "Catastrophe Management",
+          "secondary": "capability",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.catastrophe-management",
+          "domain": "claims",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "The ability to declare catastrophe events, activate surge protocols, deploy field resources, and manage high-volume claims processing with modified SLAs and approval authorities.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.reduce-claims-cycle",
+        "kind": "goal",
+        "name": "Reduce Claims Cycle Time",
+        "role": "goal",
+        "labels": {
+          "primary": "Reduce Claims Cycle Time",
+          "secondary": "goal",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.reduce-claims-cycle",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Reduce average claims cycle time from 14 days to 7 days by Q4 2026 through automation and process optimization.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.improve-adjudication-accuracy",
+        "kind": "goal",
+        "name": "Improve Adjudication Accuracy",
+        "role": "goal",
+        "labels": {
+          "primary": "Improve Adjudication Accuracy",
+          "secondary": "goal",
+          "domain": "claims"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.improve-adjudication-accuracy",
+          "domain": "claims",
+          "status": "active",
+          "criticality": null,
+          "description": "Improve automated adjudication accuracy from 82% to 95% by enhancing rules engine and incorporating ML models.",
+          "technology": null
+        }
+      },
+      {
+        "id": "goal.improve-member-experience",
+        "kind": "goal",
+        "name": "Improve Member Experience",
+        "role": "goal",
+        "labels": {
+          "primary": "Improve Member Experience",
+          "secondary": "goal",
+          "domain": "operations"
+        },
+        "display": {
+          "shape": "triangle",
+          "color": "#2563EB",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "goal.improve-member-experience",
+          "domain": "operations",
+          "status": "active",
+          "criticality": null,
+          "description": "Deliver seamless digital experiences across quoting, servicing, and claims with <3 second page loads and >4.5 app store rating.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "capability.claim-adjudication",
+        "to": "system.claims-processing",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Realized by claims processing system",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.fnol",
+        "to": "system.claims-processing",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "FNOL capability realized",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.claim-settlement",
+        "to": "system.claims-processing",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Settlement processing",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "capability.fnol",
+        "to": "system.claims-portal",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "FNOL via portal",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.reduce-claims-cycle",
+        "to": "capability.claim-adjudication",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Faster adjudication reduces cycle time",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.adjudication-process",
+        "to": "capability.claim-adjudication",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Adjudication process",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.cat-claims",
+        "to": "capability.claim-adjudication",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "CAT claims includes batch adjudication",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.reduce-claims-cycle",
+        "to": "capability.fnol",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Faster FNOL reduces cycle time",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.fnol-process",
+        "to": "capability.fnol",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "FNOL process realizes FNOL capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.cat-claims",
+        "to": "capability.fnol",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "CAT claims process realizes FNOL capability at surge scale",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.improve-member-experience",
+        "to": "capability.fnol",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Fast FNOL improves member experience",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.settlement-process",
+        "to": "capability.claim-settlement",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Settlement process",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.subrogation-recovery",
+        "to": "capability.subrogation",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Subrogation process realizes subrogation capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.improve-adjudication-accuracy",
+        "to": "capability.fraud-detection",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "Better fraud detection improves accuracy",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.fraud-investigation",
+        "to": "capability.fraud-detection",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Fraud investigation process realizes fraud detection capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "process.cat-claims",
+        "to": "capability.catastrophe-management",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "CAT claims process realizes CAT management capability",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "goal.reduce-claims-cycle",
+        "to": "capability.catastrophe-management",
+        "rel_type": "supported_by",
+        "labels": {
+          "primary": "CAT management supports claims cycle reduction",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "grid",
+      "columns": 3
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.344Z",
+      "node_count": 19,
+      "edge_count": 17
+    }
+  }
+}

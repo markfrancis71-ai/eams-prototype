@@ -1,0 +1,34 @@
+[
+  {
+    "id": 158,
+    "eams_rel_id": "rel-179",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.capacity-planning",
+    "to_entity_id": "capability.observability",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Capacity planning relies on observability data",
+    "branch": "main",
+    "from_entity_name": "Capacity Planning Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Observability",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 159,
+    "eams_rel_id": "rel-180",
+    "rel_type": "uses",
+    "from_entity_id": "process.capacity-planning",
+    "to_entity_id": "system.monitoring-platform",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Capacity planning uses monitoring metrics",
+    "branch": "main",
+    "from_entity_name": "Capacity Planning Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Monitoring Platform",
+    "to_entity_kind": "system"
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "scenario_id": "scenario-1775108419081",
+  "results": [
+    {
+      "action": {
+        "type": "deprecate",
+        "target_entity_id": "system.claims-data-platform"
+      },
+      "entity": {
+        "id": 3,
+        "eams_id": "system.claims-data-platform",
+        "kind": "system",
+        "name": "Claims Data Platform",
+        "domain": "claims",
+        "status": "active",
+        "description": "Analytics and reporting platform for claims data, providing real-time dashboards and batch reporting capabilities.",
+        "ownership_architect": "David Kim",
+        "ownership_business_owner": "Mike Rodriguez",
+        "criticality": "tier-2",
+        "lifecycle": "production",
+        "tpm_id": "TPM-CL-003",
+        "technology_primary": "Snowflake/dbt",
+        "technology_language": "SQL/Python",
+        "technology_framework": null,
+        "technology_runtime": null,
+        "technology_hosting": "AWS + Snowflake",
+        "container_type": null,
+        "parent_system_id": null,
+        "nfr_availability": null,
+        "nfr_throughput": null,
+        "nfr_latency": null,
+        "nfr_data_classification": "confidential",
+        "nfr_encryption": null,
+        "nfr_retention": null,
+        "tags": "[\"data\",\"analytics\",\"claims\"]",
+        "metadata_created": "2024-01-10",
+        "metadata_last_reviewed": null,
+        "metadata_review_due": null,
+        "compliance_status": "compliant",
+        "git_sha": null,
+        "compiled_at": null,
+        "branch": "main",
+        "content_hash": "ghi789",
+        "raw_yaml": null
+      },
+      "direct_impact": 0,
+      "total_impact": 1,
+      "affected_entities": [
+        {
+          "eams_id": "system.claims-data-platform",
+          "name": "Claims Data Platform",
+          "kind": "system"
+        }
+      ],
+      "affected_relationships": [],
+      "risk_level": "low",
+      "warnings": []
+    }
+  ]
+}

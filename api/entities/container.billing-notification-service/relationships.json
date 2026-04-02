@@ -1,0 +1,34 @@
+[
+  {
+    "id": 116,
+    "eams_rel_id": "rel-137",
+    "rel_type": "container_of",
+    "from_entity_id": "system.billing",
+    "to_entity_id": "container.billing-notification-service",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Billing System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Billing Notification Service",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 121,
+    "eams_rel_id": "rel-142",
+    "rel_type": "uses",
+    "from_entity_id": "container.billing-scheduler",
+    "to_entity_id": "container.billing-notification-service",
+    "criticality": "async",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Triggers billing notifications",
+    "branch": "main",
+    "from_entity_name": "Billing Scheduler",
+    "from_entity_kind": "container",
+    "to_entity_name": "Billing Notification Service",
+    "to_entity_kind": "container"
+  }
+]

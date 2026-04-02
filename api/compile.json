@@ -1,0 +1,20 @@
+{
+  "id": 3,
+  "compile_id": "compile-1775108418402",
+  "branch": "main",
+  "git_sha": "05aeveys52im",
+  "trigger": "manual",
+  "outcome": "partial_success",
+  "entities_total": 104,
+  "entities_passed": 103,
+  "entities_blocked": 1,
+  "diff_added": 0,
+  "diff_modified": 0,
+  "diff_removed": 0,
+  "errors": "[]",
+  "compliance_findings": "{\"violations\":4,\"warnings\":5,\"advisories\":3}",
+  "blocked_entities": "[\"system.legacy-claims-api\"]",
+  "stage_timings": "{\"parse\":101,\"validate\":285,\"normalize\":87,\"resolve\":227,\"compile\":324,\"compliance\":147,\"diff\":94,\"publish\":68}",
+  "started_at": "2026-04-02T05:40:18.402Z",
+  "completed_at": "2026-04-02T05:40:20.402Z"
+}

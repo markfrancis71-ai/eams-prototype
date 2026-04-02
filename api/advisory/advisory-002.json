@@ -1,0 +1,17 @@
+{
+  "id": 2,
+  "advisory_id": "advisory-002",
+  "output_type": "explanation",
+  "scope_entity_id": "decision.adr-0042",
+  "scope_mode": "entity",
+  "branch": "main",
+  "status": "completed",
+  "disposition": "accepted",
+  "disposition_note": null,
+  "model_tier": "tier-1",
+  "content": "{\"summary\":\"ADR-0042 proposes real-time adjudication for auto claims under $5,000\",\"explanation\":\"This architectural decision shifts claim adjudication from a batch-oriented queue model to a synchronous fast-path for low-value auto claims. The rationale is to reduce cycle time from 3-5 business days to under 4 hours for ~35% of auto claims volume. The trade-off is increased complexity in the adjudication API (dual code paths) and higher infrastructure costs for real-time capacity. The decision aligns with the strategic goal of reducing claims cycle time.\",\"impact_analysis\":{\"affected_systems\":[\"system.claims-processing\",\"container.adjudication-api\",\"container.rules-engine\"],\"risk_level\":\"medium\",\"implementation_effort\":\"2-3 sprints\"}}",
+  "data_gaps": null,
+  "generated_at": "2026-02-20T14:00:00Z",
+  "acknowledged_at": "2026-02-22T09:15:00Z",
+  "acknowledged_by": "sarah.chen@company.com"
+}

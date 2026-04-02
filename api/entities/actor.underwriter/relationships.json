@@ -1,0 +1,18 @@
+[
+  {
+    "id": 109,
+    "eams_rel_id": "rel-130",
+    "rel_type": "uses",
+    "from_entity_id": "actor.underwriter",
+    "to_entity_id": "system.policy-admin",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Underwriter uses Policy Admin",
+    "branch": "main",
+    "from_entity_name": "Underwriter",
+    "from_entity_kind": "actor",
+    "to_entity_name": "Policy Admin System",
+    "to_entity_kind": "system"
+  }
+]

@@ -1,0 +1,131 @@
+{
+  "nodes": [
+    {
+      "kind": "goal",
+      "label": "Goal",
+      "description": "Strategic business objectives",
+      "color": "#2563EB"
+    },
+    {
+      "kind": "capability",
+      "label": "Capability",
+      "description": "Business capabilities that fulfill goals",
+      "color": "#6B4C9A"
+    },
+    {
+      "kind": "process",
+      "label": "Process",
+      "description": "Business processes that realize capabilities",
+      "color": "#0F7173"
+    },
+    {
+      "kind": "system",
+      "label": "System",
+      "description": "Software systems that automate processes",
+      "color": "#1B3A5C"
+    },
+    {
+      "kind": "container",
+      "label": "Container",
+      "description": "Deployable components within systems",
+      "color": "#0F7173"
+    },
+    {
+      "kind": "data_entity",
+      "label": "Data Entity",
+      "description": "Logical data objects managed by systems",
+      "color": "#7C5E3C"
+    },
+    {
+      "kind": "standard",
+      "label": "Standard",
+      "description": "Technology and compliance standards",
+      "color": "#6D28D9"
+    },
+    {
+      "kind": "decision",
+      "label": "Decision",
+      "description": "Architecture Decision Records",
+      "color": "#D97706"
+    },
+    {
+      "kind": "actor",
+      "label": "Actor",
+      "description": "People or external systems that interact",
+      "color": "#64748B"
+    }
+  ],
+  "edges": [
+    {
+      "from": "goal",
+      "to": "capability",
+      "rel_type": "supported_by",
+      "label": "supported by"
+    },
+    {
+      "from": "capability",
+      "to": "process",
+      "rel_type": "realized_by",
+      "label": "realized by"
+    },
+    {
+      "from": "process",
+      "to": "system",
+      "rel_type": "automated_by",
+      "label": "automated by"
+    },
+    {
+      "from": "system",
+      "to": "container",
+      "rel_type": "container_of",
+      "label": "contains"
+    },
+    {
+      "from": "system",
+      "to": "data_entity",
+      "rel_type": "manages",
+      "label": "manages"
+    },
+    {
+      "from": "system",
+      "to": "system",
+      "rel_type": "uses",
+      "label": "uses"
+    },
+    {
+      "from": "container",
+      "to": "container",
+      "rel_type": "calls",
+      "label": "calls"
+    },
+    {
+      "from": "system",
+      "to": "standard",
+      "rel_type": "governed_by",
+      "label": "governed by"
+    },
+    {
+      "from": "decision",
+      "to": "system",
+      "rel_type": "applies_to",
+      "label": "applies to"
+    },
+    {
+      "from": "actor",
+      "to": "system",
+      "rel_type": "interacts_with",
+      "label": "interacts with"
+    }
+  ],
+  "counts": {
+    "system": 14,
+    "container": 32,
+    "capability": 16,
+    "process": 14,
+    "data_entity": 7,
+    "goal": 5,
+    "decision": 5,
+    "standard": 6,
+    "actor": 5
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "path": "policy/systems.yaml",
+  "content": "# Policy Domain — Systems\ndomain: policy\n\nsystems:\n  - eams_id: system.policy-admin\n    name: Policy Admin System\n    status: active\n    criticality: tier-1\n    technology:\n      primary: Java/Spring Boot\n\n  - eams_id: system.policy-rating-engine\n    name: Policy Rating Engine\n    status: active\n    criticality: tier-1\n    technology:\n      primary: Go\n"
+}

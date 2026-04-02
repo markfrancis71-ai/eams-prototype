@@ -1,0 +1,18 @@
+[
+  {
+    "id": 35,
+    "eams_rel_id": "rel-035",
+    "rel_type": "produces",
+    "from_entity_id": "container.adjudication-api",
+    "to_entity_id": "data.adjudication-decision",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Produces adjudication decisions",
+    "branch": "main",
+    "from_entity_name": "Adjudication API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Adjudication Decision",
+    "to_entity_kind": "data_entity"
+  }
+]

@@ -1,0 +1,99 @@
+{
+  "entity": {
+    "id": 9,
+    "eams_id": "container.claims-notification-service",
+    "kind": "container",
+    "name": "Claims Notification Service",
+    "domain": "claims",
+    "status": "active",
+    "description": "Handles email, SMS, and push notifications for claims status updates, document requests, and settlement communications.",
+    "ownership_architect": null,
+    "ownership_business_owner": null,
+    "criticality": "tier-2",
+    "lifecycle": "production",
+    "tpm_id": null,
+    "technology_primary": "Node.js",
+    "technology_language": "TypeScript",
+    "technology_framework": null,
+    "technology_runtime": null,
+    "technology_hosting": "AWS Lambda",
+    "container_type": "worker",
+    "parent_system_id": "system.claims-processing",
+    "nfr_availability": null,
+    "nfr_throughput": null,
+    "nfr_latency": null,
+    "nfr_data_classification": null,
+    "nfr_encryption": null,
+    "nfr_retention": null,
+    "tags": "[\"notifications\",\"email\",\"sms\"]",
+    "metadata_created": "2023-04-01",
+    "metadata_last_reviewed": null,
+    "metadata_review_due": null,
+    "compliance_status": "compliant",
+    "git_sha": null,
+    "compiled_at": null,
+    "branch": "main",
+    "content_hash": "cnt005",
+    "raw_yaml": null
+  },
+  "relationships": [
+    {
+      "id": 13,
+      "eams_rel_id": "rel-013",
+      "rel_type": "subscribes_to",
+      "from_entity_id": "container.claims-notification-service",
+      "to_entity_id": "container.event-router",
+      "criticality": "async",
+      "protocol": "Kafka",
+      "sla_dependency_ms": null,
+      "description": "Subscribes to claim events",
+      "branch": "main"
+    },
+    {
+      "id": 5,
+      "eams_rel_id": "rel-005",
+      "rel_type": "container_of",
+      "from_entity_id": "system.claims-processing",
+      "to_entity_id": "container.claims-notification-service",
+      "criticality": "informational",
+      "protocol": null,
+      "sla_dependency_ms": null,
+      "description": "Contains",
+      "branch": "main"
+    }
+  ],
+  "compliance_findings": [],
+  "standards": [],
+  "decisions": [],
+  "signals": [
+    {
+      "id": 2,
+      "signal_id": "signal-002",
+      "signal_type": "performance",
+      "source": "Datadog",
+      "source_id": "DD-METRIC-8842",
+      "title": "Event Router — Consumer Lag Warning",
+      "description": "Kafka consumer lag exceeded 45 seconds on the claims-events topic. Normal threshold is 10 seconds. Caused by increased FNOL volume from storm event.",
+      "affected_entities": "[\"container.event-router\",\"container.claims-notification-service\"]",
+      "severity": "medium",
+      "timestamp": "2026-03-26T09:15:00Z"
+    },
+    {
+      "id": 11,
+      "signal_id": "signal-011",
+      "signal_type": "change",
+      "source": "Harness",
+      "source_id": "HARNESS-PIPE-6623",
+      "title": "Claims Notification Service — Config Change (Email Templates)",
+      "description": "Email template configuration updated for Claims Notification Service. 3 templates modified: claim-submitted, claim-approved, settlement-complete. Change deployed via Harness pipeline.",
+      "affected_entities": "[\"container.claims-notification-service\",\"system.claims-processing\"]",
+      "severity": "low",
+      "timestamp": "2026-03-29T10:05:00Z"
+    }
+  ],
+  "_meta": {
+    "generated_at": "2026-04-02T05:40:15.294Z",
+    "relationship_count": 2,
+    "finding_count": 0
+  }
+}

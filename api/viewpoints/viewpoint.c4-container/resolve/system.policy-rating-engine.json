@@ -1,0 +1,188 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.c4-container",
+    "name": "C4 Container View",
+    "description": "Shows the internal containers of a system — APIs, databases, message queues, UIs — and their relationships."
+  },
+  "scope": {
+    "entity_id": "system.policy-rating-engine"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.policy-rating-engine",
+        "kind": "system",
+        "name": "Policy Rating Engine",
+        "role": "system",
+        "labels": {
+          "primary": "Policy Rating Engine",
+          "secondary": "Go",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.policy-rating-engine",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Calculates premiums based on risk factors, coverage selections, and actuarial tables. Supports real-time and batch rating.",
+          "technology": "Go"
+        }
+      },
+      {
+        "id": "container.rating-api",
+        "kind": "container",
+        "name": "Rating API",
+        "role": "container",
+        "labels": {
+          "primary": "Rating API",
+          "secondary": "Go",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.rating-api",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "High-performance rating calculation API.",
+          "technology": "Go"
+        }
+      },
+      {
+        "id": "container.rating-tables",
+        "kind": "container",
+        "name": "Rating Tables Store",
+        "role": "container",
+        "labels": {
+          "primary": "Rating Tables Store",
+          "secondary": "Redis",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.rating-tables",
+          "domain": "policy",
+          "status": "active",
+          "criticality": null,
+          "description": "Redis-cached actuarial rating tables and factors.",
+          "technology": "Redis"
+        }
+      },
+      {
+        "id": "container.policy-rating-api",
+        "kind": "container",
+        "name": "Policy Rating API",
+        "role": "container",
+        "labels": {
+          "primary": "Policy Rating API",
+          "secondary": "Java/Spring Boot",
+          "domain": "policy"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#0F7173",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "container.policy-rating-api",
+          "domain": "policy",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "REST API for real-time policy rating calculations. Handles quote rating, renewal re-rating, and endorsement re-rating across all lines of business.",
+          "technology": "Java/Spring Boot"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "system.policy-rating-engine",
+        "to": "container.rating-api",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.policy-rating-engine",
+        "to": "container.rating-tables",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      },
+      {
+        "from": "system.policy-rating-engine",
+        "to": "container.policy-rating-api",
+        "rel_type": "container_of",
+        "labels": {
+          "primary": "Contains",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [
+      {
+        "id": "group-system.policy-rating-engine",
+        "label": "Policy Rating Engine",
+        "members": [
+          "container.rating-api",
+          "container.rating-tables",
+          "container.policy-rating-api"
+        ],
+        "color": "#1B3A5C33"
+      }
+    ],
+    "layout": {
+      "type": "hierarchical",
+      "direction": "TB"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.253Z",
+      "node_count": 4,
+      "edge_count": 3
+    }
+  }
+}

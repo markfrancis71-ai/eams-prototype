@@ -1,0 +1,34 @@
+[
+  {
+    "id": 103,
+    "eams_rel_id": "rel-124",
+    "rel_type": "stores_in",
+    "from_entity_id": "data_entity.policy-record",
+    "to_entity_id": "container.policy-database",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Policy records stored in policy database",
+    "branch": "main",
+    "from_entity_name": "Policy Record",
+    "from_entity_kind": "data_entity",
+    "to_entity_name": "Policy Database",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 104,
+    "eams_rel_id": "rel-125",
+    "rel_type": "uses",
+    "from_entity_id": "container.policy-api",
+    "to_entity_id": "data_entity.policy-record",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Policy API manages policy records",
+    "branch": "main",
+    "from_entity_name": "Policy API",
+    "from_entity_kind": "container",
+    "to_entity_name": "Policy Record",
+    "to_entity_kind": "data_entity"
+  }
+]

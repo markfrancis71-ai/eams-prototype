@@ -1,0 +1,50 @@
+[
+  {
+    "id": 59,
+    "eams_rel_id": "rel-059",
+    "rel_type": "container_of",
+    "from_entity_id": "system.payment-gateway",
+    "to_entity_id": "container.payment-processor",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Payment Gateway",
+    "from_entity_kind": "system",
+    "to_entity_name": "Payment Processor",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 42,
+    "eams_rel_id": "rel-042",
+    "rel_type": "uses",
+    "from_entity_id": "system.claims-processing",
+    "to_entity_id": "system.payment-gateway",
+    "criticality": "synchronous-critical",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Processes claim settlements",
+    "branch": "main",
+    "from_entity_name": "Claims Processing System",
+    "from_entity_kind": "system",
+    "to_entity_name": "Payment Gateway",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 166,
+    "eams_rel_id": "rel-187",
+    "rel_type": "uses",
+    "from_entity_id": "system.monitoring-platform",
+    "to_entity_id": "system.payment-gateway",
+    "criticality": "non-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Monitors payment gateway health",
+    "branch": "main",
+    "from_entity_name": "Monitoring Platform",
+    "from_entity_kind": "system",
+    "to_entity_name": "Payment Gateway",
+    "to_entity_kind": "system"
+  }
+]

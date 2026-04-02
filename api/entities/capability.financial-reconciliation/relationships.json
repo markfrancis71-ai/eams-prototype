@@ -1,0 +1,34 @@
+[
+  {
+    "id": 125,
+    "eams_rel_id": "rel-146",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.financial-reconciliation",
+    "to_entity_id": "system.billing",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Reconciliation realized by Billing System",
+    "branch": "main",
+    "from_entity_name": "Financial Reconciliation",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Billing System",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 126,
+    "eams_rel_id": "rel-147",
+    "rel_type": "realized_by",
+    "from_entity_id": "capability.financial-reconciliation",
+    "to_entity_id": "container.payment-ledger",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Ledger enables reconciliation",
+    "branch": "main",
+    "from_entity_name": "Financial Reconciliation",
+    "from_entity_kind": "capability",
+    "to_entity_name": "Payment Ledger",
+    "to_entity_kind": "container"
+  }
+]

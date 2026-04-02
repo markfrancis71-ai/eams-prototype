@@ -1,0 +1,16 @@
+{
+  "id": 7,
+  "viewpoint_id": "viewpoint.tier1-dependency",
+  "name": "Tier-1 Dependency Graph",
+  "description": "Shows all tier-1 critical systems and their dependencies. Highlights single points of failure.",
+  "scope_strategy": "entity-query",
+  "stakeholders": "[\"enterprise-architect\",\"cto\",\"sre\"]",
+  "parameters": "{}",
+  "scope_config": "{\"query\":{\"criticality\":\"tier-1\"}}",
+  "include_rules": "[{\"rel_types\":[\"uses\",\"stores_in\",\"reads_from\"]}]",
+  "filters": "{\"criticality\":[\"tier-1\"]}",
+  "styling": "{\"emphasize_criticality\":true}",
+  "layout": "{\"type\":\"force-directed\"}",
+  "output_config": "{\"format\":\"render-graph\"}",
+  "version": "1.0"
+}

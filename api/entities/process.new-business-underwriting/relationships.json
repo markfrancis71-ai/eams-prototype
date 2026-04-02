@@ -1,0 +1,50 @@
+[
+  {
+    "id": 94,
+    "eams_rel_id": "rel-115",
+    "rel_type": "realized_by",
+    "from_entity_id": "process.new-business-underwriting",
+    "to_entity_id": "capability.underwriting",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "New business process realizes underwriting capability",
+    "branch": "main",
+    "from_entity_name": "New Business Underwriting Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Underwriting",
+    "to_entity_kind": "capability"
+  },
+  {
+    "id": 95,
+    "eams_rel_id": "rel-116",
+    "rel_type": "automated_by",
+    "from_entity_id": "process.new-business-underwriting",
+    "to_entity_id": "system.policy-admin",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "New business automated by Policy Admin",
+    "branch": "main",
+    "from_entity_name": "New Business Underwriting Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Policy Admin System",
+    "to_entity_kind": "system"
+  },
+  {
+    "id": 96,
+    "eams_rel_id": "rel-117",
+    "rel_type": "uses",
+    "from_entity_id": "process.new-business-underwriting",
+    "to_entity_id": "system.policy-rating-engine",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "New business uses rating engine for quote",
+    "branch": "main",
+    "from_entity_name": "New Business Underwriting Process",
+    "from_entity_kind": "process",
+    "to_entity_name": "Policy Rating Engine",
+    "to_entity_kind": "system"
+  }
+]

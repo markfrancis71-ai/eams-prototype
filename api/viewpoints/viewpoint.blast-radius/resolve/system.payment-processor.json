@@ -1,0 +1,95 @@
+{
+  "viewpoint": {
+    "id": "viewpoint.blast-radius",
+    "name": "Blast Radius",
+    "description": "Shows the impact radius of a system failure — all directly and transitively dependent systems, capabilities, and processes."
+  },
+  "scope": {
+    "entity_id": "system.payment-processor"
+  },
+  "render_graph": {
+    "nodes": [
+      {
+        "id": "system.payment-processor",
+        "kind": "system",
+        "name": "Payment Processor",
+        "role": "system",
+        "labels": {
+          "primary": "Payment Processor",
+          "secondary": "Node.js",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "box",
+          "color": "#1B3A5C",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "system.payment-processor",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "External payment processing integration hub. Handles credit card, ACH, and EFT transactions via Stripe and internal banking APIs.",
+          "technology": "Node.js"
+        }
+      },
+      {
+        "id": "capability.premium-collection",
+        "kind": "capability",
+        "name": "Premium Collection",
+        "role": "capability",
+        "labels": {
+          "primary": "Premium Collection",
+          "secondary": "capability",
+          "domain": "billing"
+        },
+        "display": {
+          "shape": "hexagon",
+          "color": "#6B4C9A",
+          "badges": [
+            "tier-1"
+          ],
+          "dashed": false
+        },
+        "data": {
+          "eams_id": "capability.premium-collection",
+          "domain": "billing",
+          "status": "active",
+          "criticality": "tier-1",
+          "description": "Ability to collect premiums through multiple payment methods, manage installment plans, and handle payment failures gracefully.",
+          "technology": null
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "capability.premium-collection",
+        "to": "system.payment-processor",
+        "rel_type": "realized_by",
+        "labels": {
+          "primary": "Premium collection uses Payment Processor",
+          "protocol": ""
+        },
+        "display": {
+          "style": "dashed",
+          "weight": 1,
+          "color": "#64748B",
+          "animated": false
+        }
+      }
+    ],
+    "groups": [],
+    "layout": {
+      "type": "radial",
+      "center": "seed"
+    },
+    "metadata": {
+      "generated_at": "2026-04-02T05:40:17.411Z",
+      "node_count": 2,
+      "edge_count": 1
+    }
+  }
+}

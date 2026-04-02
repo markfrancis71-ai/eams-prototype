@@ -1,0 +1,18 @@
+[
+  {
+    "id": 33,
+    "eams_rel_id": "rel-033",
+    "rel_type": "governed_by",
+    "from_entity_id": "system.claims-processing",
+    "to_entity_id": "standard.aws-deployment",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Must follow AWS deployment standard",
+    "branch": "main",
+    "from_entity_name": "Claims Processing System",
+    "from_entity_kind": "system",
+    "to_entity_name": "AWS Deployment Standard",
+    "to_entity_kind": "standard"
+  }
+]

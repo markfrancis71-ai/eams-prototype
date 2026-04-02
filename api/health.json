@@ -1,0 +1,125 @@
+{
+  "overall_score": 77,
+  "domains": [
+    {
+      "domain": "claims",
+      "entity_count": 40,
+      "overall_score": 48,
+      "compliance_score": 0,
+      "signal_score": 0,
+      "lifecycle_score": 98,
+      "review_score": 93,
+      "findings_count": 7,
+      "active_signals": 13,
+      "critical_signals": 0,
+      "deprecated_count": 1
+    },
+    {
+      "domain": "policy",
+      "entity_count": 25,
+      "overall_score": 91,
+      "compliance_score": 85,
+      "signal_score": 80,
+      "lifecycle_score": 100,
+      "review_score": 100,
+      "findings_count": 1,
+      "active_signals": 5,
+      "critical_signals": 0,
+      "deprecated_count": 0
+    },
+    {
+      "domain": "billing",
+      "entity_count": 15,
+      "overall_score": 80,
+      "compliance_score": 70,
+      "signal_score": 50,
+      "lifecycle_score": 100,
+      "review_score": 100,
+      "findings_count": 2,
+      "active_signals": 6,
+      "critical_signals": 1,
+      "deprecated_count": 0
+    },
+    {
+      "domain": "operations",
+      "entity_count": 24,
+      "overall_score": 88,
+      "compliance_score": 70,
+      "signal_score": 80,
+      "lifecycle_score": 100,
+      "review_score": 100,
+      "findings_count": 2,
+      "active_signals": 3,
+      "critical_signals": 0,
+      "deprecated_count": 0
+    }
+  ],
+  "kinds": [
+    {
+      "kind": "system",
+      "total": 14,
+      "active": 13,
+      "deprecated": 1,
+      "proposed": 0
+    },
+    {
+      "kind": "container",
+      "total": 32,
+      "active": 32,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "capability",
+      "total": 16,
+      "active": 16,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "process",
+      "total": 14,
+      "active": 14,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "data_entity",
+      "total": 7,
+      "active": 7,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "goal",
+      "total": 5,
+      "active": 5,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "decision",
+      "total": 5,
+      "active": 5,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "standard",
+      "total": 6,
+      "active": 6,
+      "deprecated": 0,
+      "proposed": 0
+    },
+    {
+      "kind": "actor",
+      "total": 5,
+      "active": 5,
+      "deprecated": 0,
+      "proposed": 0
+    }
+  ],
+  "total_entities": 104,
+  "total_findings": 12,
+  "total_signals": 22
+}

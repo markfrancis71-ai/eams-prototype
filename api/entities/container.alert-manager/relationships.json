@@ -1,0 +1,50 @@
+[
+  {
+    "id": 145,
+    "eams_rel_id": "rel-166",
+    "rel_type": "uses",
+    "from_entity_id": "container.alert-manager",
+    "to_entity_id": "container.incident-tracker",
+    "criticality": "synchronous-critical",
+    "protocol": "REST/HTTPS",
+    "sla_dependency_ms": null,
+    "description": "Creates incidents from alerts",
+    "branch": "main",
+    "from_entity_name": "Alert Manager",
+    "from_entity_kind": "container",
+    "to_entity_name": "Incident Tracker",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 139,
+    "eams_rel_id": "rel-160",
+    "rel_type": "container_of",
+    "from_entity_id": "system.monitoring-platform",
+    "to_entity_id": "container.alert-manager",
+    "criticality": "informational",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Contains",
+    "branch": "main",
+    "from_entity_name": "Monitoring Platform",
+    "from_entity_kind": "system",
+    "to_entity_name": "Alert Manager",
+    "to_entity_kind": "container"
+  },
+  {
+    "id": 144,
+    "eams_rel_id": "rel-165",
+    "rel_type": "uses",
+    "from_entity_id": "container.monitoring-dashboard",
+    "to_entity_id": "container.alert-manager",
+    "criticality": "synchronous-critical",
+    "protocol": null,
+    "sla_dependency_ms": null,
+    "description": "Dashboard shows alert status",
+    "branch": "main",
+    "from_entity_name": "Monitoring Dashboard",
+    "from_entity_kind": "container",
+    "to_entity_name": "Alert Manager",
+    "to_entity_kind": "container"
+  }
+]
