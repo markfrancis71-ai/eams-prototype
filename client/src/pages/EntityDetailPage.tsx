@@ -18,6 +18,7 @@ import {
   ChevronDown, Copy, Download, Loader2,
 } from "lucide-react";
 import type { Entity, Relationship, ComplianceFinding, Signal } from "@shared/schema";
+import { generateArtifactHTML } from "@/lib/static-api";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
@@ -81,11 +82,15 @@ export default function EntityDetailPage() {
 
   const generateReport = useMutation({
     mutationFn: async (template: string) => {
-      const res = await apiRequest("POST", "/api/artifacts/generate", {
-        entity_id: eamsId,
+      // Always use client-side generation (works in both static and local mode)
+      if (!bundle) throw new Error("No entity data");
+      return generateArtifactHTML(
+        bundle.entity,
+        bundle.relationships || [],
+        bundle.compliance_findings || [],
+        bundle.signals || [],
         template,
-      });
-      return res.json();
+      );
     },
     onSuccess: (data: any) => {
       setReportTitle(data.title || "Report");

@@ -8,6 +8,7 @@ import {
   FlaskConical, Trash2, AlertTriangle, XCircle, Ban, Plus, Play,
 } from "lucide-react";
 import type { Entity } from "@shared/schema";
+import { analyzeScenarioStatic } from "@/lib/static-api";
 
 const KIND_COLORS: Record<string, string> = {
   goal: "#2563EB", capability: "#6B4C9A", process: "#0F7173",
@@ -71,13 +72,12 @@ export default function ScenarioPage() {
 
   const analyzeMutation = useMutation({
     mutationFn: async (scenarioActions: ScenarioAction[]) => {
-      const res = await apiRequest("POST", "/api/scenarios/analyze", {
-        actions: scenarioActions.map(a => ({
-          type: a.type === "decommission" ? "remove" : a.type,
-          target_entity_id: a.target_entity_id,
-        })),
-      });
-      return res.json();
+      const mappedActions = scenarioActions.map(a => ({
+        type: a.type === "decommission" ? "remove" : a.type,
+        target_entity_id: a.target_entity_id,
+      }));
+      // Always use client-side analysis (works in both static and local mode)
+      return analyzeScenarioStatic(mappedActions);
     },
     onSuccess: (data) => {
       setAnalysisResults(data.results);

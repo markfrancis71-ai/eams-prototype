@@ -4,6 +4,7 @@ import { Play, CheckCircle, AlertTriangle, XCircle, Clock, Layers } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { CompileRecord } from "@shared/schema";
+import { mockCompile } from "@/lib/static-api";
 
 const OUTCOME_ICON: Record<string, any> = {
   success: CheckCircle, partial_success: AlertTriangle, failed: XCircle,
@@ -19,8 +20,8 @@ export default function CompilePage() {
 
   const compileMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/compile", { branch: "main" });
-      return res.json();
+      // Always use client-side mock (works in both static and local mode)
+      return mockCompile();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/compile"] });
